@@ -1,0 +1,37 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/rany/Rany.otf",
+      "sha1": "24f9ec7d8620c14142e3fe55de7413a6ef43615e"
+    },
+    {
+      "path": "src/assets/fonts/rany/RanyBold Italic.otf",
+      "sha1": "398d8c38092be31f442fd125cbf8d0e12ca70c73"
+    },
+    {
+      "path": "src/assets/fonts/rany/RanyBold.otf",
+      "sha1": "48d3bcbc597e2695b7245677c66d03855a6cc8f6"
+    },
+    {
+      "path": "src/assets/fonts/rany/RanyItalic.otf",
+      "sha1": "29a137937ade2c7c4aa15c3ffc668fd99b81cebd"
+    },
+    {
+      "path": "src/assets/fonts/rany/RanyLight Italic.otf",
+      "sha1": "161461946b8c870bd87f014fa72cc9e1aaf8d089"
+    },
+    {
+      "path": "src/assets/fonts/rany/RanyLight.otf",
+      "sha1": "2527c4117ac99551026592b89a4d88f8a95e57d5"
+    },
+    {
+      "path": "src/assets/fonts/rany/RanyMedium Italic.otf",
+      "sha1": "0eccb3fedf1110c0e8b1bfeac3ab34c4cf8d9d1e"
+    },
+    {
+      "path": "src/assets/fonts/rany/RanyMedium.otf",
+      "sha1": "1a53d16468af1261bd16d92129da33c92a8efddc"
+    }
+  ]
+}

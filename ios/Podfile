@@ -25,8 +25,30 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+rn_maps_path = '../node_modules/react-native-maps'
+permissions_path = '../node_modules/react-native-permissions/ios'
+pod 'react-native-google-maps', :path => rn_maps_path
+pod 'GoogleMaps'
+pod 'Google-Maps-iOS-Utils'
+
 target 'FastFastRider' do
   config = use_native_modules!
+
+  $RNFirebaseAsStaticFramework = true
+
+  pod 'Firebase', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'FirebaseAppCheckInterop', :modular_headers => true
+  pod 'FirebaseAuthInterop', :modular_headers => true
+  pod 'FirebaseCoreExtension', :modular_headers => true
+  pod 'GTMSessionFetcher', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'FirebaseInstallations', :modular_headers => true
+  pod 'GoogleDataTransport', :modular_headers => true
+  pod 'nanopb', :modular_headers => true
+  pod 'AppAuth', :modular_headers => true
+  pod 'FirebaseFirestoreInternal', :modular_headers => true
 
   use_react_native!(
     :path => config[:reactNativePath],

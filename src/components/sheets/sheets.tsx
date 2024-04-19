@@ -1,0 +1,20 @@
+import {AddressSheetsNew} from './addressSheetNew';
+import {BanksSheet} from './BanksSheet';
+import {ContractTypeSheet} from './contractType';
+import {OrderDetailsSheet} from './orderDetails';
+import {OrderHelpSheet} from './orderHelp';
+import {ProfileSheets} from './profileSheet';
+import {RateCustomerSheet} from './rateCustomer';
+import {SettingsSheet} from './settingsSheet';
+import {VerifyIdentitySheet} from './verifyIdentity';
+import {registerSheet} from 'react-native-actions-sheet';
+
+registerSheet('profileSheet', ProfileSheets);
+registerSheet('bankSheet', BanksSheet);
+registerSheet('orderDetailsSheet', OrderDetailsSheet);
+registerSheet('orderHelpSheet', OrderHelpSheet);
+registerSheet('addressSheetNew', AddressSheetsNew);
+registerSheet('verifyIdentitySheet', VerifyIdentitySheet);
+registerSheet('settingsSheet', SettingsSheet);
+registerSheet('contractType', ContractTypeSheet);
+registerSheet('rateCustomerSheet', RateCustomerSheet);

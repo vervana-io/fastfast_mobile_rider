@@ -1,118 +1,238 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import './src/components/sheets/sheets';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+/* eslint-disable react-native/no-inline-styles */
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
+  Box,
+  Center,
+  ColorMode,
+  HStack,
+  Heading,
+  NativeBaseProvider,
+  StorageManager,
   Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-
+} from 'native-base';
+import React, {useEffect} from 'react';
 import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  checkApplicationNotificationPermission,
+  registerAppWithFCM,
+  registerListenerWithFCM,
+} from '@handlers/fcmHandler';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+import {AppNavigator} from '@navigation/index';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {CheckMarkSolid} from '@assets/svg/CheckMarkSolid';
+import {CloseIconSolid} from '@assets/svg/closeIconSolid';
+import ErrorBoundary from 'react-native-error-boundary';
+import {ErrorFallback} from '@components/utils';
+import FlashMessage from 'react-native-flash-message';
+import FlipperAsyncStorage from 'rn-flipper-async-storage-advanced';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {InfoIconSolid} from '@assets/svg/infoIconSolid';
+import {LogBox} from 'react-native';
+import {QueryClientProvider} from 'react-query';
+import Toast from 'react-native-toast-message';
+import {authStore} from '@store/auth';
+import crashlytics from '@react-native-firebase/crashlytics';
+import messaging from '@react-native-firebase/messaging';
+import {rootClientQuery} from './src/config';
+import {rootConfig} from '@store/root';
+import {theme} from './theme';
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const toastConfig = {
+  success: ({text1, props, text2}: any) => (
+    <Box w="full" p="20px">
+      <HStack
+        h="82px"
+        bg="white"
+        rounded="lg"
+        py={4}
+        px={2}
+        alignItems="center"
+        justifyContent="space-between"
+        space={2}>
+        <Center w="32px" h="32px" bg="paypleGreen" rounded="full">
+          <CheckMarkSolid />
+        </Center>
+        <Box flex={1}>
+          <Heading size="sm" color="#135932">
+            {text1}
+          </Heading>
+          <Text fontSize="14px" color="#135932">
+            {text2}
+          </Text>
+        </Box>
+      </HStack>
+    </Box>
+  ),
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  error: ({text1, props, text2}: any) => (
+    <Box w="full" p="20px">
+      <HStack
+        h="82px"
+        bg="white"
+        rounded="lg"
+        py={4}
+        px={2}
+        alignItems="center"
+        justifyContent="space-between"
+        space={2}>
+        <Center w="32px" h="32px" bg="danger.100" rounded="full">
+          <CloseIconSolid />
+        </Center>
+        <Box flex={1}>
+          <Heading size="sm" color="#D54444">
+            {text1}
+          </Heading>
+          <Text fontSize="14px" color="#D54444">
+            {text2}
+          </Text>
+        </Box>
+      </HStack>
+    </Box>
+  ),
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  warning: ({text1, props, text2}: any) => (
+    <Box w="full" p="20px">
+      <HStack
+        h="82px"
+        bg="white"
+        rounded="lg"
+        py={4}
+        px={2}
+        alignItems="center"
+        justifyContent="space-between"
+        space={2}>
+        <Center w="32px" h="32px" bg="white" rounded="full">
+          <InfoIconSolid />
+        </Center>
+        <Box flex={1}>
+          <Heading size="sm" color="#B59900">
+            {text1}
+          </Heading>
+          <Text fontSize="14px" color="#B59900">
+            {text2}
+          </Text>
+        </Box>
+      </HStack>
+    </Box>
+  ),
+
+  info: ({text1, props, text2}: any) => (
+    <Box w="full" p="20px">
+      <HStack
+        h="82px"
+        bg="white"
+        rounded="lg"
+        py={4}
+        px={2}
+        alignItems="center"
+        justifyContent="space-between"
+        space={2}>
+        <Center w="32px" h="32px" bg="white" rounded="full">
+          <InfoIconSolid fill="#1d4ed8" />
+        </Center>
+        <Box flex={1}>
+          <Heading size="sm" color="#60a5fa">
+            {text1}
+          </Heading>
+          <Text fontSize="14px" color="#60a5fa">
+            {text2}
+          </Text>
+        </Box>
+      </HStack>
+    </Box>
+  ),
+};
+
+export default function App() {
+  LogBox.ignoreLogs([
+    'In React 18',
+    'The native module for Flipper',
+    'onAnimated',
+    'If you do not provide children',
+    'VirtualizedLists should',
+  ]);
+
+  crashlytics().log('App mounted.'); // firebase crashlytics
+  const userId = authStore?.auth.user?.id ?? '';
+  const userName = authStore?.auth.user?.username ?? '';
+  const errorHandler = (error: Error, stackTrace: string) => {
+    crashlytics().recordError(error);
+    crashlytics().log(`Stack Trace: ${stackTrace}`);
+    // crashlytics().log(`App build no: ${DeviceInfo.getBuildNumber()}`);
+    // crashlytics().log(`App version no: ${DeviceInfo.getVersion()}`);
+    crashlytics().setAttributes({
+      isNewUser: rootConfig.newUser ? 'true' : 'false',
+      id: userId.toString(),
+      username: userName,
+    });
+    /* Log the error to an error reporting service */
+    if (__DEV__) {
+      console.log('ERROR_BOUNDARY', error, stackTrace);
+    }
   };
 
+  const colorModeManager: StorageManager = {
+    get: async () => {
+      try {
+        let val = await AsyncStorage.getItem('@color-mode');
+        return val === 'dark' ? 'dark' : 'light';
+      } catch (e) {
+        return 'light';
+      }
+    },
+    set: async (value: ColorMode) => {
+      try {
+        await AsyncStorage.setItem('@color-mode', value);
+      } catch (e) {
+        console.log(e);
+      }
+    },
+  };
+
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+    }
+  }
+
+  const getToken = async () => {
+    const token = await messaging().getToken();
+    console.log('token', token);
+  };
+
+  useEffect(() => {
+    requestUserPermission();
+    getToken();
+  }, []);
+
+  useEffect(() => {
+    registerListenerWithFCM();
+    registerAppWithFCM();
+    checkApplicationNotificationPermission();
+  }, []);
+
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <>
+      <FlipperAsyncStorage />
+      <QueryClientProvider client={rootClientQuery}>
+        <NativeBaseProvider theme={theme} colorModeManager={colorModeManager}>
+          <GestureHandlerRootView style={{flex: 1}}>
+            <ErrorBoundary
+              onError={errorHandler}
+              FallbackComponent={ErrorFallback}>
+              <AppNavigator />
+            </ErrorBoundary>
+            <Toast config={toastConfig} />
+            <FlashMessage position="bottom" />
+          </GestureHandlerRootView>
+        </NativeBaseProvider>
+      </QueryClientProvider>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
-export default App;
