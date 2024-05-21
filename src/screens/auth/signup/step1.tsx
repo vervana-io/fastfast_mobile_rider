@@ -1,4 +1,4 @@
-import {Box, Button, ChevronRightIcon, HStack, Text, VStack} from 'native-base';
+import {Box, ChevronRightIcon, HStack, Text, VStack} from 'native-base';
 
 import {BackButton} from '@components/ui';
 import {Calendar} from '@assets/svg/Calendar';

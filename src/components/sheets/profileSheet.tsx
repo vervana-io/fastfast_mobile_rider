@@ -235,11 +235,11 @@ export const ProfileSheets = observer((props: SheetProps) => {
     ),
     [
       height,
-      uploadedOrder?.uri,
       userD.rider?.deliveried_orders,
       userD.rider?.first_name,
       userD.rider?.last_name,
       userD.rider?.ratings,
+      userD.rider?.selfie,
       userD.user?.created_at,
     ],
   );

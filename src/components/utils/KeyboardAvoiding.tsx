@@ -52,6 +52,7 @@ export const KeyboardAvoiding = (props: KeyboardAvoidingProps) => {
       <ScrollView
         _contentContainerStyle={{flexGrow: 1, paddingBottom: paddingBottom}}
         showsVerticalScrollIndicator={false}
+        directionalLockEnabled
         refreshControl={
           refreshable ? (
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

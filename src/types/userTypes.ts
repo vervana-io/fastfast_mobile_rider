@@ -38,6 +38,8 @@ export interface profileUpdateType {
   bank_code?: string;
   account_number?: string;
   account_name?: string;
+  contract_type?: string; // 1 for full time, 2 for part time, 3 for weekend
+  shift_data?: number[]; //([Monday (1), Tuesday (2), Wednesday (3), Thursday (4), Friday (5), Saturday (6), Sunday (7), All (0)])
 }
 
 export interface userAddresses {

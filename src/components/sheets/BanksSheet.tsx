@@ -68,7 +68,7 @@ export const BanksSheet = observer((props: SheetProps) => {
 
   const Content = useCallback(() => {
     return (
-      <Box p={2} px={4} h={WIN_HEIGHT}>
+      <Box p={2} px={4} h={WIN_HEIGHT * 0.89}>
         <HStack justifyContent="space-between" alignItems="center">
           <Heading fontSize="16px" fontWeight="bold" flex={1}>
             Choose Bank

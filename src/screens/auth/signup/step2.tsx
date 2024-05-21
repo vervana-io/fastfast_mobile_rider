@@ -1,5 +1,6 @@
 import {Alert, Platform} from 'react-native';
 import {Box, Button, Text, VStack} from 'native-base';
+import {Field, Formik} from 'formik';
 import React, {useRef, useState} from 'react';
 import {
   isValidEmail,
@@ -11,9 +12,9 @@ import {object, ref, string} from 'yup';
 
 import {BackButton} from '@components/ui';
 import {DefaultLayout} from '@layouts/default';
-import {Formik} from 'formik';
 import {Input} from '@components/inputs';
 import {SignupTop} from './components/signupTop';
+import {__passwords__} from '@helpers/regex/constants';
 import {apiType} from '@types/apiTypes';
 import {navigate} from '@navigation/NavigationService';
 import {showMessage} from 'react-native-flash-message';
@@ -36,17 +37,12 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
   const step2Shema = object({
     first_name: string().required('First name is required'),
     last_name: string().required('Last name is required'),
-    phone_number: string()
-      .matches(
-        /^([0|\+[0-9]{1,5})?([7-9][0-9]{9})$/,
-        'Provide a valid number using +234',
-      )
-      .required('Your phone number is required'),
+    phone_number: string().required('Your phone number is required'),
     email: string().email().required('Email is required'),
     password: string()
       .matches(
-        /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/,
-        'Password must contain at least 8 characters, one uppercase, one number and one special case character',
+        __passwords__.M8L1D1S1.expression,
+        'Password must contain Minimum eight characters, at least one letter, one number and one special character',
       )
       .required('Password is required'),
     confirm: string()
@@ -63,9 +59,14 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
             if (val.status) {
               setEmailGood(false);
               emref?.current?.setErrors({['email']: 'Email already exist'});
-            } else {
+            } else if (!val.status) {
               setEmailGood(true);
               emref?.current?.setErrors({});
+            } else {
+              setEmailGood(false);
+              emref?.current?.setErrors({
+                ['email']: 'Could not validate email',
+              });
             }
           },
         },
@@ -146,7 +147,14 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
             const upd = {...regData, ...values};
             navigate('SignUpStep3', {data: upd});
           }}>
-          {({handleChange, handleSubmit, errors, values}) => (
+          {({
+            handleChange,
+            handleSubmit,
+            handleBlur,
+            touched,
+            errors,
+            values,
+          }) => (
             <>
               <VStack my={8}>
                 <SignupTop title="Personal Details" percentage="50" />
@@ -166,10 +174,13 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       label="First Name"
                       placeholder="Your legal first name"
                       onChangeText={handleChange('first_name')}
+                      onBlur={handleBlur('first_name')}
                       errorMessage={errors.first_name}
-                      hasError={errors.first_name ? true : false}
+                      hasError={
+                        errors.first_name && touched.first_name ? true : false
+                      }
                       value={values.first_name}
-                      py={Platform.OS === 'ios' ? 4 : 2}
+                      // py={Platform.OS === 'ios' ? 4 : 2}
                     />
                   </Box>
                   <Box w="full" mt={3}>
@@ -177,10 +188,13 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       label="Last Name"
                       placeholder="Your legal last name"
                       onChangeText={handleChange('last_name')}
+                      onBlur={handleBlur('last_name')}
                       errorMessage={errors.last_name}
-                      hasError={errors.last_name ? true : false}
+                      hasError={
+                        errors.last_name && touched.last_name ? true : false
+                      }
                       value={values.last_name}
-                      py={Platform.OS === 'ios' ? 4 : 2}
+                      // py={Platform.OS === 'ios' ? 4 : 2}
                     />
                   </Box>
                   <Box w="full" mt={3}>
@@ -188,10 +202,15 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       label="Phone Number"
                       placeholder=""
                       onChangeText={handleChange('phone_number')}
+                      onBlur={handleBlur('phone_number')}
                       errorMessage={errors.phone_number}
-                      hasError={errors.phone_number ? true : false}
+                      hasError={
+                        errors.phone_number && touched.phone_number
+                          ? true
+                          : false
+                      }
                       value={values.phone_number}
-                      py={Platform.OS === 'ios' ? 4 : 2}
+                      // py={Platform.OS === 'ios' ? 4 : 2}
                       keyboardType="phone-pad"
                     />
                   </Box>
@@ -200,10 +219,11 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       label="Email"
                       placeholder="Your email address"
                       onChangeText={handleChange('email')}
+                      onBlur={handleBlur('email')}
                       errorMessage={errors.email}
-                      hasError={errors.email ? true : false}
+                      hasError={errors.email && touched.email ? true : false}
                       value={values.email}
-                      py={Platform.OS === 'ios' ? 4 : 2}
+                      // py={Platform.OS === 'ios' ? 4 : 2}
                       onEndEditing={() => checkEmail(values.email)}
                       keyboardType="email-address"
                     />
@@ -226,10 +246,13 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       hasIcon
                       iconPosition="right"
                       onChangeText={handleChange('password')}
+                      onBlur={handleBlur('password')}
                       errorMessage={errors.password}
-                      hasError={errors.password ? true : false}
+                      hasError={
+                        errors.password && touched.password ? true : false
+                      }
                       value={values.password}
-                      py={Platform.OS === 'ios' ? 4 : 2}
+                      // py={Platform.OS === 'ios' ? 4 : 2}
                     />
                   </Box>
                   <Box w="full" mt={3}>
@@ -240,8 +263,11 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       hasIcon
                       iconPosition="right"
                       onChangeText={handleChange('confirm')}
+                      onBlur={handleBlur('confirm')}
                       errorMessage={errors.confirm}
-                      hasError={errors.confirm ? true : false}
+                      hasError={
+                        errors.confirm && touched.confirm ? true : false
+                      }
                       value={values.confirm}
                     />
                   </Box>

@@ -16,6 +16,7 @@ export interface apiPaginatedType extends paginationType {
 export interface ApiErrorType {
   data: {
     detail: string;
+    errors: {};
   };
   status: number;
   statusText: string | undefined;

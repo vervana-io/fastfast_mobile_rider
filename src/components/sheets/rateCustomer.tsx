@@ -25,15 +25,70 @@ import {StarIcon2} from '@assets/svg/StarIcon2';
 import {WIN_HEIGHT} from '../../config';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
+import {ordersStore} from '@store/orders';
+
+interface ratingType {
+  message: string;
+  type: 'rider' | 'seller';
+}
+
+const badRating: ratingType[] = [
+  {
+    type: 'rider',
+    message: 'Not Friendly',
+  },
+  {
+    type: 'rider',
+    message: 'Agressive',
+  },
+  {
+    type: 'rider',
+    message: 'Hard to relate',
+  },
+  {
+    type: 'rider',
+    message: 'Bad communication',
+  },
+  {
+    type: 'rider',
+    message: 'Very insulting',
+  },
+];
+
+const goodRating: ratingType[] = [
+  {
+    type: 'rider',
+    message: 'Friendly',
+  },
+  {
+    type: 'rider',
+    message: 'Generous',
+  },
+  {
+    type: 'rider',
+    message: 'Easy to Locate',
+  },
+  {
+    type: 'rider',
+    message: 'Polite',
+  },
+  {
+    type: 'rider',
+    message: 'Good communication',
+  },
+];
 
 export const RateCustomerSheet = observer((props: SheetProps) => {
   const rateCustomerSheetRef = useRef<ActionSheetRef>(null);
   const [rating, setRating] = useState([1, 2, 3, 4, 5]);
   const [selectedRating, setSelectedRating] = useState(0);
   const [message, setMessage] = useState('');
+  const [showRating, setShowRating] = useState(true);
 
-  const payload = props.payload;
-  const {customer_id, delivery_fee} = payload;
+  const payload: any = props.payload;
+  const delivery_fee = payload?.delivery_fee ?? 0;
+  const customer_id = payload?.customer_id ?? 0;
+  // const {customer_id, delivery_fee} = payload;
 
   const handleRatingPress = (selected: number) => {
     setSelectedRating(selected);
@@ -44,23 +99,43 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
       <Text fontWeight="bold" mb={4}>
         Oh wow!
       </Text>
-      <Text>What went wrong</Text>
+      <Text>What went wrong?</Text>
       <HStack my={4} space={3} flexWrap="wrap">
-        <Pressable bg="themeLight.gray.3" p={2} px={3} mb={4} rounded="full">
-          <Text>Not Friendly</Text>
-        </Pressable>
-        <Pressable bg="themeLight.gray.3" p={2} px={3} mb={4} rounded="full">
-          <Text>Agressive</Text>
-        </Pressable>
-        <Pressable bg="themeLight.gray.3" p={2} px={3} mb={4} rounded="full">
-          <Text>Hard to locate</Text>
-        </Pressable>
-        <Pressable bg="themeLight.gray.3" p={2} px={3} mb={4} rounded="full">
-          <Text>Bad communication</Text>
-        </Pressable>
-        <Pressable bg="themeLight.gray.3" p={2} px={3} mb={4} rounded="full">
-          <Text>Very insulting</Text>
-        </Pressable>
+        {badRating.map((el, i) => (
+          <Pressable
+            bg="themeLight.gray.3"
+            p={2}
+            px={3}
+            mb={4}
+            rounded="full"
+            onPress={() => setMessage(el.message)}
+            key={i}>
+            <Text>{el.message}</Text>
+          </Pressable>
+        ))}
+      </HStack>
+    </>
+  );
+
+  const goodRatingResponse = () => (
+    <>
+      <Text fontWeight="bold" mb={4}>
+        Awesome!
+      </Text>
+      <Text>What went well?</Text>
+      <HStack my={4} space={3} flexWrap="wrap">
+        {goodRating.map((el, i) => (
+          <Pressable
+            bg="themeLight.gray.3"
+            p={2}
+            px={3}
+            mb={4}
+            rounded="full"
+            onPress={() => setMessage(el.message)}
+            key={i}>
+            <Text>{el.message}</Text>
+          </Pressable>
+        ))}
       </HStack>
     </>
   );
@@ -81,7 +156,12 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
         <Button
           rounded="full"
           mt={8}
-          onPress={() => SheetManager.hide('rateCustomerSheet')}
+          onPress={() => {
+            SheetManager.hide('rateCustomerSheet');
+            SheetManager.hide('orderDetailsSheet');
+            ordersStore.setSelectedOrder({});
+            ordersStore.setSelectedOrderId(0);
+          }}
           bg="themeLight.primary.base"
           _text={{fontWeight: 'bold'}}>
           Back home
@@ -111,7 +191,11 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
                 </Pressable>
               ))}
             </HStack>
-            <Box mt={6}>{badRatingResponse()}</Box>
+            {selectedRating >= 3 ? (
+              <Box mt={6}>{goodRatingResponse()}</Box>
+            ) : selectedRating < 3 && selectedRating > 0 ? (
+              <Box mt={6}>{badRatingResponse()}</Box>
+            ) : null}
             <TextArea
               value={message}
               onChangeText={e => setMessage(e)}
@@ -119,7 +203,11 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
               mt={3}
               autoCompleteType={undefined}
             />
-            <Button rounded="full" _text={{fontWeight: 'bold'}} mt={4}>
+            <Button
+              rounded="full"
+              _text={{fontWeight: 'bold'}}
+              mt={4}
+              onPress={() => setShowRating(false)}>
               Submit
             </Button>
           </VStack>
@@ -136,14 +224,16 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
         width: 0,
       }}
       gestureEnabled={true}
+      closeOnPressBack={false}
+      closeOnTouchBackdrop={false}
       containerStyle={{
         height: WIN_HEIGHT * 0.9,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        backgroundColor: 'transparent',
+        backgroundColor: 'white',
         // backgroundColor: colorMode === 'dark' ? '#111827' : '#fff',
       }}>
-      {Complete()}
+      {showRating ? Content() : Complete()}
     </ActionSheet>
   );
 });

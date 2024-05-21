@@ -1,4 +1,3 @@
-import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
 import RNMapView, {Circle, Marker} from 'react-native-maps';
 import React, {useEffect, useRef, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
@@ -6,12 +5,17 @@ import {StyleSheet, View} from 'react-native';
 import {Box} from 'native-base';
 import {MapTypes} from '@types/mapTypes';
 import MapViewDirections from 'react-native-maps-directions';
+import {addressesStore} from '@store/addresses';
 import mapStyle from './mapStyles.json';
+import {observer} from 'mobx-react-lite';
 import {useGeolocation} from '@hooks/useGeoLocation';
 
-const MapView = (props: MapTypes) => {
+const MapView = observer((props: MapTypes) => {
   const {markers} = props;
   const mapRef = useRef<RNMapView>(null);
+
+  const selectedAddress = addressesStore.selectedAddress;
+
   // const [location, setLocation] = useState<GeoPosition | null>(null);
   const [initialRegion, setInitialRegion] = useState<{
     latitude: number;
@@ -21,15 +25,22 @@ const MapView = (props: MapTypes) => {
   const {location} = useGeolocation({enableFetchLocation: true});
 
   useEffect(() => {
-    if (location) {
-      setInitialRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-    } else {
-      setInitialRegion(null);
-    }
-  }, [location]);
+    setTimeout(() => {
+      if (selectedAddress.latitude) {
+        setInitialRegion({
+          latitude: parseFloat(selectedAddress.latitude ?? ''),
+          longitude: parseFloat(selectedAddress.longitude ?? ''),
+        });
+      } else if (location) {
+        setInitialRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+      } else {
+        setInitialRegion(null);
+      }
+    }, 500);
+  }, [location, selectedAddress.latitude, selectedAddress.longitude]);
 
   useEffect(() => {
     if (initialRegion?.latitude && mapRef.current) {
@@ -159,7 +170,7 @@ const MapView = (props: MapTypes) => {
       )}
     </Box>
   );
-};
+});
 
 export default MapView;
 

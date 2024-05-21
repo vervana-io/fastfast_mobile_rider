@@ -26,10 +26,15 @@ export const DefaultLayout = (props: layoutProps) => {
   useEffect(() => {
     const checkPermission = async () => {
       const checkPrems = await PermissionManager.checkPerms();
-      const checkEnabled: boolean = await isLocationEnabled();
-      console.log('check', checkPrems);
-      if (checkPrems !== 'granted' || !checkEnabled) {
-        setModalVisible(true);
+      if (Platform.OS === 'ios') {
+        if (checkPrems !== 'granted') {
+          setModalVisible(true);
+        }
+      } else {
+        const checkEnabled: boolean = await isLocationEnabled();
+        if (checkPrems !== 'granted' || !checkEnabled) {
+          setModalVisible(true);
+        }
       }
     };
 
@@ -105,7 +110,7 @@ export const DefaultLayout = (props: layoutProps) => {
 
   return (
     <>
-      <Box safeAreaTop bg={statusBarColor} />
+      {Platform.OS === 'android' && <Box safeAreaTop bg={statusBarColor} />}
       <Box flex={1} bg="white">
         <StatusBar
           backgroundColor={statusBarColor}

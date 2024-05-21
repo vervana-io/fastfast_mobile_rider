@@ -7,32 +7,26 @@ import {
   Pressable,
   Spinner,
   Text,
+  VStack,
 } from 'native-base';
 import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
-// import MapView, {
-//   LatLng,
-//   Marker,
-//   PROVIDER_GOOGLE,
-//   Region,
-// } from 'react-native-maps';
+import {Platform, StyleSheet} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
-import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
 
 import {BicycleIcon} from '@assets/svg/BicycleIcon';
 import {DefaultLayout} from '@layouts/default';
 import MapView from '@components/ui/map/mapView';
 import {OrderRequest} from './components/orderRequest';
 import {SheetManager} from 'react-native-actions-sheet';
-import {StyleSheet} from 'react-native';
 import Toast from 'react-native-toast-message';
 import {Todos} from './components/todos';
+import {addressesStore} from '@store/addresses';
 import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
 import {enableLatestRenderer} from 'react-native-maps';
 import {markersType} from '@types/mapTypes';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
-import {playEffectForNotifications} from '@handlers/playEffect';
 import {useUser} from '@hooks/useUser';
 
 enableLatestRenderer();
@@ -49,6 +43,7 @@ export const Home = observer((props: HomeProps) => {
 
   const userD = authStore.auth;
   const selectedOrder = ordersStore.selectedOrder;
+  const address = addressesStore.selectedAddress;
 
   const {toggleOnlineStatus, userDetails} = useUser({enableFetchAddress: true});
 
@@ -79,51 +74,66 @@ export const Home = observer((props: HomeProps) => {
     );
   };
 
-  const goOnline = () => {
-    toggleOnlineStatus.mutate(
-      {
-        status: onlineStatus ? 0 : 1,
-      },
-      {
-        onSuccess: (val: apiType) => {
-          if (val.status) {
-            setOnlineStatus(!onlineStatus);
-            userDetails.refetch();
-          } else {
-            Toast.show({
-              type: 'error',
-              text1: 'Online Status',
-              text2: val.message,
-            });
-          }
+  const goOnline = useCallback(() => {
+    if (address.street) {
+      toggleOnlineStatus.mutate(
+        {
+          status: onlineStatus ? 0 : 1,
         },
-      },
-    );
-  };
+        {
+          onSuccess: (val: apiType) => {
+            if (val.status) {
+              setOnlineStatus(!onlineStatus);
+              userDetails.refetch();
+            } else {
+              Toast.show({
+                type: 'error',
+                text1: 'Online Status',
+                text2: val.message,
+              });
+            }
+          },
+        },
+      );
+    } else {
+      Toast.show({
+        type: 'warning',
+        text1: 'Going Online?',
+        text2: 'You need to set your current address to go online',
+      });
+      setTimeout(() => {
+        SheetManager.show('addressSheetNewIOS');
+      }, 1000);
+    }
+  }, [address.street, onlineStatus, toggleOnlineStatus, userDetails]);
 
   const OnlineSection = useCallback(
     () => (
       <Center position="absolute" bottom={0} w="full" zIndex={1}>
-        <Center
-          borderWidth={2}
-          borderColor={
-            onlineStatus ? 'themeLight.primary.base' : 'rgba(0,0,0, .7)'
-          }
-          w={20}
-          h={20}
-          p={1}
-          rounded="full"
-          my={4}>
-          <Button
+        <Center position="absolute" bottom={0} w="full">
+          <Center
+            position="relative"
+            borderWidth={2}
+            borderColor={
+              onlineStatus ? 'themeLight.primary.base' : 'rgba(0,0,0, .7)'
+            }
+            w={20}
+            h={20}
+            p={1}
+            top={-70}
             rounded="full"
-            w="full"
-            h="full"
-            bg={onlineStatus ? 'rgba(0, 150, 85, .7)' : 'rgba(0,0,0, .7)'}
-            onPress={goOnline}
-            _pressed={{bg: 'themeLight.accent'}}
-            _text={{fontWeight: 'bold', fontSize: 'lg'}}>
-            {toggleOnlineStatus.isLoading ? <Spinner color="white" /> : 'Go'}
-          </Button>
+            my={4}>
+            <Button
+              rounded="full"
+              w="full"
+              h="full"
+              bg={onlineStatus ? 'rgba(0, 150, 85, .7)' : 'rgba(0,0,0, .7)'}
+              onPress={goOnline}
+              _pressed={{bg: 'themeLight.accent'}}
+              _text={{fontWeight: 'bold', fontSize: 'lg'}}>
+              {toggleOnlineStatus.isLoading ? <Spinner color="white" /> : 'Go'}
+            </Button>
+          </Center>
         </Center>
         <Center
           w="full"
@@ -143,7 +153,7 @@ export const Home = observer((props: HomeProps) => {
         </Center>
       </Center>
     ),
-    [onlineStatus, toggleOnlineStatus.isLoading],
+    [goOnline, onlineStatus, toggleOnlineStatus.isLoading],
   );
 
   // this triggers the location function to get location if permissions has been set in default layout
@@ -176,19 +186,23 @@ export const Home = observer((props: HomeProps) => {
       longitude: location?.coords.longitude ?? 0,
     };
 
-    const customers_geo_data: markersType = {
-      id: selectedOrder.address?.id.toString(),
-      title: selectedOrder.address?.street ?? '',
-      latitude: parseFloat(selectedOrder.address?.latitude ?? ''),
-      longitude: parseFloat(selectedOrder.address?.longitude ?? ''),
-    };
-    const group = [riders_geo_data, sellers_geo_data];
-    const group2 = [riders_geo_data, customers_geo_data];
-    if (selectedOrder.id) {
-      if (picked_up_at !== null) {
-        setMarkers(group);
+    if (selectedOrder.address?.id) {
+      const customers_geo_data: markersType = {
+        id: selectedOrder.address.id.toString(),
+        title: selectedOrder.address?.street ?? '',
+        latitude: parseFloat(selectedOrder?.address?.latitude ?? ''),
+        longitude: parseFloat(selectedOrder?.address?.longitude ?? ''),
+      };
+      const group = [riders_geo_data, sellers_geo_data];
+      const group2 = [riders_geo_data, customers_geo_data];
+      if (selectedOrder.id) {
+        if (picked_up_at !== null) {
+          setMarkers(group);
+        } else {
+          setMarkers(group2);
+        }
       } else {
-        setMarkers(group2);
+        setMarkers([]);
       }
     }
   }, [location?.coords.latitude, location?.coords.longitude, selectedOrder]);
@@ -200,8 +214,20 @@ export const Home = observer((props: HomeProps) => {
     }
   }, [userD]);
 
+  useEffect(() => {
+    // here we remove the markes on the map if the order has been cleared
+    if (!selectedOrder.id) {
+      setMarkers([]);
+    }
+    // SheetManager.show('rateCustomerSheet');
+  }, [selectedOrder]);
+
   return (
-    <DefaultLayout checkPermissions hasPermissionSet={getLocation}>
+    <DefaultLayout
+      refreshable={false}
+      useKeyboardScroll={false}
+      checkPermissions
+      hasPermissionSet={getLocation}>
       <Box flex={1} bg="themeLight.gray.3" style={styles.container}>
         <HStack
           position="absolute"
@@ -210,7 +236,11 @@ export const Home = observer((props: HomeProps) => {
           justifyContent="space-between"
           w="full"
           px={4}>
-          <Pressable onPress={() => navigation.openDrawer()} w="45px" h="44px">
+          <Pressable
+            mt={Platform.OS === 'ios' ? '8' : 0}
+            onPress={() => navigation.openDrawer()}
+            w="45px"
+            h="44px">
             <Center
               rounded="2xl"
               opacity={0.1}
@@ -230,29 +260,45 @@ export const Home = observer((props: HomeProps) => {
             </Center>
           </Pressable>
           {ordersStore.selectedOrderId ? (
-            <Pressable
-              bg="white"
-              rounded="lg"
-              onPress={() =>
-                SheetManager.show('orderDetailsSheet', {
-                  payload: {order_id: ordersStore.selectedOrderId},
-                })
-              }>
-              <HStack space={3} flex={1} shadow="9" alignItems="center" px={3}>
-                <BicycleIcon />
-                <Text color="themeLight.gray.1" fontWeight="bold">
-                  Heading to{' '}
-                  {ordersStore.selectedOrder.status &&
-                  ordersStore.selectedOrder.status < 3
-                    ? 'restaurant'
-                    : ordersStore.selectedOrder.status === 3
-                    ? 'customer'
-                    : ordersStore.selectedOrder.status === 4
-                    ? 'Delivered'
-                    : null}
-                </Text>
-              </HStack>
-            </Pressable>
+            <Box safeArea>
+              <Pressable
+                bg="white"
+                py={2}
+                rounded="lg"
+                onPress={() =>
+                  SheetManager.show('orderDetailsSheet', {
+                    payload: {order_id: ordersStore.selectedOrderId},
+                  })
+                }>
+                <HStack
+                  space={3}
+                  flex={1}
+                  shadow="9"
+                  alignItems="center"
+                  px={3}>
+                  <BicycleIcon />
+                  <VStack>
+                    <Text color="themeLight.gray.1" fontWeight="bold">
+                      Click to reveal order
+                    </Text>
+                    <Text
+                      fontSize="xs"
+                      color="themeLight.gray.1"
+                      fontWeight="light">
+                      Heading to{' '}
+                      {ordersStore.selectedOrder.status &&
+                      ordersStore.selectedOrder.status < 3
+                        ? 'restaurant'
+                        : ordersStore.selectedOrder.status === 3
+                        ? 'customer'
+                        : ordersStore.selectedOrder.status === 4
+                        ? 'Delivered'
+                        : null}
+                    </Text>
+                  </VStack>
+                </HStack>
+              </Pressable>
+            </Box>
           ) : null}
         </HStack>
         {/* <Todos /> */}

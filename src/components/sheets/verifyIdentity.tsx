@@ -257,7 +257,7 @@ export const VerifyIdentitySheet = (props: SheetProps) => {
         height: WIN_HEIGHT * 0.9,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        backgroundColor: 'transparent',
+        backgroundColor: 'white',
         // backgroundColor: colorMode === 'dark' ? '#111827' : '#fff',
       }}>
       {verified ? VerifyDone() : Content()}

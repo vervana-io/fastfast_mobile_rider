@@ -15,6 +15,7 @@ export const passwordSalts = {
   M8L1D1: 'M8L1D1',
   M8L1D1S1: 'M8L1D1S1',
   M8L1U1D1S1: 'M8L1U1D1S1',
+  M8L1: 'M8L1',
 };
 // type PasswordType = "M8L1D1" | "M8L1D1S1" | "M8L1U1D1S1";
 
@@ -30,6 +31,9 @@ export const isValidPassword = (
   }
   if (passwordType === passwordSalts.M8L1U1D1S1) {
     return __passwords__.M8L1U1D1S1.expression.test(password);
+  }
+  if (passwordType === passwordSalts.M8L1) {
+    return __passwords__.M8L1.expression.test(password);
   }
   return false;
 };

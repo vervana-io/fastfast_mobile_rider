@@ -4,6 +4,7 @@ import ActionSheet, {
   SheetManager,
   SheetProps,
 } from 'react-native-actions-sheet';
+import {Alerts, AlertsProps, SheetHeader} from '@components/ui';
 import {
   Box,
   Button,
@@ -15,10 +16,11 @@ import {
 } from 'native-base';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
-import {SheetHeader} from '@components/ui';
 import {WIN_HEIGHT} from '../../config';
+import {apiType} from '@types/index';
 import {authStore} from '@store/auth';
 import {observer} from 'mobx-react-lite';
+import {useUser} from '@hooks/useUser';
 
 interface WorkListType {
   title: string;
@@ -51,8 +53,14 @@ const WorkList: WorkListType[] = [
 export const ContractTypeSheet = observer((props: SheetProps) => {
   const contractTypeSheetRef = useRef<ActionSheetRef>(null);
   const [service, setService] = React.useState('');
+  const [errors, setErrors] = useState<{
+    type: AlertsProps['status'];
+    message: any;
+  }>();
 
   const userD = authStore.auth;
+
+  const {profileUpdate} = useUser();
 
   useEffect(() => {
     const type = userD.rider?.contract_type.toString() ?? '';
@@ -79,10 +87,45 @@ export const ContractTypeSheet = observer((props: SheetProps) => {
     return dayNames[dayNumber - 1];
   };
 
+  const doUpdate = useCallback(() => {
+    const payload = {
+      contract_type: service,
+      shift_data: getServiceDataById().days,
+    };
+    profileUpdate.mutate(payload, {
+      onSuccess: (val: apiType) => {
+        if (val.status) {
+          setErrors({
+            type: 'success',
+            message: 'Your contract type has been changed',
+          });
+        } else {
+          setErrors({
+            type: 'warning',
+            message: val.message,
+          });
+        }
+      },
+      onError: () => {
+        setErrors({
+          type: 'error',
+          message: 'An error occurred',
+        });
+      },
+    });
+  }, [getServiceDataById, profileUpdate, service]);
+
   const Content = useCallback(() => {
     return (
       <Box py={6} px={4} bg="#ffffff" h="full" roundedTop="2xl">
         <SheetHeader sheetToClose="contractType" title="Contract type" />
+        {errors?.message && (
+          <Alerts
+            status={errors.type}
+            title={errors.message}
+            variant="outline"
+          />
+        )}
         <VStack mt={4}>
           <Select
             selectedValue={service}
@@ -122,13 +165,27 @@ export const ContractTypeSheet = observer((props: SheetProps) => {
             </HStack>
           </VStack>
 
-          <Button py={4} rounded="full" mt={8} _text={{fontWeight: 'bold'}}>
+          <Button
+            onPress={doUpdate}
+            py={4}
+            rounded="full"
+            isLoading={profileUpdate.isLoading}
+            isLoadingText="Contract updating..."
+            mt={8}
+            _text={{fontWeight: 'bold'}}>
             Finish
           </Button>
         </VStack>
       </Box>
     );
-  }, [getServiceDataById, service]);
+  }, [
+    doUpdate,
+    errors?.message,
+    errors?.type,
+    getServiceDataById,
+    profileUpdate.isLoading,
+    service,
+  ]);
 
   return (
     <ActionSheet
@@ -142,7 +199,7 @@ export const ContractTypeSheet = observer((props: SheetProps) => {
         height: WIN_HEIGHT * 0.9,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        backgroundColor: 'transparent',
+        backgroundColor: 'white',
         // backgroundColor: colorMode === 'dark' ? '#111827' : '#fff',
       }}>
       {Content()}

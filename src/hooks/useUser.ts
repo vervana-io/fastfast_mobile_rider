@@ -88,6 +88,15 @@ export const useUser = (config?: userConfig) => {
     }
   });
 
+  const deleteAddress = useMutation(async (data: {id: string}) => {
+    try {
+      const req: any = await http.get(`addresses/delete/${data.id}`);
+      return req.data;
+    } catch (error) {
+      throw error;
+    }
+  });
+
   const profileUpdate = useMutation(async (data: profileUpdateType) => {
     try {
       const req: any = await http.post('profile/update', data);
@@ -104,5 +113,6 @@ export const useUser = (config?: userConfig) => {
     updateAddress,
     fetchAddress,
     profileUpdate,
+    deleteAddress,
   };
 };

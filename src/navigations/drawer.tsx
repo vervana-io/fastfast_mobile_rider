@@ -1,6 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import * as React from 'react';
 
+import {Alert, Linking} from 'react-native';
 import {
   Badge,
   Box,
@@ -28,7 +29,7 @@ import {authStore} from '@store/auth';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {createStackNavigator} from '@react-navigation/stack';
 import {observer} from 'mobx-react-lite';
-import { ordersStore } from '@store/orders';
+import {ordersStore} from '@store/orders';
 import {useAuth} from '@hooks/useAuth';
 
 const navOptions = {
@@ -59,7 +60,11 @@ const DrawerContent = observer(({navigation, state}: any) => {
   const userD = authStore.auth;
   const {city, house_number, street} = addressesStore.selectedAddress;
 
-  const selectedAddress = `${house_number} ${street}, ${city}, ${addressesStore.selectedAddress.state}`;
+  const selectedAddress = street
+    ? `${house_number ?? ''} ${street ?? ''}, ${city ?? ''}, ${
+        addressesStore.selectedAddress.state ?? ''
+      }`
+    : 'Click to select address';
 
   const Logout = () => {
     logout.mutate(
@@ -80,6 +85,17 @@ const DrawerContent = observer(({navigation, state}: any) => {
 
   const navigateToScreen = (screen: string) => {
     navigation.navigate(screen);
+  };
+
+  const openExtLink = (link: string) => {
+    console.log('link ', link);
+    Linking.canOpenURL(link).then(supported => {
+      if (supported) {
+        Linking.openURL(link);
+      } else {
+        Alert.alert("Sorry we can't open the provided link at this time");
+      }
+    });
   };
 
   return (
@@ -119,7 +135,7 @@ const DrawerContent = observer(({navigation, state}: any) => {
           </Box>
 
           <VStack mt={8} space={3}>
-            <Pressable py={2} onPress={() => openSheet('addressSheetNew')}>
+            <Pressable py={2} onPress={() => openSheet('addressSheetNewIOS')}>
               <HStack alignItems="center" space={2}>
                 <LocationPin />
                 <VStack flex={1}>
@@ -130,7 +146,7 @@ const DrawerContent = observer(({navigation, state}: any) => {
                 </VStack>
               </HStack>
             </Pressable>
-            <Pressable py={2}>
+            <Pressable py={2} onPress={() => openSheet('EarningsSheet')}>
               <HStack alignItems="center" space={2}>
                 <Dollar />
                 <Text>Earnings</Text>
@@ -138,22 +154,28 @@ const DrawerContent = observer(({navigation, state}: any) => {
             </Pressable>
             <Pressable py={2} onPress={() => navigateToScreen('Orders')}>
               <HStack>
-                <HStack alignItems="center" ml={-2} space={2}>
-                  <Badge // bg="red.400"
-                    colorScheme="danger"
-                    rounded="full"
-                    position="absolute"
-                    right={0}
-                    bottom={2}
-                    mr={-6}
-                    zIndex={1}
-                    variant="solid"
-                    alignSelf="flex-end"
-                    _text={{
-                      fontSize: 12,
-                    }}>
-                    {ordersStore.ongoingOrderCount}
-                  </Badge>
+                <HStack
+                  alignItems="center"
+                  ml={-2}
+                  space={2}
+                  pl={ordersStore.ongoingOrderCount === 0 ? 2 : 0}>
+                  {ordersStore.ongoingOrderCount > 0 && (
+                    <Badge // bg="red.400"
+                      colorScheme="danger"
+                      rounded="full"
+                      position="absolute"
+                      right={0}
+                      bottom={2}
+                      mr={-6}
+                      zIndex={1}
+                      variant="solid"
+                      alignSelf="flex-end"
+                      _text={{
+                        fontSize: 12,
+                      }}>
+                      {ordersStore.ongoingOrderCount}
+                    </Badge>
+                  )}
                   <OrdersIcon fill="#00C555" />
                   <Text>Orders</Text>
                 </HStack>
@@ -167,12 +189,18 @@ const DrawerContent = observer(({navigation, state}: any) => {
                 <Text fontWeight="bold">Settings</Text>
               </HStack>
             </Pressable>
-            <Pressable py={2}>
+            <Pressable
+              py={2}
+              onPress={() =>
+                openExtLink('https://www.fastfastapp.com/terms-and-condition')
+              }>
               <HStack alignItems="center" space={2}>
                 <Text fontWeight="bold">Help</Text>
               </HStack>
             </Pressable>
-            <Pressable py={2}>
+            <Pressable
+              py={2}
+              onPress={() => openExtLink('https://fastfastapp.com/faq')}>
               <HStack alignItems="center" space={2}>
                 <Text fontWeight="bold">FAQs</Text>
               </HStack>
@@ -180,7 +208,9 @@ const DrawerContent = observer(({navigation, state}: any) => {
             <Pressable py={2} onPress={Logout}>
               <HStack alignItems="center" space={2}>
                 {logout.isLoading && <Spinner />}
-                <Text fontWeight="bold">Logout</Text>
+                <Text fontWeight="bold" color="themeLight.error">
+                  Logout
+                </Text>
               </HStack>
             </Pressable>
           </VStack>

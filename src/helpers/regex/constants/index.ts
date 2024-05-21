@@ -2,9 +2,14 @@ export const __email__: RegExp =
   /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
 export const __passwords__ = {
+  M8L1: {
+    // Minimum eight characters, at least one letter:
+    type: 'M8L1',
+    expression: /^(?=.*[A-Za-z])[A-Za-z\d]{8,}$/,
+  },
   M8L1D1: {
     // Minimum eight characters, at least one letter and one number:
-    type: 'M8L1D1',
+    type: 'M8L1',
     expression: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
   },
   M8L1D1S1: {

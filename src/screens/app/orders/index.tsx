@@ -15,6 +15,8 @@ import {Linking, useWindowDimensions} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import {SceneMap, TabBar, TabView} from 'react-native-tab-view';
 
+import {BackButton} from '@components/ui';
+import {BikeIcon} from '@assets/svg/BikeIcon';
 import {DefaultLayout} from '@layouts/default';
 import {LocationPin} from '@assets/svg/LocationPin';
 import {LocationPin2} from '@assets/svg/LocationPin2';
@@ -22,8 +24,9 @@ import {PhoneIcon} from '@assets/svg/PhoneIcon';
 import {SheetManager} from 'react-native-actions-sheet';
 import {TimeIcon} from '@assets/svg/TimeIcon';
 import dayjs from 'dayjs';
+import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
-import { orderTypes } from '@types/orderTypes';
+import {orderTypes} from '@types/orderTypes';
 import {ordersStore} from '@store/orders';
 import {useOrders} from '@hooks/useOrders';
 
@@ -38,7 +41,7 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
   const {fetchOngoingOrders, orderStates} = useOrders();
   const {ordersData} = orderStates;
 
-  const orders = ordersStore.orders;
+  const orders: orderTypes[] = ordersStore.orders;
 
   const [active, setIsActive] = useState([-1]);
 
@@ -66,12 +69,15 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
     </VStack>
   );
 
-  const openOrder = (order_id: number, item: orderTypes) => {
-    navigation.navigate('Home');
-    ordersStore.setSelectedOrderId(order_id);
-    ordersStore.setSelectedOrder(item);
-    SheetManager.show('orderDetailsSheet', {payload: {order_id}});
-  };
+  const openOrder = useCallback(
+    (order_id: number, item: orderTypes) => {
+      navigation.navigate('Home');
+      ordersStore.setSelectedOrderId(order_id);
+      ordersStore.setSelectedOrder(item);
+      SheetManager.show('orderDetailsSheet', {payload: {order_id}});
+    },
+    [navigation],
+  );
 
   const Pickup = useCallback(
     () => (
@@ -165,7 +171,14 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                     justifyContent="space-between"
                     alignItems="center"
                     mb={4}>
-                    <Text fontWeight="bold">Fee: ₦{item.total_amount}</Text>
+                    <VStack>
+                      <Text fontWeight="bold">
+                        Delivery Fee: ₦{item.delivery_fee}
+                      </Text>
+                      <Text fontWeight="bold">
+                        Order Fee: ₦{item.sub_total}
+                      </Text>
+                    </VStack>
                     <Text fontWeight="bold">
                       Code: #
                       {item.status === '3'
@@ -185,61 +198,93 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
             )}
             keyExtractor={item => item.id.toString()}
           />
-        ) : null}
+        ) : (
+          <Center py={8}>
+            <BikeIcon />
+            <Text my={4}>No ongoing orders yet</Text>
+          </Center>
+        )}
       </VStack>
     ),
-    [fetchOngoingOrders.isLoading, orders],
+    [fetchOngoingOrders.isLoading, openOrder, orders],
   );
 
   const Completted = useCallback(
     () => (
       <VStack space={2} flex={1} py={4}>
-        <Box py={6} px={4} bg="white" rounded="2xl" shadow="56">
-          <HStack justifyContent="space-between" space={2}>
-            <VStack flex={1} space={2}>
-              <Text fontWeight="bold" fontSize="lg">
-                Kings of Wings
-              </Text>
-              <Text color="themeLight.gray.2" fontSize="xs">
-                ILUPEJU BUS-STOP, IKEJA, LAGOS, IKEJA, LAGOS
-              </Text>
-            </VStack>
-            <HStack space={2}>
-              <Button
-                leftIcon={<QuestionIcon />}
-                w="44px"
-                h="44px"
-                rounded="2xl"
-                onPress={() => SheetManager.show('orderHelpSheet')}
-                bg="#1B1B1B"
-                _pressed={{bg: 'rgba(255,255,255, .4)'}}
-              />
-              <Button
-                leftIcon={<PhoneIcon stroke="white" />}
-                w="44px"
-                h="44px"
-                rounded="2xl"
-                onPress={() => {}}
-                bg="#1B1B1B"
-                _pressed={{bg: 'rgba(255,255,255, .4)'}}
-              />
-            </HStack>
-          </HStack>
-          <Box mt={2}>
-            <Text fontWeight="bold">Fee: ₦2000</Text>
-            <VStack bg="themeLight.gray.4" rounded="lg" my={4} p={4} space={2}>
-              <Text color="black">1x Chicken Wing</Text>
-              <Text color="black">1x Chicken Wing</Text>
-              <Text color="black">1x Chicken Wing</Text>
-            </VStack>
-            <Button _text={{fontWeight: 'bold'}} rounded="full" py={4}>
-              View Details
-            </Button>
-          </Box>
-        </Box>
+        {fetchOngoingOrders.isLoading ? (
+          <LazyPlaceholder />
+        ) : !fetchOngoingOrders.isLoading && orders.length > 0 ? (
+          <FlatList
+            data={orders}
+            renderItem={({item}) => (
+              <VStack space={2} flex={1} py={4}>
+                <Box py={6} px={4} bg="white" rounded="2xl" shadow="56">
+                  <HStack justifyContent="space-between" space={2}>
+                    <VStack flex={1} space={2}>
+                      <Text fontWeight="bold" fontSize="lg">
+                        {item.seller.trading_name}
+                      </Text>
+                      <Text color="themeLight.gray.2" fontSize="xs">
+                        {item?.seller.address}
+                      </Text>
+                    </VStack>
+                    <HStack space={2}>
+                      {/* <Button
+                        leftIcon={<QuestionIcon />}
+                        w="44px"
+                        h="44px"
+                        rounded="2xl"
+                        onPress={() => SheetManager.show('orderHelpSheet')}
+                        bg="#1B1B1B"
+                        _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                      />
+                      <Button
+                        leftIcon={<PhoneIcon stroke="white" />}
+                        w="44px"
+                        h="44px"
+                        rounded="2xl"
+                        onPress={() => {}}
+                        bg="#1B1B1B"
+                        _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                      /> */}
+                    </HStack>
+                  </HStack>
+                  <Box mt={2}>
+                    <Text fontWeight="bold">
+                      Fee: ₦{formatter.formatCurrencySimple(item.total_amount)}
+                    </Text>
+                    <VStack
+                      bg="themeLight.gray.4"
+                      rounded="lg"
+                      my={4}
+                      p={4}
+                      space={2}>
+                      {item.order_products &&
+                        item.order_products.map((el, i) => (
+                          <Text color="black" key={i}>
+                            {el.quantity}x {el.product?.title}
+                          </Text>
+                        ))}
+                    </VStack>
+                    {/* <Button _text={{fontWeight: 'bold'}} rounded="full" py={4}>
+                      View Details
+                    </Button> */}
+                  </Box>
+                </Box>
+              </VStack>
+            )}
+            keyExtractor={item => item.id.toString()}
+          />
+        ) : (
+          <Center py={8}>
+            <BikeIcon />
+            <Text my={4}>You have not completted any orders yet</Text>
+          </Center>
+        )}
       </VStack>
     ),
-    [],
+    [fetchOngoingOrders.isLoading, orders],
   );
 
   const renderScene = SceneMap({
@@ -250,7 +295,7 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
     {key: 'first', title: 'Ongoing Request'},
-    {key: 'second', title: 'completted Request'},
+    {key: 'second', title: 'Completed Request'},
   ]);
 
   const renderTabBar = (props: any) => (
@@ -283,22 +328,6 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
     />
   );
 
-  useEffect(() => {
-    if (index === 0) {
-      fetchOngoingOrders.mutate({
-        page: 1,
-        per_page: 6,
-        status: '1',
-      });
-    } else if (index === 1) {
-      // fetchOngoingOrders.mutate({
-      //   page: 1,
-      //   per_page: 6,
-      //   status: '4',
-      // });
-    }
-  }, [index]);
-
   const refreshData = () => {
     // refresh all required data here
     if (index === 0) {
@@ -308,18 +337,25 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
         status: '1',
       });
     } else if (index === 1) {
-      // fetchOngoingOrders.mutate({
-      //   page: 1,
-      //   per_page: 6,
-      //   status: '4',
-      // });
+      fetchOngoingOrders.mutate({
+        page: 1,
+        per_page: 6,
+        status: '2',
+      });
     }
   };
 
+  useEffect(() => {
+    refreshData();
+  }, [index]);
+
   return (
     <DefaultLayout refreshable={true} shouldRefresh={refreshData}>
-      <Box flex={1} bg="themeLight.gray.4" p={4}>
-        <Heading size="md">All Orders</Heading>
+      <Box safeArea flex={1} bg="themeLight.gray.4" p={4}>
+        <BackButton />
+        <Heading size="md" mt={2}>
+          All Orders
+        </Heading>
         <Box flex={1} mt={2}>
           <TabView
             lazy

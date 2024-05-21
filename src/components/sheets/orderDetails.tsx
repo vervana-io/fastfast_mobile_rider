@@ -12,6 +12,7 @@ import {
   Center,
   CloseIcon,
   DeleteIcon,
+  Divider,
   HStack,
   Image,
   Pressable,
@@ -19,15 +20,15 @@ import {
   VStack,
   useColorMode,
 } from 'native-base';
+import {Linking, StyleSheet} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {WIN_HEIGHT, WIN_WIDTH} from '../../config';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 import {CameraScreen} from '../ui/camera';
 import {ExpandIcon} from '@assets/svg/Expand';
-import {Linking} from 'react-native';
 import {PhoneIcon} from '@assets/svg/PhoneIcon';
 import {QuestionIcon} from '@assets/svg/QuestionIcon';
-import {WIN_HEIGHT} from '../../config';
 import {apiType} from '@types/index';
 import {observer} from 'mobx-react-lite';
 import {orderType} from '@types/orderTypes';
@@ -43,6 +44,8 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
   const allowedUpload = 2;
   const [errorMessage, setErrorMessage] = useState('');
   // const [ordersData, setOrdersData] = useState<Partial<orderType>>({});
+  const [orderCompleted, setOrderCompleted] = useState(false);
+  const [showFullPin, setShowFullPin] = useState(false);
 
   const isFocused = useIsFocused();
 
@@ -53,7 +56,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
   const payload: any = props.payload;
   const order_id = payload?.order_id ?? ordersStore.selectedOrderId;
   const ordersData = ordersStore.selectedOrder;
-  const request_id = payload?.request_id ?? ordersData.misc_rider_info.id;
+  const request_id = payload?.request_id ?? ordersData?.misc_rider_info?.id;
 
   const {colorMode} = useColorMode();
 
@@ -71,7 +74,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
     );
   };
 
-  const _snapPhotoPic = async () => {
+  const _snapPhotoPic = useCallback(async () => {
     if (uploadedOrder.length < allowedUpload) {
       await launchImageLibrary(
         {
@@ -93,7 +96,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         },
       );
     }
-  };
+  }, [uploadedOrder.length]);
 
   const removeImage = (i: number) => {
     setUploadedOrder(prev => {
@@ -104,6 +107,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
   };
 
   const doArrival = useCallback(() => {
+    setErrorMessage('');
     arrivalOrder.mutate(
       {
         order_id,
@@ -122,6 +126,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
   }, [order_id, request_id]);
 
   const doDelivered = useCallback(() => {
+    setErrorMessage('');
     deliveredOrder.mutate(
       {
         order_id,
@@ -136,7 +141,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
               delivery_fee: ordersData.delivery_fee,
             };
             SheetManager.show('rateCustomerSheet', {payload: pay});
-            SheetManager.hide('orderDetailsSheet');
+            // SheetManager.hide('orderDetailsSheet');
           } else {
             setErrorMessage(val.message);
           }
@@ -150,6 +155,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
     uploadedOrder.map(el => {
       list.push(el.base64);
     });
+    setErrorMessage('');
     pickUpOrder.mutate(
       {
         order_id,
@@ -221,14 +227,18 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         </HStack>
         <Box mt={2}>
           <Text color="white" fontWeight="bold">
-            Fee: ₦{ordersData?.total_amount}
+            Fee: ₦{ordersData?.sub_total}
+          </Text>
+          <Text color="white" fontWeight="bold">
+            Delivery Fee: ₦{ordersData?.delivery_fee}
           </Text>
           <VStack bg="white" rounded="lg" h="155px" my={4} p={4} space={2}>
-            {ordersData.order_products?.map((el, i) => (
-              <Text key={i} color="black">
-                {el.quantity}x {el.product.title}
-              </Text>
-            ))}
+            {ordersData.order_products &&
+              ordersData.order_products?.map((el, i) => (
+                <Text key={i} color="black">
+                  {el.quantity}x {el.product?.title}
+                </Text>
+              ))}
           </VStack>
           {ordersData.status === 3 &&
           ordersData.is_rider_customer_arrived === 1 ? (
@@ -249,7 +259,15 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
               onPress={doArrival}>
               I have arrived
             </Button>
-          ) : null}
+          ) : (
+            <Button
+              _text={{fontWeight: 'bold'}}
+              rounded="full"
+              py={4}
+              onPress={() => orderDetailsSheetRef.current?.snapToOffset(100)}>
+              Proceed
+            </Button>
+          )}
         </Box>
       </Box>
     );
@@ -258,18 +276,20 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
     deliveredOrder.isLoading,
     doArrival,
     doDelivered,
+    ordersData?.delivery_fee,
     ordersData.is_rider_customer_arrived,
     ordersData.order_products,
     ordersData?.seller?.address,
     ordersData?.seller?.trading_name,
     ordersData.status,
-    ordersData?.total_amount,
+    ordersData?.sub_total,
   ]);
 
   const ContentFull = useCallback(
     () => (
       <Box py={6} px={4} bg="white" h="full" roundedTop="2xl">
-        <Pressable onPress={() => SheetManager.hide('orderDetailsSheet')}>
+        <Pressable
+          onPress={() => orderDetailsSheetRef.current?.snapToOffset(60)}>
           <Box
             w={45}
             h={45}
@@ -278,7 +298,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
             rounded="lg"
           />
           <Pressable
-            onPress={() => SheetManager.hide('orderDetailsSheet')}
+            onPress={() => orderDetailsSheetRef.current?.snapToOffset(60)}
             position="absolute"
             zIndex={4}
             top={3}
@@ -312,23 +332,36 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
                   {ordersData?.order_products?.length} Items
                 </Text>
               </VStack>
-              <Pressable>
+              <Pressable
+                onPress={() => {
+                  setShowFullPin(true);
+                }}>
                 <ExpandIcon />
               </Pressable>
             </HStack>
             <VStack bg="themeLight.gray.4" rounded="lg" my={4} p={4} space={2}>
-              {ordersData.order_products?.map((el, i) => (
-                <Text key={i} color="black">
-                  {el.quantity}x {el.product.title}
+              {ordersData.order_products &&
+                ordersData.order_products?.map((el, i) => (
+                  <Text key={i} color="black">
+                    {el.quantity}x {el.product?.title}
+                  </Text>
+                ))}
+            </VStack>
+            <HStack space={2}>
+              <VStack>
+                <Text fontWeight="bold">Fee</Text>
+                <Text color="themeLight.gray.2" fontWeight="light">
+                  ₦{ordersData?.sub_total}
                 </Text>
-              ))}
-            </VStack>
-            <VStack>
-              <Text fontWeight="bold">Fee</Text>
-              <Text color="themeLight.gray.2" fontWeight="light">
-                ₦{ordersData?.total_amount}
-              </Text>
-            </VStack>
+              </VStack>
+              <Divider orientation="vertical" mx={2} />
+              <VStack>
+                <Text fontWeight="bold">Deliver Fee</Text>
+                <Text color="themeLight.gray.2" fontWeight="light">
+                  ₦{ordersData?.delivery_fee}
+                </Text>
+              </VStack>
+            </HStack>
             <VStack mt={2}>
               <Text>Note from business</Text>
               <Text fontWeight="hairline" color="themeLight.gray.2">
@@ -442,6 +475,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
       doPickUp,
       errorMessage,
       fetchSingleOrder.isLoading,
+      ordersData?.delivery_fee,
       ordersData?.delivery_pin,
       ordersData.is_rider_customer_arrived,
       ordersData.order_detail,
@@ -450,10 +484,80 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
       ordersData?.seller?.address,
       ordersData?.seller?.trading_name,
       ordersData.status,
-      ordersData?.total_amount,
+      ordersData?.sub_total,
       pickUpOrder.isLoading,
       uploadedOrder,
     ],
+  );
+
+  const OrderComplete = useCallback(
+    () => (
+      <Box py={6} px={4} bg="#fff" h="full" roundedTop="2xl">
+        <Center my={8}>
+          <Text fontSize="2xl" fontWeight="semibold" mb={8}>
+            Great Job 👍
+          </Text>
+          <Text fontSize="sm" color="themeLight.gray.2">
+            You just earned
+          </Text>
+          <HStack mb={40}>
+            <Text
+              fontWeight="bold"
+              fontSize="3xl"
+              color="themeLight.primary.base">
+              ₦1,700
+            </Text>
+            <AddIcon color="themeLight.primary.base" />
+          </HStack>
+          <Button
+            w="full"
+            rounded="full"
+            _text={{fontWeight: 'bold'}}
+            onPress={() => {
+              SheetManager.hide('orderDetailsSheet');
+              ordersStore.setSelectedOrder({});
+              ordersStore.setSelectedOrderId(0);
+            }}>
+            Back home
+          </Button>
+        </Center>
+      </Box>
+    ),
+    [],
+  );
+
+  const FullPin = useCallback(
+    () => (
+      <Box py={6} px={4} bg="#182819" h="full" roundedTop="2xl">
+        <Center flex={1}>
+          <Text
+            style={styles.rotateText}
+            fontSize="170px"
+            fontFamily="body"
+            w={WIN_HEIGHT * 0.7}
+            h={WIN_WIDTH * 0.8}
+            textAlign="center"
+            color="white"
+            fontWeight="bold">
+            #
+            {ordersData?.status && ordersData?.status >= 3
+              ? ordersData?.delivery_pin
+              : ordersData?.pick_up_pin}
+          </Text>
+        </Center>
+        <Center py={8}>
+          <Pressable
+            onPress={() => {
+              setShowFullPin(false);
+            }}>
+            <Text color="#15AA56" fontWeight="bold">
+              Go Back
+            </Text>
+          </Pressable>
+        </Center>
+      </Box>
+    ),
+    [ordersData?.delivery_pin, ordersData?.pick_up_pin, ordersData?.status],
   );
 
   return (
@@ -486,7 +590,21 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         backgroundColor: 'transparent',
         // backgroundColor: colorMode === 'dark' ? '#111827' : '#fff',
       }}>
-      {hasFullDetails ? ContentFull() : Content()}
+      {showFullPin ? (
+        <FullPin />
+      ) : orderCompleted ? (
+        <OrderComplete />
+      ) : hasFullDetails ? (
+        ContentFull()
+      ) : (
+        Content()
+      )}
     </ActionSheet>
   );
+});
+
+const styles = StyleSheet.create({
+  rotateText: {
+    transform: [{rotate: '-90deg'}],
+  },
 });

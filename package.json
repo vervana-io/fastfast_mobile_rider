@@ -18,7 +18,7 @@
     "refreshBuild": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
     "patch": "npx patch-package react-native-inappbrowser-reborn --use-yarn",
     "availableIOSSimulator": "xcrun simctl list devices",
-    "runOnSimulator15": "npx react-native run-ios --simulator='iPhone 15'"
+    "runOnSimulator15": "npx react-native run-ios --simulator='iPhone 15 Plus'"
   },
   "dependencies": {
     "@notifee/react-native": "^7.8.2",

@@ -13,3 +13,4 @@ export * from './sellerType';
 export * from './userTypes';
 export * from './productTypes';
 export * from './categoriesTypes';
+export * from './transactionsType';

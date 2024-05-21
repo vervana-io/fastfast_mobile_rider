@@ -1,4 +1,4 @@
-import {Box, Center, Spinner, StatusBar} from 'native-base';
+import {Box, Center, Image, Spinner, StatusBar, VStack} from 'native-base';
 import React, {useCallback, useEffect} from 'react';
 
 import {LogoText} from '@assets/svg/LogoText';
@@ -71,18 +71,45 @@ export const Splashscreen = (props: SplashscreenProps) => {
   }, [CheckUserValidity, navigation]);
 
   return (
-    <Center bg="themeLight.accent" flex={1}>
+    <Center bg="white" flex={1}>
       <StatusBar backgroundColor="#009655" barStyle="light-content" />
-      <Box position="absolute" top={0} w="full" left={0} zIndex={1}>
-        <Pattern />
+      <Box w="full" h="full">
+        <VStack
+          position="absolute"
+          top={0}
+          w="full"
+          h="full"
+          justifyContent="center"
+          alignItems="center">
+          <Box mx="auto" w="200px" h="56.79px">
+            <Image
+              w="100%"
+              h="100%"
+              source={require('@assets/img/splashscreen/rider.png')}
+              alt="splashscreen"
+            />
+          </Box>
+          {showConnectivity && (
+            <Center>
+              <Spinner mt={9} color="themeLight.accent" size="lg" />
+            </Center>
+          )}
+        </VStack>
+        <Box
+          position="absolute"
+          bottom={0}
+          zIndex={1}
+          w="full"
+          alignItems="center"
+          justifyContent="center">
+          <Image
+            w="100%"
+            h="220px"
+            source={require('@assets/img/splashscreen/pattern.png')}
+            alt="splashscreen"
+          />
+        </Box>
       </Box>
-      <LogoText width={120} height={100} />
-
-      {showConnectivity && (
-        <Center>
-          <Spinner mt={9} color="white" />
-        </Center>
-      )}
       {/* {!showConnectivity && fetchUser.isFetching && <Spinner mt={9} />} */}
     </Center>
   );

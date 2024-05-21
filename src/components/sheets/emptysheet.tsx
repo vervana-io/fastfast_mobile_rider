@@ -29,7 +29,7 @@ export const EmptySheet = observer((props: SheetProps) => {
         height: WIN_HEIGHT * 0.6,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        backgroundColor: 'transparent',
+        backgroundColor: 'white',
         // backgroundColor: colorMode === 'dark' ? '#111827' : '#fff',
       }}>
       {Content()}

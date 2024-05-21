@@ -162,6 +162,22 @@ export const useOrders = () => {
     },
   );
 
+  const complaints = useMutation(
+    async (data: {
+      title: string;
+      body: string;
+      old_ticket_id?: number;
+      media_base64?: string;
+    }) => {
+      try {
+        const req: any = await http.post('tickets/create', data);
+        return req.data;
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
   return {
     fetchOngoingOrders,
     fetchSingleOrder,
@@ -174,5 +190,6 @@ export const useOrders = () => {
     pickUpOrder,
     arrivalOrder,
     deliveredOrder,
+    complaints,
   };
 };

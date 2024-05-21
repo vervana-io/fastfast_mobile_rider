@@ -32,11 +32,11 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
   const {route} = props;
   const [selectedVehicleType, setSelectedVehicleType] = useState<
     'bike' | 'car' | 'none'
-  >('none');
+  >('bike');
 
   const regData = route?.params?.data;
 
-  const [license, setLicense] = useState('');
+  const [license, setLicense] = useState('l');
 
   const pickImage = async () => {
     await launchImageLibrary(
@@ -69,10 +69,21 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
           }}
           validationSchema={step2Shema}
           onSubmit={values => {
-            const upd = {...regData, ...values};
-            navigate('SignUpStep4', {data: upd});
+            if (license === 'l') {
+              setLicense('');
+            } else {
+              const upd = {...regData, ...values};
+              navigate('SignUpStep4', {data: upd});
+            }
           }}>
-          {({handleChange, handleSubmit, errors, values}) => (
+          {({
+            handleChange,
+            handleSubmit,
+            handleBlur,
+            touched,
+            errors,
+            values,
+          }) => (
             <>
               <VStack my={8}>
                 <SignupTop title="Verification" percentage="75" />
@@ -80,14 +91,14 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
                   <Box w="full" h="159px" borderWidth={1} borderStyle="dashed">
                     <Pressable flex={1} onPress={() => pickImage()}>
                       <Center flex={1}>
-                        {license !== '' ? (
+                        {license !== 'l' && license !== '' ? (
                           <Image
                             w="100%"
                             h="100%"
                             source={{
                               uri: 'data:image/png;base64,' + license,
                             }}
-                            alt="back image"
+                            alt="Licence image"
                             rounded="md"
                           />
                         ) : (
@@ -154,8 +165,13 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
                       label="Vehicle Brand"
                       placeholder="Brand of vehicle"
                       onChangeText={handleChange('vehicle_brand')}
+                      onBlur={handleBlur('vehicle_brand')}
                       errorMessage={errors.vehicle_brand}
-                      hasError={errors.vehicle_brand ? true : false}
+                      hasError={
+                        errors.vehicle_brand && touched.vehicle_brand
+                          ? true
+                          : false
+                      }
                       value={values.vehicle_brand}
                       py={Platform.OS === 'ios' ? 4 : 2}
                     />
@@ -165,8 +181,14 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
                       label="Plate Number"
                       placeholder="Vehicle plate number"
                       onChangeText={handleChange('vehicle_plate_number')}
+                      onBlur={handleBlur('vehicle_plate_number')}
                       errorMessage={errors.vehicle_plate_number}
-                      hasError={errors.vehicle_plate_number ? true : false}
+                      hasError={
+                        errors.vehicle_plate_number &&
+                        touched.vehicle_plate_number
+                          ? true
+                          : false
+                      }
                       value={values.vehicle_plate_number}
                       py={Platform.OS === 'ios' ? 4 : 2}
                     />

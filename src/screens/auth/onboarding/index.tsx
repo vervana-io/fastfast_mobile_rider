@@ -86,7 +86,7 @@ export const Onboarding = () => {
   };
 
   return (
-    <DefaultLayout>
+    <DefaultLayout checkPermissions={false}>
       <VStack w="full" flex={1} safeArea>
         <VStack space={6} flex={1} justifyContent="space-between">
           <Center p={8}>

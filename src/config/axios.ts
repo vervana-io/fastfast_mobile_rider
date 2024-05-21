@@ -44,9 +44,9 @@ apiInstance.interceptors.response.use(
   },
   (error: AxiosError<any>) => {
     debugAPIError(error);
-    console.log('error code', error.response);
     const statusCode = error.response?.status;
     rootConfig.setRequestLoading(false);
+    console.log('error code', statusCode);
     if (statusCode === 403) {
       // config.setShouldLogin(true);
       authStore.logout().then(() => {
@@ -54,11 +54,11 @@ apiInstance.interceptors.response.use(
       });
     } else if (statusCode === 409) {
       Alert.alert('Duplicate Request, try again in one minute');
-    } else {
     }
     const formattedError: ApiErrorType = {
       data: {
         detail: error.response?.data.detail,
+        errors: error.response?.data.error,
       },
       status: error.response?.status ?? 0,
       statusText: error.response?.statusText,

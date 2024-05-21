@@ -13,7 +13,6 @@ import {SmilleyTear} from '@assets/svg/SmilleyTear';
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT} from '../../../../config';
 import {apiType} from '@types/index';
-import {clearNotificationById} from '@handlers/fcmHandler';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
@@ -37,61 +36,69 @@ export const OrderRequest = observer(() => {
   };
 
   const doReassign = () => {
-    const order_id = notificationData.order_id;
-    const request_id = NotificationOrder.data.request_id;
-    reassignOrder.mutate(
-      {
-        order_id,
-        request_id,
-      },
-      {
-        onSuccess: (val: apiType) => {
-          if (val.status) {
-            console.log('good', val);
-            setShowReassign(false);
-            setShowOrder(false);
-            ordersStore.clearNotifiedOrder();
-          } else {
-            Toast.show({
-              type: 'warning',
-              text1: 'Order Request',
-              text2: val.message,
-            });
-          }
-        },
-      },
-    );
+    if (notificationData.order_id) {
+      const order_id = notificationData.order_id;
+      const request_id = NotificationOrder.data.request_id;
+      if (order_id) {
+        reassignOrder.mutate(
+          {
+            order_id,
+            request_id,
+          },
+          {
+            onSuccess: (val: apiType) => {
+              if (val.status) {
+                console.log('good', val);
+                setShowReassign(false);
+                setShowOrder(false);
+                ordersStore.clearNotifiedOrder();
+              } else {
+                Toast.show({
+                  type: 'warning',
+                  text1: 'Order Request',
+                  text2: val.message,
+                });
+                setShowOrder(false);
+                ordersStore.clearNotifiedOrder();
+              }
+            },
+          },
+        );
+      }
+    }
   };
 
-  const triggerAccept = () => {
-    const order_id = notificationData.order_id;
-    const request_id = NotificationOrder.data.request_id;
-    acceptOrder.mutate(
-      {
-        order_id,
-        request_id,
-      },
-      {
-        onSuccess: (val: apiType) => {
-          if (val.status) {
-            //clear notification and open order details sheet
-            setShowOrder(false);
-            ordersStore.clearNotifiedOrder();
-            ordersStore.setSelectedOrderId(order_id);
-            SheetManager.show('orderDetailsSheet', {
-              payload: {order_id, request_id},
-            });
-          } else {
-            Toast.show({
-              type: 'warning',
-              text1: 'Order Request',
-              text2: val.message,
-            });
-          }
+  const triggerAccept = useCallback(() => {
+    if (notificationData.order_id) {
+      const order_id = notificationData?.order_id;
+      const request_id = NotificationOrder?.data?.request_id;
+      acceptOrder.mutate(
+        {
+          order_id,
+          request_id,
         },
-      },
-    );
-  };
+        {
+          onSuccess: (val: apiType) => {
+            if (val.status) {
+              //clear notification and open order details sheet
+              setShowOrder(false);
+              ordersStore.clearNotifiedOrder();
+              ordersStore.setSelectedOrderId(order_id);
+              SheetManager.show('orderDetailsSheet', {
+                payload: {order_id, request_id},
+              });
+            } else {
+              Toast.show({
+                type: 'warning',
+                text1: 'Order Request',
+                text2: val.message,
+              });
+            }
+          },
+        },
+      );
+    }
+  }, [NotificationOrder?.data?.request_id, notificationData?.order_id]);
 
   const Request = useCallback(
     () => (
@@ -100,7 +107,7 @@ export const OrderRequest = observer(() => {
           <Text color="white" fontWeight="bold" fontSize="30px">
             ₦
             {formatter.formatCurrencySimple(
-              parseInt(notificationData?.amount, 10),
+              parseInt(notificationData?.delivery_fee, 10),
             )}
           </Text>
           <Text color="white">{notificationData?.title}</Text>
@@ -170,9 +177,12 @@ export const OrderRequest = observer(() => {
       notificationData?.address?.city,
       notificationData?.address?.house_number,
       notificationData?.address?.street,
-      notificationData?.amount,
-      notificationData?.time,
+      notificationData?.customer_address?.city,
+      notificationData?.customer_address?.house_number,
+      notificationData?.customer_address?.street,
+      notificationData?.delivery_fee,
       notificationData?.title,
+      triggerAccept,
     ],
   );
 
@@ -218,8 +228,8 @@ export const OrderRequest = observer(() => {
   });
 
   useEffect(() => {
+    console.log('noti', notificationData);
     if (notificationData?.amount) {
-      console.log('has notification', JSON.stringify(NotificationOrder));
       // clearNotificationById(NotificationOrder.messageId);
       setTimeout(() => {
         toggleBoxHeight();

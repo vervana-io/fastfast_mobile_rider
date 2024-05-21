@@ -1,12 +1,41 @@
 # Resolve react_native_pods.rb with node to allow for hoisting
-require Pod::Executable.execute_command('node', ['-p',
-  'require.resolve(
-    "react-native/scripts/react_native_pods.rb",
-    {paths: [process.argv[1]]},
-  )', __dir__]).strip
+def node_require(script)
+  # Resolve script with node to allow for hoisting
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
+
+node_require('react-native/scripts/react_native_pods.rb')
+node_require('react-native-permissions/scripts/setup.rb')
 
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
+
+setup_permissions([
+  # 'AppTrackingTransparency',
+  # 'Bluetooth',
+  # 'Calendars',
+  # 'CalendarsWriteOnly',
+  # 'Camera',
+  # 'Contacts',
+  # 'FaceID',
+  'LocationAccuracy',
+  'LocationAlways',
+  'LocationWhenInUse',
+  # 'MediaLibrary',
+  # 'Microphone',
+  # 'Motion',
+  'Notifications',
+  # 'PhotoLibrary',
+  # 'PhotoLibraryAddOnly',
+  # 'Reminders',
+  # 'Siri',
+  # 'SpeechRecognition',
+  # 'StoreKit',
+])
 
 # If you are using a `react-native-flipper` your iOS build will fail when `NO_FLIPPER=1` is set.
 # because `react-native-flipper` depends on (FlipperKit,...) that will be excluded
@@ -25,30 +54,35 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-rn_maps_path = '../node_modules/react-native-maps'
-permissions_path = '../node_modules/react-native-permissions/ios'
-pod 'react-native-google-maps', :path => rn_maps_path
-pod 'GoogleMaps'
-pod 'Google-Maps-iOS-Utils'
+# rn_maps_path = '../node_modules/react-native-maps'
+# permissions_path = '../node_modules/react-native-permissions/ios'
+# pod 'react-native-google-maps', :path => rn_maps_path
+# pod 'GoogleMaps'
+# pod 'Google-Maps-iOS-Utils'
 
 target 'FastFastRider' do
+  rn_maps_path = '../node_modules/react-native-maps'
+  pod 'react-native-google-maps', :path => rn_maps_path
+
   config = use_native_modules!
+
+  use_frameworks! :linkage => :static
 
   $RNFirebaseAsStaticFramework = true
 
-  pod 'Firebase', :modular_headers => true
-  pod 'FirebaseCore', :modular_headers => true
-  pod 'FirebaseCoreInternal', :modular_headers => true
-  pod 'FirebaseAppCheckInterop', :modular_headers => true
-  pod 'FirebaseAuthInterop', :modular_headers => true
-  pod 'FirebaseCoreExtension', :modular_headers => true
-  pod 'GTMSessionFetcher', :modular_headers => true
-  pod 'GoogleUtilities', :modular_headers => true
-  pod 'FirebaseInstallations', :modular_headers => true
-  pod 'GoogleDataTransport', :modular_headers => true
-  pod 'nanopb', :modular_headers => true
-  pod 'AppAuth', :modular_headers => true
-  pod 'FirebaseFirestoreInternal', :modular_headers => true
+  # pod 'Firebase', :modular_headers => true
+  # pod 'FirebaseCore', :modular_headers => true
+  # pod 'FirebaseCoreInternal', :modular_headers => true
+  # pod 'FirebaseAppCheckInterop', :modular_headers => true
+  # pod 'FirebaseAuthInterop', :modular_headers => true
+  # pod 'FirebaseCoreExtension', :modular_headers => true
+  # pod 'GTMSessionFetcher', :modular_headers => true
+  # pod 'GoogleUtilities', :modular_headers => true
+  # pod 'FirebaseInstallations', :modular_headers => true
+  # pod 'GoogleDataTransport', :modular_headers => true
+  # pod 'nanopb', :modular_headers => true
+  # pod 'AppAuth', :modular_headers => true
+  # pod 'FirebaseFirestoreInternal', :modular_headers => true
 
   use_react_native!(
     :path => config[:reactNativePath],
@@ -56,7 +90,7 @@ target 'FastFastRider' do
     #
     # Note that if you have use_frameworks! enabled, Flipper will not work and
     # you should disable the next line.
-    :flipper_configuration => flipper_config,
+    # :flipper_configuration => flipper_config,
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )

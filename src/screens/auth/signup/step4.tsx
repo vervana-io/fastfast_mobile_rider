@@ -19,6 +19,7 @@ import {Input} from '@components/inputs';
 import PermissionManager from '@handlers/permissionHandler';
 import {SheetManager} from 'react-native-actions-sheet';
 import {SignupTop} from './components/signupTop';
+import Toast from 'react-native-toast-message';
 import {apiType} from '@types/apiTypes';
 import {bankTypes} from '@types/bankTypes';
 import {functions} from '@helpers/functions';
@@ -78,8 +79,8 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
 
   const proceed = () => {
     const payload = {
-      latitude: location?.coords.latitude,
-      longitude: location?.coords.longitude,
+      latitude: location?.coords.latitude ?? '0',
+      longitude: location?.coords.longitude ?? '0',
     };
     const upd = {...regData, ...payload};
     console.log(upd);
@@ -90,13 +91,19 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
           navigate('Auth', {screen: 'Completion'});
         }
       },
-      onError: e => {
-        console.log('error', e);
-        showMessage({
-          type: 'danger',
-          message: 'An error occurred',
-          position: 'bottom',
-        });
+      onError: (e: any) => {
+        const errorS = e.data.errors;
+        console.log('error', errorS);
+        for (const key in errorS) {
+          if (Object.prototype.hasOwnProperty.call(errorS, key)) {
+            const el = errorS[key];
+            Toast.show({
+              type: 'error',
+              text1: 'Create Account',
+              text2: el,
+            });
+          }
+        }
       },
     });
 

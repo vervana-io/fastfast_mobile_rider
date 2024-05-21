@@ -26,7 +26,7 @@ import {WIN_HEIGHT} from '../../config';
 import {WeatherIcon} from '@assets/svg/WeatherIcon';
 import {observer} from 'mobx-react-lite';
 
-interface ListType {
+export interface ListType {
   id: number;
   title: string;
   icon: any;
@@ -68,6 +68,10 @@ const List: ListType[] = [
 export const OrderHelpSheet = observer((props: SheetProps) => {
   const orderHelpSheetRef = useRef<ActionSheetRef>(null);
 
+  const openComplaint = (data: ListType) => {
+    SheetManager.show('ComplaintSheet', {payload: data});
+  };
+
   const Content = useCallback(() => {
     return (
       <Box py={6} px={4} bg="#ffffff" h="full" roundedTop="2xl">
@@ -99,6 +103,7 @@ export const OrderHelpSheet = observer((props: SheetProps) => {
             <Button
               key={i}
               bg="themeLight.gray.4"
+              onPress={() => openComplaint(el)}
               leftIcon={el.icon}
               _icon={{marginRight: 10}}
               justifyContent="flex-start"
@@ -124,7 +129,7 @@ export const OrderHelpSheet = observer((props: SheetProps) => {
         height: WIN_HEIGHT * 0.9,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        backgroundColor: 'transparent',
+        backgroundColor: 'white',
         // backgroundColor: colorMode === 'dark' ? '#111827' : '#fff',
       }}>
       {Content()}

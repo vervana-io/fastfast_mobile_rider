@@ -4,11 +4,11 @@ module.exports = {
     android: {},
   },
   assets: ['./src/assets/fonts/rany'],
-  // dependencies: {
-  //   'react-native-flipper': {
-  //     platforms: {
-  //       ios: null,
-  //     },
-  //   },
-  // },
+  dependencies: {
+    'react-native-flipper': {
+      platforms: {
+        ios: null,
+      },
+    },
+  },
 };

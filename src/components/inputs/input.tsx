@@ -57,7 +57,7 @@ interface InputProps {
   mb?: number;
   mt?: number;
   placeholderTextColor?: string;
-  fontSize?: string;
+  fontSize?: IInputProps['fontSize'];
   bg?: string;
   borderRadius?: number;
   borderBottomLeftRadius?: number;
@@ -80,6 +80,7 @@ interface InputProps {
   onFocus?: () => void;
   labelElementRight?: any;
   bgColor?: string;
+  height?: string | number;
 }
 
 export const Input = React.forwardRef<typeof NBInput, InputProps>(
@@ -117,13 +118,13 @@ export const Input = React.forwardRef<typeof NBInput, InputProps>(
       mx,
       my,
       px,
-      py,
+      py = 0,
       pl,
       pr,
       mb,
       mt,
       placeholderTextColor,
-      fontSize,
+      fontSize = 'md',
       bg = '#fff',
       borderRadius = 6,
       returnKeyLabel,
@@ -135,6 +136,7 @@ export const Input = React.forwardRef<typeof NBInput, InputProps>(
       onFocus,
       labelElementRight,
       bgColor,
+      height = 52,
     } = props;
     const [show, setShow] = React.useState(true);
 
@@ -227,6 +229,7 @@ export const Input = React.forwardRef<typeof NBInput, InputProps>(
                 pr={pr}
                 h={h}
                 w={w}
+                height={height}
                 borderBottomLeftRadius={borderBottomLeftRadius}
                 borderBottomRightRadius={borderBottomRightRadius}
                 minLength={minLength}

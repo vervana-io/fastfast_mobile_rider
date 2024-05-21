@@ -5,6 +5,7 @@ import {
   Center,
   HStack,
   Heading,
+  Image,
   Link,
   Text,
   VStack,
@@ -119,9 +120,9 @@ export const Login = (props: LoginProp) => {
   };
 
   const doLogin = async (values: any) => {
-    const token = await messaging().getToken();
+    // const token = await messaging().getToken();
     const payload = {
-      device_token: token,
+      device_token: '',
       field: values.email,
       password: values.password,
     };
@@ -139,6 +140,7 @@ export const Login = (props: LoginProp) => {
         }
       },
       onError: (e: any) => {
+        console.log('res error', e);
         if (e.status === 401) {
           // Alert.alert('Invalid Credentials');
           Toast.show({
@@ -146,19 +148,37 @@ export const Login = (props: LoginProp) => {
             text1: 'Login',
             text2: 'Invalid Credentials',
           });
+        } else if (e.status === 422) {
+          const errorS = e.data.errors;
+          console.log('error', errorS)
+          for (const key in errorS) {
+            if (Object.prototype.hasOwnProperty.call(errorS, key)) {
+              const el = errorS[key];
+              Toast.show({
+                type: 'error',
+                text1: 'Create Account',
+                text2: el,
+              });
+            }
+          }
         }
       },
     });
   };
 
   return (
-    <DefaultLayout checkPermissions={false}>
+    <DefaultLayout checkPermissions={true}>
       <Box position="absolute" top={0} w="full" left={0} zIndex={1}>
         <Pattern />
       </Box>
       <Box alignItems="center" flex={1} pt={0.2 * WIN_HEIGHT}>
-        <Box w={110} h={120}>
-          <LogoTextPrimary />
+        <Box w={110} h={110}>
+          <Image
+            w="full"
+            h="full"
+            alt="rider logo"
+            source={require('@assets/img/riderlogo.png')}
+          />
         </Box>
         <Center mt={8} w="full" px={8}>
           <Heading size="md" fontWeight="bold">
@@ -173,16 +193,25 @@ export const Login = (props: LoginProp) => {
             onSubmit={values => {
               doLogin(values);
             }}>
-            {({handleChange, handleSubmit, errors, values}) => (
+            {({
+              handleChange,
+              handleSubmit,
+              handleBlur,
+              touched,
+              errors,
+              values,
+            }) => (
               <VStack w="full" space={2}>
                 <Box w="full" mt={3}>
                   <Input
                     label="Email"
                     placeholder=""
                     py={Platform.OS === 'ios' ? 4 : 2}
+                    autoCapitalize="none"
                     onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
                     errorMessage={errors.email}
-                    hasError={errors.email ? true : false}
+                    hasError={errors.email && touched.email ? true : false}
                     value={values.email}
                   />
                 </Box>
@@ -194,8 +223,11 @@ export const Login = (props: LoginProp) => {
                     hasIcon
                     iconPosition="right"
                     onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
                     errorMessage={errors.password}
-                    hasError={errors.password ? true : false}
+                    hasError={
+                      errors.password && touched.password ? true : false
+                    }
                     value={values.password}
                     py={Platform.OS === 'ios' ? 4 : 2}
                     onSubmitEditing={handleSubmit}
