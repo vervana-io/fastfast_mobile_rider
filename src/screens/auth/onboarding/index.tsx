@@ -34,19 +34,19 @@ const List: OnboardingList[] = [
     image: <RiderIm width={300} height={240} />,
     title: 'Become a Delivery Rider',
     description:
-      'Lorem ipsum dolor sit amet consectetur. Gravida pellentesque lorem faucibus facilisi sagittis pellentesque morbi blandit eget.',
+      'Join us and experience the ease of earning money through deliveries. Flexible schedules, quick payouts, and the freedom to work on your terms.',
   },
   {
     image: <CalendarIm width={250} />,
     title: 'Flexible Working Hours',
     description:
-      'Lorem ipsum dolor sit amet consectetur. Gravida pellentesque lorem faucibus facilisi sagittis pellentesque morbi blandit eget.',
+      'With FastFast, you decide when to work. Whether it’s a few hours a week or a full-time commitment, you’re in control. Balance your work with your life seamlessly.',
   },
   {
     image: <ExchangeIm width={250} />,
     title: 'Convenient Earnings',
     description:
-      'Lorem ipsum dolor sit amet consectetur. Gravida pellentesque lorem faucibus facilisi sagittis pellentesque morbi blandit eget.',
+      'Convenient, quick, and right at your fingertips. Earn on your own schedule, wherever you are. Turn your free time into cash with just a few taps.',
   },
 ];
 
@@ -68,7 +68,7 @@ export const Onboarding = () => {
         <Text fontSize={20} fontWeight="bold">
           {data.title}
         </Text>
-        <Text textAlign="center" fontSize={14} fontWeight="light">
+        <Text textAlign="center" px={6} fontSize={14} fontWeight="light">
           {data.description}
         </Text>
       </Center>
