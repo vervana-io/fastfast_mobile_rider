@@ -10,8 +10,8 @@ import {
   VStack,
 } from 'native-base';
 import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
-import {Platform, StyleSheet} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import {AppState, AppStateStatus, Platform, StyleSheet} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import {BicycleIcon} from '@assets/svg/BicycleIcon';
 import {DefaultLayout} from '@layouts/default';
@@ -23,11 +23,14 @@ import {Todos} from './components/todos';
 import {addressesStore} from '@store/addresses';
 import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
-import {enableLatestRenderer} from 'react-native-maps';
+import {AnimatedRegion, enableLatestRenderer} from 'react-native-maps';
 import {markersType} from '@types/mapTypes';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
 import {useUser} from '@hooks/useUser';
+import {requestLocationPermission} from '@handlers/LocationPermissionHandler';
+import {myLocationNotification} from '@handlers/localNotifications';
+import io from 'socket.io-client';
 
 enableLatestRenderer();
 
@@ -40,6 +43,21 @@ export const Home = observer((props: HomeProps) => {
   const [location, setLocation] = useState<GeoPosition | null>(null);
   const [markers, setMarkers] = useState<markersType[]>([]);
   const [onlineStatus, setOnlineStatus] = useState(false);
+  const [appState, setAppState] = useState<AppStateStatus>(
+    AppState.currentState,
+  );
+
+  const socket: any = useRef<ReturnType<typeof io> | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // const [riderPosition] = useState(
+  //   new AnimatedRegion({
+  //     latitude: 9.033918,
+  //     longitude: 7.44668,
+  //     latitudeDelta: 0.005,
+  //     longitudeDelta: 0.005,
+  //   }),
+  // );
 
   const userD = authStore.auth;
   const selectedOrder = ordersStore.selectedOrder;
@@ -50,8 +68,16 @@ export const Home = observer((props: HomeProps) => {
   const GeoLocate = () => {
     Geolocation.getCurrentPosition(
       position => {
-        setLocation(position);
-        // console.log(position);
+        // console.log('position', position);
+
+        setRidersPosition({
+          title: 'You',
+          latitude: position?.coords?.latitude,
+          longitude: position?.coords?.longitude,
+        });
+        if (position?.coords?.latitude !== null) {
+          SendToSocket(position?.coords.latitude, position?.coords.longitude);
+        }
       },
       error => {
         // Alert.alert(`Code ${error.code}`, error.message);
@@ -74,6 +100,31 @@ export const Home = observer((props: HomeProps) => {
     );
   };
 
+  const SendToSocket = (latitude: number, longitude: number) => {
+    socket.current?.emit('message', {
+      riderId: userD?.user?.id.toString(),
+      orderId: selectedOrder?.id ?? '',
+      // message:location,
+      message: {
+        message: {
+          coords: {
+            accuracy: 600,
+            altitude: 0,
+            altitudeAccuracy: 0,
+            heading: 0,
+            latitude: latitude,
+            longitude: longitude,
+            speed: 0,
+          },
+          mocked: false,
+          provider: 'fused',
+          timestamp: 1727774592688,
+        },
+        sender: '0UhHCw1nwc7haMLAAAF3',
+      },
+    });
+  };
+
   const goOnline = useCallback(() => {
     if (address.street) {
       toggleOnlineStatus.mutate(
@@ -83,6 +134,7 @@ export const Home = observer((props: HomeProps) => {
         {
           onSuccess: (val: apiType) => {
             if (val.status) {
+              myLocationNotification('Your app is sending Locations regularly');
               setOnlineStatus(!onlineStatus);
               userDetails.refetch();
             } else {
@@ -106,6 +158,162 @@ export const Home = observer((props: HomeProps) => {
       }, 1000);
     }
   }, [address.street, onlineStatus, toggleOnlineStatus, userDetails]);
+
+  // const getRiderLocation = () => {
+  //   const result = requestLocationPermission();
+  //   result.then(res => {
+  //     console.log('res is:', res);
+  //     if (res) {
+  //       Geolocation.getCurrentPosition(
+  //         position => {
+  //           console.log('position', position);
+  //           // setLocation(position);
+  //         },
+  //         error => {
+  //           // See error code charts below.
+  //           console.log(error.code, error.message);
+  //           // setLocation(false);
+  //         },
+  //         {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+  //       );
+  //     }
+  //   });
+  //   // console.log(location);
+  // };
+
+  // useEffect(() => {
+  //   const handleAppStateChange = (nextAppState: AppStateStatus) => {
+  //     if (appState.match(/inactive|background/) && nextAppState === 'active') {
+  //       console.log('App has come to the foreground!');
+  //       onAppForeground();
+  //     } else if (nextAppState === 'background') {
+  //       console.log('App has gone to the background!');
+  //       onAppBackground();
+  //     }
+
+  //     setAppState(nextAppState);
+  //   };
+
+  //   // Listen for app state changes
+  //   const subscription = AppState.addEventListener(
+  //     'change',
+  //     handleAppStateChange,
+  //   );
+
+  //   // Clean up the listener on unmount
+  //   return () => {
+  //     subscription.remove();
+  //   };
+  // }, [appState]);
+
+  useEffect(() => {
+    if (onlineStatus) {
+      socket.current = io('https://service.fastfastapp.com');
+
+      // Handle connection event
+      socket.current.on('connect', () => {
+        console.log('Socket.IO connected');
+      });
+
+      // Handle disconnection
+      socket.current.on('disconnect', () => {
+        console.log('Socket.IO disconnected');
+      });
+
+      // intervalRef.current = setInterval(() => {
+      //   GeoLocate();
+      //   socket.current?.emit('message', {
+      //     riderId: userD?.user?.id.toString(),
+      //     orderId: '456',
+      //     // message:location,
+      //     message: {
+      //       message: {
+      //         coords: {
+      //           accuracy: 600,
+      //           altitude: 0,
+      //           altitudeAccuracy: 0,
+      //           heading: 0,
+      //           latitude: 6.605874,
+      //           longitude: 3.349149,
+      //           speed: 0,
+      //         },
+      //         mocked: false,
+      //         provider: 'fused',
+      //         timestamp: 1727774592688,
+      //       },
+      //       sender: '0UhHCw1nwc7haMLAAAF3',
+      //     },
+      //   });
+      //   // console.log('Location: Logitude and Latitude');
+      // }, 10000);
+    }
+
+    // const handleAppStateChange = (nextAppState: AppStateStatus) => {
+    //   if (appState.match(/inactive|background/) && nextAppState === 'active') {
+    //     console.log('App has come to the foreground!');
+    //     socket.current = io('https://0825-105-113-85-140.ngrok-free.app');
+
+    //     // Handle connection event
+    //     socket.current.on('connect', () => {
+    //       console.log('Socket.IO connected');
+    //     });
+
+    //     // Handle disconnection
+    //     socket.current.on('disconnect', () => {
+    //       console.log('Socket.IO disconnected');
+    //     });
+
+    //     // Start interval for logging "first" every 20 seconds
+    //     intervalRef.current = setInterval(() => {
+    //       socket.current?.emit('message', 'first');
+    //       console.log('first');
+
+    //       // GeoLocate();
+    //       // console.log('Location: Logitude and Latitude');
+    //     }, 20000);
+    //   } else if (nextAppState === 'background') {
+    //     console.log('App has gone to the background!');
+    //     socket.current = io('https://0825-105-113-85-140.ngrok-free.app');
+
+    //     // Handle connection event
+    //     socket.current.on('connect', () => {
+    //       console.log('Socket.IO connected');
+    //     });
+
+    //     // Handle disconnection
+    //     socket.current.on('disconnect', () => {
+    //       console.log('Socket.IO disconnected');
+    //     });
+
+    //     // Start interval for logging "first" every 20 seconds
+    //     intervalRef.current = setInterval(() => {
+    //       socket.current?.emit('rider_location', 'first');
+    //       console.log('first');
+    //       // GeoLocate();
+    //       // console.log('Location: Logitude and Latitude');
+    //     }, 5000);
+    //   }
+
+    //   setAppState(nextAppState);
+    // };
+
+    // const subscription = AppState.addEventListener(
+    //   'change',
+    //   // handleAppStateChange,
+    // );
+
+    // Clean up WebSocket connection and interval on component unmount
+    return () => {
+      // subscription.remove();
+
+      if (socket.current) {
+        socket.current.disconnect();
+      }
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [onlineStatus, appState, location]);
 
   const OnlineSection = useCallback(
     () => (
@@ -168,6 +376,59 @@ export const Home = observer((props: HomeProps) => {
     GeoLocate();
   }, []);
 
+  // const animateRider = coordinates => {
+  //   let index = 0;
+
+  //   const move = () => {
+  //     if (index < coordinates.length) {
+  //       const nextCoordinate = coordinates[index];
+  //       index++;
+
+  //       riderPosition
+  //         .timing({
+  //           latitude: nextCoordinate.latitude,
+  //           longitude: nextCoordinate.longitude,
+  //           duration: 2000, // Time for each point in milliseconds
+  //           useNativeDriver: false,
+  //         })
+  //         .start(() => {
+  //           move(); // Move to the next point after animation completes
+  //         });
+  //     }
+  //   };
+
+  //   move(); // Start moving
+  // };
+  // useEffect(() => {
+  //   animateRider(routeCoordinates);
+  // }, []);
+
+  const [ridersPosition, setRidersPosition] = useState({
+    title: 'You',
+    latitude: location?.coords.latitude ?? 0,
+    longitude: location?.coords.longitude ?? 0,
+  });
+
+  // const routeCoordinates = [
+  //   {latitude: 9.024, longitude: 7.431809},
+  //   {latitude: 9.011029, longitude: 7.420028},
+  //   {latitude: 8.999554, longitude: 7.409764},
+  //   {latitude: 8.990526, longitude: 7.397513},
+  //   {latitude: 8.982651, longitude: 7.383899},
+  //   {latitude: 8.968244, longitude: 7.353756},
+  //   {latitude: 8.95326, longitude: 7.335087},
+  //   {latitude: 8.939429, longitude: 7.310972},
+  //   {latitude: 8.942927, longitude: 7.293336}, // Final destination point
+  // ];
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      GeoLocate();
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   useEffect(() => {
     // here we get the sellers address and the riders address if picked_up time is null
     // if picked_up time is not null then we get customers address and riders address
@@ -180,12 +441,6 @@ export const Home = observer((props: HomeProps) => {
       longitude: parseFloat(selectedOrder.seller?.longitude ?? ''),
     };
 
-    const riders_geo_data: markersType = {
-      title: 'You',
-      latitude: location?.coords.latitude ?? 0,
-      longitude: location?.coords.longitude ?? 0,
-    };
-
     if (selectedOrder.address?.id) {
       const customers_geo_data: markersType = {
         id: selectedOrder.address.id.toString(),
@@ -193,8 +448,8 @@ export const Home = observer((props: HomeProps) => {
         latitude: parseFloat(selectedOrder?.address?.latitude ?? ''),
         longitude: parseFloat(selectedOrder?.address?.longitude ?? ''),
       };
-      const group = [riders_geo_data, sellers_geo_data];
-      const group2 = [riders_geo_data, customers_geo_data];
+      const group = [ridersPosition, sellers_geo_data];
+      const group2 = [ridersPosition, customers_geo_data];
       if (selectedOrder.id) {
         if (picked_up_at !== null) {
           setMarkers(group);
@@ -205,7 +460,12 @@ export const Home = observer((props: HomeProps) => {
         setMarkers([]);
       }
     }
-  }, [location?.coords.latitude, location?.coords.longitude, selectedOrder]);
+  }, [
+    location?.coords.latitude,
+    location?.coords.longitude,
+    selectedOrder,
+    ridersPosition,
+  ]);
 
   useEffect(() => {
     // set onloine status
