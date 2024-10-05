@@ -36,6 +36,7 @@ import {ordersStore} from '@store/orders';
 import {uploadedOrderType} from '@types/generalType';
 import {useIsFocused} from '@react-navigation/native';
 import {useOrders} from '@hooks/useOrders';
+import io from 'socket.io-client';
 
 export const OrderDetailsSheet = observer((props: SheetProps) => {
   const orderDetailsSheetRef = useRef<ActionSheetRef>(null);
@@ -57,6 +58,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
   const order_id = payload?.order_id ?? ordersStore.selectedOrderId;
   const ordersData = ordersStore.selectedOrder;
   const request_id = payload?.request_id ?? ordersData?.misc_rider_info?.id;
+  const socket: any = useRef<ReturnType<typeof io> | null>(null);
 
   const {colorMode} = useColorMode();
 
@@ -166,6 +168,17 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         onSuccess: (val: apiType) => {
           if (val.status) {
             getOrderInfo();
+            socket.current = io('https://service.fastfastapp.com');
+
+            socket.current.emit('createRoom', '456', (response: any) => {
+              if (response.success) {
+                console.log('Room created:', response.message);
+                // reject(response);
+              } else {
+                console.error('Failed to create room:', response.message);
+                // reject(new Error(response.message));
+              }
+            });
           } else {
             setErrorMessage(val.message);
           }
