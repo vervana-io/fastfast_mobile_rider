@@ -11,7 +11,7 @@ import {
   StorageManager,
   Text,
 } from 'native-base';
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   checkApplicationNotificationPermission,
   registerAppWithFCM,
@@ -37,6 +37,9 @@ import messaging from '@react-native-firebase/messaging';
 import {rootClientQuery} from './src/config';
 import {rootConfig} from '@store/root';
 import {theme} from './theme';
+import {initializePusher} from '@handlers/pusherHandler';
+import {requestLocationPermission} from '@handlers/LocationPermissionHandler';
+import Geolocation from 'react-native-geolocation-service';
 
 const toastConfig = {
   success: ({text1, props, text2}: any) => (
@@ -145,6 +148,24 @@ const toastConfig = {
 };
 
 export default function App() {
+  useEffect(() => {
+    // Initialize Pusher
+    initializePusher();
+
+    // subscribeToEvent((event: any) => {
+    //   const parsed = JSON.parse(event?.data);
+    //   if (event?.eventName === 'customer_pick_up_order') {
+    //     notificationStore.setRefetchOrder(parsed?.order_id);
+    //     // console.log('EventName', parsed);
+    //     Toast.show({
+    //       type: 'info',
+    //       text1: `${parsed?.title} for ${parsed?.seller_name}`,
+    //       text2: parsed?.body,
+    //     });
+    //   }
+    // });
+  }, []);
+
   LogBox.ignoreLogs([
     'In React 18',
     'The native module for Flipper',
