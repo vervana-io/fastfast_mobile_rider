@@ -17,6 +17,7 @@ import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
 import {useOrders} from '@hooks/useOrders';
+import {subscribeToEvent} from '@handlers/pusherHandler';
 
 export const OrderRequest = observer(() => {
   const NotificationOrder: any = ordersStore.notifiedOrder;
@@ -24,11 +25,14 @@ export const OrderRequest = observer(() => {
   const notificationData = notification ? JSON.parse(notification) : null;
   const [showReassign, setShowReassign] = useState(false);
   const [showOrder, setShowOrder] = useState<boolean>(true);
+  const [pusherOrder, setPusherOrder] = useState({});
 
   const [boxChangeableHeight, setBoxChangeableHeight] = useState(0);
   const boxHeight = useSharedValue(WIN_HEIGHT * boxChangeableHeight);
 
   const {acceptOrder, reassignOrder} = useOrders();
+
+  console.log('NotificationOrder', NotificationOrder);
 
   const triggerReassign = () => {
     setShowReassign(true);
@@ -36,8 +40,8 @@ export const OrderRequest = observer(() => {
   };
 
   const doReassign = () => {
-    if (notificationData.order_id) {
-      const order_id = notificationData.order_id;
+    if (pusherOrder.order_id) {
+      const order_id = pusherOrder.order_id;
       const request_id = NotificationOrder.data.request_id;
       if (order_id) {
         reassignOrder.mutate(
@@ -69,9 +73,13 @@ export const OrderRequest = observer(() => {
   };
 
   const triggerAccept = useCallback(() => {
-    if (notificationData.order_id) {
-      const order_id = notificationData?.order_id;
-      const request_id = NotificationOrder?.data?.request_id;
+    if (pusherOrder.order_id) {
+      const order_id = pusherOrder?.order_id;
+
+      console.log('order_id', order_id);
+      const request_id = NotificationOrder?.data?.request_id || '234';
+      console.log('request_id', request_id);
+
       acceptOrder.mutate(
         {
           order_id,
@@ -98,7 +106,7 @@ export const OrderRequest = observer(() => {
         },
       );
     }
-  }, [NotificationOrder?.data?.request_id, notificationData?.order_id]);
+  }, [NotificationOrder?.data?.request_id, pusherOrder?.order_id]);
 
   const Request = useCallback(
     () => (
@@ -107,11 +115,11 @@ export const OrderRequest = observer(() => {
           <Text color="white" fontWeight="bold" fontSize="30px">
             ₦
             {formatter.formatCurrencySimple(
-              parseInt(notificationData?.delivery_fee, 10),
+              parseInt(pusherOrder?.delivery_fee, 10),
             )}
           </Text>
-          <Text color="white">{notificationData?.title}</Text>
-          {/* <Text color="white">{notificationData.trading_name}</Text> */}
+          <Text color="white">{pusherOrder?.title}</Text>
+          {/* <Text color="white">{pusherOrder.trading_name}</Text> */}
         </Center>
         <VStack mt={4}>
           <VStack>
@@ -126,9 +134,8 @@ export const OrderRequest = observer(() => {
                 <Box />
               </Center>
               <Text color="white" flex={1}>
-                {notificationData?.address?.house_number}{' '}
-                {notificationData?.address?.street}{' '}
-                {notificationData?.address?.city}
+                {pusherOrder?.address?.house_number}{' '}
+                {pusherOrder?.address?.street} {pusherOrder?.address?.city}
               </Text>
             </HStack>
             <Box
@@ -145,9 +152,9 @@ export const OrderRequest = observer(() => {
             <HStack alignItems="center" space={2}>
               <LocationPin fill="white" />
               <Text color="white" flex={1}>
-                {notificationData?.customer_address?.house_number}{' '}
-                {notificationData?.customer_address?.street}{' '}
-                {notificationData?.customer_address?.city}
+                {pusherOrder?.customer_address?.house_number}{' '}
+                {pusherOrder?.customer_address?.street}{' '}
+                {pusherOrder?.customer_address?.city}
               </Text>
             </HStack>
           </VStack>
@@ -174,14 +181,14 @@ export const OrderRequest = observer(() => {
     ),
     [
       acceptOrder.isLoading,
-      notificationData?.address?.city,
-      notificationData?.address?.house_number,
-      notificationData?.address?.street,
-      notificationData?.customer_address?.city,
-      notificationData?.customer_address?.house_number,
-      notificationData?.customer_address?.street,
-      notificationData?.delivery_fee,
-      notificationData?.title,
+      pusherOrder?.address?.city,
+      pusherOrder?.address?.house_number,
+      pusherOrder?.address?.street,
+      pusherOrder?.customer_address?.city,
+      pusherOrder?.customer_address?.house_number,
+      pusherOrder?.customer_address?.street,
+      pusherOrder?.delivery_fee,
+      pusherOrder?.title,
       triggerAccept,
     ],
   );
@@ -228,19 +235,63 @@ export const OrderRequest = observer(() => {
   });
 
   useEffect(() => {
+    setPusherOrder(notificationData);
+    // setPusherOrder({
+    //   order_id: '456',
+    //   amount: 3900,
+    //   delivery_pin: '4244',
+    //   id: 1,
+    //   pick_up_pin: '6302',
+    //   reference: '#ORDER_1722718197643990',
+    //   rider_id: 0,
+    //   sub_total: 3400,
+    //   delivery_fee: 400,
+    //   title: 'Chicken Repulblic',
+    //   address: {
+    //     house_number: '2A',
+    //     street: 'Abuja Street',
+    //     city: 'Ilupeju, Lagos',
+    //   },
+    //   customer_address: {
+    //     house_number: '13',
+    //     street: 'Ajangbadi Street',
+    //     city: 'Festac, Lagos',
+    //   },
+    // });
+  }, []);
+
+  useEffect(() => {
+    subscribeToEvent(event => {
+      if (event?.eventName === 'rider_new_order') {
+        console.log('EventName', event);
+        setPusherOrder(JSON.parse(event?.data));
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     console.log('noti', notificationData);
-    if (notificationData?.amount) {
+    console.log('NotificationOrder', NotificationOrder);
+    if (pusherOrder?.amount || notificationData?.amount) {
       // clearNotificationById(NotificationOrder.messageId);
       setTimeout(() => {
         toggleBoxHeight();
       }, 500);
     }
-  }, [NotificationOrder, notificationData, toggleBoxHeight]);
+  }, [
+    NotificationOrder,
+    notificationData,
+    pusherOrder?.amount,
+    toggleBoxHeight,
+  ]);
 
   return (
     <Animated.View style={[styles.box, animatedBoxStyle]}>
       <Box px={3}>
-        {notificationData?.amount && !showReassign && <Request />}
+        {/* {notificationData?.amount && !showReassign && <Request />}  */}
+        {pusherOrder?.amount || (notificationData?.amount && !showReassign) ? (
+          <Request />
+        ) : null}
         {showReassign && <Reassign />}
       </Box>
     </Animated.View>

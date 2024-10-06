@@ -10,4 +10,5 @@ export interface markersType {
 export interface MapTypes {
   coords?: GeoCoordinates | null;
   markers?: markersType[];
+  riderPosition?: any;
 }

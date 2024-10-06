@@ -120,9 +120,9 @@ export const Login = (props: LoginProp) => {
   };
 
   const doLogin = async (values: any) => {
-    // const token = await messaging().getToken();
+    const token = await messaging().getToken();
     const payload = {
-      device_token: '',
+      device_token: token,
       field: values.email,
       password: values.password,
     };
@@ -150,7 +150,7 @@ export const Login = (props: LoginProp) => {
           });
         } else if (e.status === 422) {
           const errorS = e.data.errors;
-          console.log('error', errorS)
+          console.log('error', errorS);
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
               const el = errorS[key];

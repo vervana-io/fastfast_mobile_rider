@@ -1,6 +1,6 @@
-import RNMapView, {Circle, Marker} from 'react-native-maps';
+import RNMapView, {AnimatedRegion, Circle, Marker} from 'react-native-maps';
 import React, {useEffect, useRef, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Image, StyleSheet, View} from 'react-native';
 
 import {Box} from 'native-base';
 import {MapTypes} from '@types/mapTypes';
@@ -14,6 +14,11 @@ const MapView = observer((props: MapTypes) => {
   const {markers} = props;
   const mapRef = useRef<RNMapView>(null);
 
+  const [curentLocation, setCurentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
   const selectedAddress = addressesStore.selectedAddress;
 
   // const [location, setLocation] = useState<GeoPosition | null>(null);
@@ -22,7 +27,42 @@ const MapView = observer((props: MapTypes) => {
     longitude: number;
   } | null>(null);
 
+  const [markerPosition, setMarkerPosition] = useState(
+    new AnimatedRegion({
+      latitude: curentLocation?.latitude ?? initialRegion?.latitude,
+      longitude: curentLocation?.longitude ?? initialRegion?.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    }),
+  );
+
   const {location} = useGeolocation({enableFetchLocation: true});
+
+  // Effect to animate marker movement when curentLocation changes
+  useEffect(() => {
+    if (curentLocation) {
+      markerPosition
+        .timing({
+          latitude: curentLocation.latitude,
+          longitude: curentLocation.longitude,
+          duration: 500, // Animate over 0.5 seconds
+          useNativeDriver: false, // Needed for AnimatedRegion
+        })
+        .start();
+    }
+  }, [curentLocation, markerPosition]);
+
+  useEffect(() => {
+    if (mapRef.current && curentLocation) {
+      mapRef.current.animateCamera({
+        center: {
+          latitude: curentLocation.latitude,
+          longitude: curentLocation.longitude,
+        },
+        zoom: markers ? 11 : 13, // Adjust the zoom level as needed
+      });
+    }
+  }, [curentLocation, markers]); // Dependency on the changing marker position (curentLocation)
 
   useEffect(() => {
     setTimeout(() => {
@@ -60,6 +100,12 @@ const MapView = observer((props: MapTypes) => {
   // get the passed in markers and set distance
   useEffect(() => {
     console.log('passed markers', markers);
+    if (markers?.length > 0) {
+      setCurentLocation({
+        latitude: markers[0].latitude,
+        longitude: markers[0].longitude,
+      });
+    }
   }, [markers]);
 
   return (
@@ -72,8 +118,8 @@ const MapView = observer((props: MapTypes) => {
           initialCamera={{
             altitude: 15000,
             center: {
-              latitude: initialRegion?.latitude,
-              longitude: initialRegion?.longitude,
+              latitude: curentLocation?.latitude ?? initialRegion?.latitude,
+              longitude: curentLocation?.longitude ?? initialRegion?.longitude,
             },
             heading: 0,
             pitch: 1,
@@ -88,12 +134,9 @@ const MapView = observer((props: MapTypes) => {
           // loadingBackgroundColor="white"
           style={StyleSheet.absoluteFillObject}
           rotateEnabled={false}>
-          <Marker
+          <Marker.Animated
             anchor={{x: 0.5, y: 0.6}}
-            coordinate={{
-              latitude: initialRegion.latitude,
-              longitude: initialRegion.longitude,
-            }}
+            coordinate={markerPosition}
             flat
             title={(markers && markers[0]?.title) ?? 'You'}
             style={{
@@ -103,11 +146,15 @@ const MapView = observer((props: MapTypes) => {
                 },
               ],
             }}>
-            <View style={styles.dotContainer}>
+            {/* <View style={styles.dotContainer}>
               <View style={[styles.arrow]} />
               <View style={styles.dot} />
-            </View>
-          </Marker>
+            </View> */}
+            <Image
+              source={require('@assets/img/marker.png')}
+              style={{width: 30, height: 30}}
+            />
+          </Marker.Animated>
           <Circle
             center={{
               latitude: initialRegion.latitude,
