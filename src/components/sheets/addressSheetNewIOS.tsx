@@ -35,8 +35,6 @@ import {apiType} from '@types/apiTypes';
 import {functions} from '@helpers/functions';
 import {useGeolocation} from '@hooks/useGeoLocation';
 import {useIsFocused} from '@react-navigation/native';
-import {useOrders} from '@hooks/useOrders';
-import {useProducts} from '@hooks/useProducts';
 import {useUser} from '@hooks/useUser';
 
 export const AddressSheetsNewIOS = (props: SheetProps) => {
@@ -117,7 +115,7 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
         nearest_bus_stop: details.nearest_bus_stop ?? '-',
         city: details.city ?? '-',
         state: details.state ?? '-',
-        country: details.country ?? 'Nigeria',
+        country: 'Nigeria',
         latitude: details.geometry.location.lat.toString(),
         longitude: details.geometry.location.lng.toString(),
         is_primary: 1,

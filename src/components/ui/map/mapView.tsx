@@ -1,6 +1,6 @@
+import {Image, StyleSheet, View} from 'react-native';
 import RNMapView, {AnimatedRegion, Circle, Marker} from 'react-native-maps';
 import React, {useEffect, useRef, useState} from 'react';
-import {Image, StyleSheet, View} from 'react-native';
 
 import {Box} from 'native-base';
 import {MapTypes} from '@types/mapTypes';
@@ -46,7 +46,10 @@ const MapView = observer((props: MapTypes) => {
           latitude: curentLocation.latitude,
           longitude: curentLocation.longitude,
           duration: 500, // Animate over 0.5 seconds
-          useNativeDriver: false, // Needed for AnimatedRegion
+          useNativeDriver: false,
+          toValue: 0,
+          latitudeDelta: 0,
+          longitudeDelta: 0
         })
         .start();
     }
@@ -100,7 +103,7 @@ const MapView = observer((props: MapTypes) => {
   // get the passed in markers and set distance
   useEffect(() => {
     console.log('passed markers', markers);
-    if (markers?.length > 0) {
+    if (markers && markers.length > 0) {
       setCurentLocation({
         latitude: markers[0].latitude,
         longitude: markers[0].longitude,
@@ -123,12 +126,12 @@ const MapView = observer((props: MapTypes) => {
             },
             heading: 0,
             pitch: 1,
-            zoom: markers ? 12 : 13,
+            zoom: markers ? 14 : 15,
           }}
           loadingEnabled
           zoomEnabled={false}
           // followsUserLocation
-          // showsUserLocation
+          showsUserLocation
           showsMyLocationButton={false}
           showsCompass={false}
           // loadingBackgroundColor="white"
