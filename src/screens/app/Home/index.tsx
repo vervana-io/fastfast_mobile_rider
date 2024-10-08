@@ -1,3 +1,5 @@
+import {AnimatedRegion, enableLatestRenderer} from 'react-native-maps';
+import {AppState, AppStateStatus, Platform, StyleSheet} from 'react-native';
 import {
   Box,
   Button,
@@ -10,7 +12,6 @@ import {
   VStack,
 } from 'native-base';
 import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
-import {AppState, AppStateStatus, Platform, StyleSheet} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import {BicycleIcon} from '@assets/svg/BicycleIcon';
@@ -23,14 +24,13 @@ import {Todos} from './components/todos';
 import {addressesStore} from '@store/addresses';
 import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
-import {AnimatedRegion, enableLatestRenderer} from 'react-native-maps';
+import io from 'socket.io-client';
 import {markersType} from '@types/mapTypes';
+import {myLocationNotification} from '@handlers/localNotifications';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
-import {useUser} from '@hooks/useUser';
 import {requestLocationPermission} from '@handlers/LocationPermissionHandler';
-import {myLocationNotification} from '@handlers/localNotifications';
-import io from 'socket.io-client';
+import {useUser} from '@hooks/useUser';
 
 enableLatestRenderer();
 
@@ -351,7 +351,7 @@ export const Home = observer((props: HomeProps) => {
           <Text color="white" fontWeight="bold" fontSize="lg">
             You're{' '}
             {toggleOnlineStatus.isLoading && onlineStatus
-              ? 'going offiline'
+              ? 'going offline'
               : toggleOnlineStatus.isLoading && !onlineStatus
               ? 'going online'
               : !toggleOnlineStatus.isLoading && onlineStatus
