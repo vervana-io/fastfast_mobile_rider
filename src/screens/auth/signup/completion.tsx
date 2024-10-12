@@ -34,7 +34,7 @@ export const Completion = (props: Step3Props) => {
         w="full"
         py={4}
         my={8}
-        onPress={() => navigation.replace('Auth', {screen: 'Login'})}
+        onPress={() => navigation.replace('App')}
         rounded="full">
         Proceed
       </Button>
