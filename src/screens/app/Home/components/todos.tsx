@@ -15,12 +15,14 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {SheetManager} from 'react-native-actions-sheet';
 import {StyleSheet} from 'react-native';
 import {WIN_WIDTH} from '../../../../config';
+import {addressesStore} from '@store/addresses';
 import {authStore} from '@store/auth';
 import {checklist} from '@store/checklist';
 import {observer} from 'mobx-react-lite';
 
 export const Todos = observer(() => {
   const ChecklistData = checklist.checklist;
+  const addressStore = addressesStore.selectedAddress;
 
   const userD = authStore.auth;
 
@@ -30,7 +32,10 @@ export const Todos = observer(() => {
     const completedTasks = ChecklistData.filter(
       task => task.completed === 1,
     ).length;
-    return (completedTasks / ChecklistData.length) * 100;
+    const result = (completedTasks / ChecklistData.length) * 100;
+    const res = parseInt(result.toFixed(2), 10);
+    console.log('percentage', res);
+    return res;
   };
   const percentage = calculatePercentage();
 
@@ -44,13 +49,13 @@ export const Todos = observer(() => {
       checklist.updateCompletedByIndex(2);
     }
     // now we check if an address has been set
-    if (userD.user?.current_latitude) {
+    if (addressStore.latitude) {
       checklist.updateCompletedByIndex(3);
     }
   }, [
+    addressStore.latitude,
     userD.rider?.first_guarantor_name,
     userD.rider?.selfie,
-    userD.user?.current_latitude,
   ]);
 
   useEffect(() => {
@@ -75,12 +80,12 @@ export const Todos = observer(() => {
           Complete your verification to start taking orders
         </Text>
         {showProgress && (
-          <VStack my={4} w="full" h="4px" rounded="lg">
-            <Progress.Bar
-              progress={percentage}
-              color="#1B7A41"
-              width={WIN_WIDTH * 0.82}
-              height={4}
+          <VStack my={4} w="full" h="4px" bg="gray.300" rounded="lg">
+            <Box
+              h="full"
+              w={`${percentage}%`}
+              bg="themeLight.primary.base"
+              rounded="lg"
             />
           </VStack>
         )}
@@ -165,7 +170,11 @@ export const Todos = observer(() => {
         style={style.shadow}
         borderWidth={1}
         borderColor="trueGray.300">
-        {userD.user?.complaince_status === 2 ? Pending() : Incomplete()}
+        {userD.user?.complaince_status === 2 &&
+        userD.rider?.selfie &&
+        userD.rider.first_guarantor_name
+          ? Pending()
+          : Incomplete()}
       </Box>
     </Box>
   );

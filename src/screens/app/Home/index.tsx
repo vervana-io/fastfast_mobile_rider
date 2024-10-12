@@ -436,10 +436,7 @@ export const Home = observer((props: HomeProps) => {
             </Box>
           ) : null}
         </HStack>
-        {userD.user?.complaince_status === 0 ||
-        userD.user?.complaince_status === 3 ? (
-          <Todos />
-        ) : null}
+        {userD.user?.complaince_status !== 1 ? <Todos /> : null}
         <OrderRequest />
         <Box h="full" w="full" zIndex={1}>
           <MapView markers={markers} />
