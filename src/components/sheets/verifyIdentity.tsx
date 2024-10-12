@@ -30,6 +30,7 @@ import {StyleSheet} from 'react-native';
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT} from '../../config';
 import {apiType} from '@types/index';
+import { checklist } from '@store/checklist';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {uploadedOrderType} from '@types/generalType';
 import {useCameraPermission} from 'react-native-vision-camera';
@@ -50,6 +51,7 @@ export const VerifyIdentitySheet = (props: SheetProps) => {
   const toast = useToast();
 
   const {profileUpdate, userDetails} = useUser();
+  const ChecklistData = checklist.checklist;
 
   const camera = useRef<Camera>(null);
 

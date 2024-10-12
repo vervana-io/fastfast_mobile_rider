@@ -57,7 +57,7 @@ export const Login = (props: LoginProp) => {
   const ButtonWithSSO = useCallback(
     () => (
       <>
-        <Text>Or Continue With</Text>
+        {/* <Text>Or Continue With</Text> */}
         <HStack space={6} my={4}>
           {/* <Button
             leftIcon={<FBIcon />}
@@ -167,7 +167,7 @@ export const Login = (props: LoginProp) => {
   };
 
   return (
-    <DefaultLayout checkPermissions={true}>
+    <DefaultLayout>
       <Box position="absolute" top={0} w="full" left={0} zIndex={1}>
         <Pattern />
       </Box>
@@ -235,6 +235,7 @@ export const Login = (props: LoginProp) => {
                 </Box>
                 <Link
                   _text={{fontSize: 14, fontWeight: 'medium'}}
+                  onPress={() => navigation.navigate('ForgotStep1')}
                   isUnderlined={false}>
                   Forgot Your Password?
                 </Link>

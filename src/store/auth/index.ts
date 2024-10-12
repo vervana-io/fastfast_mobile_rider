@@ -9,8 +9,11 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AuthType} from '@types/authType';
 import NavigationService from '@navigation/NavigationService';
+import { addressesStore } from '@store/addresses';
+import { checklist } from '@store/checklist';
 import {makeAutoObservable} from 'mobx';
-import {rootConfig} from '../root';
+import { ordersStore } from '@store/orders';
+import { transactionsStore } from '@store/transactions';
 
 class AuthStore {
   auth: Partial<AuthType> = {};
@@ -75,6 +78,10 @@ class AuthStore {
     this.isLoggedIn = false;
     this.lockPassCode = '';
     this.deviceLocked = false;
+    addressesStore.clearPersisting();
+    ordersStore.clearPersisting();
+    checklist.clearStoredData();
+    transactionsStore.clearPersisting();
     return new Promise<any>((resolve: any) => {
       NavigationService.navigate('Splashscreen');
       resolve(true);

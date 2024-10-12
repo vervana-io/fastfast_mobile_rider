@@ -52,6 +52,26 @@ export const useAuth = () => {
     },
   );
 
+  const sendEmailToken = useMutation(async (data: {email: string}) => {
+    try {
+      const req: any = await http.post('auth/send_token_email', data);
+      return req.data;
+    } catch (error) {
+      throw error;
+    }
+  });
+
+  const validateEmailToken = useMutation(
+    async (data: {email: string; token: string}) => {
+      try {
+        const req: any = await http.post('auth/validate_token_email', data);
+        return req.data;
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
   const register = useMutation(
     async (data: {
       username: string;
@@ -69,6 +89,21 @@ export const useAuth = () => {
       } catch (error) {
         throw error;
       }
+    },
+    {
+      onSuccess: (val: apiType) => {
+        if (val.status) {
+          const data: any = val.data;
+          const payload: AuthType = {
+            user: data.user,
+            rider: data.rider,
+            setting: data.setting,
+            token: data.access_token.token,
+            wallet: data.wallet,
+          };
+          authStore.setAuth(payload);
+        }
+      },
     },
   );
 
@@ -97,5 +132,7 @@ export const useAuth = () => {
     validateToken,
     logout,
     checkIfEmailExist,
+    sendEmailToken,
+    validateEmailToken,
   };
 };

@@ -14,6 +14,8 @@ export interface User {
   current_longitude: string;
   created_at: string;
   updated_at: string;
+  complaince_status: number;
+  rejection_note: string;
 }
 
 export interface Rider {

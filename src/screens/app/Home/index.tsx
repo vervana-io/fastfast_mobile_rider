@@ -48,7 +48,7 @@ export const Home = observer((props: HomeProps) => {
   );
 
   const socket: any = useRef<ReturnType<typeof io> | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef: any = useRef<NodeJS.Timeout | null>(null);
 
   // const [riderPosition] = useState(
   //   new AnimatedRegion({
@@ -100,6 +100,7 @@ export const Home = observer((props: HomeProps) => {
     );
   };
 
+  // emit rider information to customer service
   const SendToSocket = (latitude: number, longitude: number) => {
     socket.current?.emit('message', {
       riderId: userD?.user?.id.toString(),
@@ -125,6 +126,7 @@ export const Home = observer((props: HomeProps) => {
     });
   };
 
+  // set Rider status to Online
   const goOnline = useCallback(() => {
     if (address.street) {
       toggleOnlineStatus.mutate(
@@ -159,54 +161,8 @@ export const Home = observer((props: HomeProps) => {
     }
   }, [address.street, onlineStatus, toggleOnlineStatus, userDetails]);
 
-  // const getRiderLocation = () => {
-  //   const result = requestLocationPermission();
-  //   result.then(res => {
-  //     console.log('res is:', res);
-  //     if (res) {
-  //       Geolocation.getCurrentPosition(
-  //         position => {
-  //           console.log('position', position);
-  //           // setLocation(position);
-  //         },
-  //         error => {
-  //           // See error code charts below.
-  //           console.log(error.code, error.message);
-  //           // setLocation(false);
-  //         },
-  //         {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-  //       );
-  //     }
-  //   });
-  //   // console.log(location);
-  // };
-
-  // useEffect(() => {
-  //   const handleAppStateChange = (nextAppState: AppStateStatus) => {
-  //     if (appState.match(/inactive|background/) && nextAppState === 'active') {
-  //       console.log('App has come to the foreground!');
-  //       onAppForeground();
-  //     } else if (nextAppState === 'background') {
-  //       console.log('App has gone to the background!');
-  //       onAppBackground();
-  //     }
-
-  //     setAppState(nextAppState);
-  //   };
-
-  //   // Listen for app state changes
-  //   const subscription = AppState.addEventListener(
-  //     'change',
-  //     handleAppStateChange,
-  //   );
-
-  //   // Clean up the listener on unmount
-  //   return () => {
-  //     subscription.remove();
-  //   };
-  // }, [appState]);
-
   useEffect(() => {
+    console.log('user', userD);
     if (onlineStatus) {
       socket.current = io('https://service.fastfastapp.com');
 
@@ -219,88 +175,7 @@ export const Home = observer((props: HomeProps) => {
       socket.current.on('disconnect', () => {
         console.log('Socket.IO disconnected');
       });
-
-      // intervalRef.current = setInterval(() => {
-      //   GeoLocate();
-      //   socket.current?.emit('message', {
-      //     riderId: userD?.user?.id.toString(),
-      //     orderId: '456',
-      //     // message:location,
-      //     message: {
-      //       message: {
-      //         coords: {
-      //           accuracy: 600,
-      //           altitude: 0,
-      //           altitudeAccuracy: 0,
-      //           heading: 0,
-      //           latitude: 6.605874,
-      //           longitude: 3.349149,
-      //           speed: 0,
-      //         },
-      //         mocked: false,
-      //         provider: 'fused',
-      //         timestamp: 1727774592688,
-      //       },
-      //       sender: '0UhHCw1nwc7haMLAAAF3',
-      //     },
-      //   });
-      //   // console.log('Location: Logitude and Latitude');
-      // }, 10000);
     }
-
-    // const handleAppStateChange = (nextAppState: AppStateStatus) => {
-    //   if (appState.match(/inactive|background/) && nextAppState === 'active') {
-    //     console.log('App has come to the foreground!');
-    //     socket.current = io('https://0825-105-113-85-140.ngrok-free.app');
-
-    //     // Handle connection event
-    //     socket.current.on('connect', () => {
-    //       console.log('Socket.IO connected');
-    //     });
-
-    //     // Handle disconnection
-    //     socket.current.on('disconnect', () => {
-    //       console.log('Socket.IO disconnected');
-    //     });
-
-    //     // Start interval for logging "first" every 20 seconds
-    //     intervalRef.current = setInterval(() => {
-    //       socket.current?.emit('message', 'first');
-    //       console.log('first');
-
-    //       // GeoLocate();
-    //       // console.log('Location: Logitude and Latitude');
-    //     }, 20000);
-    //   } else if (nextAppState === 'background') {
-    //     console.log('App has gone to the background!');
-    //     socket.current = io('https://0825-105-113-85-140.ngrok-free.app');
-
-    //     // Handle connection event
-    //     socket.current.on('connect', () => {
-    //       console.log('Socket.IO connected');
-    //     });
-
-    //     // Handle disconnection
-    //     socket.current.on('disconnect', () => {
-    //       console.log('Socket.IO disconnected');
-    //     });
-
-    //     // Start interval for logging "first" every 20 seconds
-    //     intervalRef.current = setInterval(() => {
-    //       socket.current?.emit('rider_location', 'first');
-    //       console.log('first');
-    //       // GeoLocate();
-    //       // console.log('Location: Logitude and Latitude');
-    //     }, 5000);
-    //   }
-
-    //   setAppState(nextAppState);
-    // };
-
-    // const subscription = AppState.addEventListener(
-    //   'change',
-    //   // handleAppStateChange,
-    // );
 
     // Clean up WebSocket connection and interval on component unmount
     return () => {
@@ -373,7 +248,7 @@ export const Home = observer((props: HomeProps) => {
 
   // we trigger the location on page load assuming location is already set from onset
   useEffect(() => {
-    GeoLocate();
+    getLocation(true);
   }, []);
 
   // const animateRider = coordinates => {
@@ -527,7 +402,7 @@ export const Home = observer((props: HomeProps) => {
                 rounded="lg"
                 onPress={() =>
                   SheetManager.show('orderDetailsSheet', {
-                    payload: {order_id: ordersStore.selectedOrderId},
+                    payload: {order_id: ordersStore?.selectedOrderId},
                   })
                 }>
                 <HStack
@@ -561,7 +436,10 @@ export const Home = observer((props: HomeProps) => {
             </Box>
           ) : null}
         </HStack>
-        {/* <Todos /> */}
+        {userD.user?.complaince_status === 0 ||
+        userD.user?.complaince_status === 3 ? (
+          <Todos />
+        ) : null}
         <OrderRequest />
         <Box h="full" w="full" zIndex={1}>
           <MapView markers={markers} />

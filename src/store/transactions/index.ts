@@ -1,4 +1,5 @@
 import {
+  clearPersistedStore,
   configurePersistable,
   getPersistedStore,
   makePersistable,
@@ -36,6 +37,10 @@ class TransactionsStore {
 
   async getStoredData() {
     return await getPersistedStore(this);
+  }
+
+  async clearPersisting() {
+    return await clearPersistedStore(this);
   }
 
   stopStore() {

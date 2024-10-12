@@ -1,6 +1,6 @@
 import {Alert, Modal, Platform} from 'react-native';
 import {Box, Button, Center, StatusBar, Text, VStack} from 'native-base';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   isLocationEnabled,
   promptForEnableLocationIfNeeded,
@@ -9,13 +9,14 @@ import {
 import {KeyboardAvoiding} from '@components/utils';
 import {LocationPin} from '@assets/svg/LocationPin';
 import PermissionManager from '@handlers/permissionHandler';
+import { checklist } from '@store/checklist';
 import {layoutProps} from '@types/layoutsTypes';
 
 export const DefaultLayout = (props: layoutProps) => {
   const {
     children,
     statusBarColor = 'white',
-    checkPermissions = true,
+    checkPermissions = false,
     hasPermissionSet,
     refreshable = false,
     shouldRefresh,

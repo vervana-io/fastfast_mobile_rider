@@ -5,10 +5,10 @@ import {
   makePersistable,
   stopPersisting,
 } from 'mobx-persist-store';
+import {makeAutoObservable, runInAction} from 'mobx';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {authStore} from '../auth/index';
-import {makeAutoObservable} from 'mobx';
 
 export interface checklistProps {
   id: number;
@@ -16,9 +16,7 @@ export interface checklistProps {
   completionTime: string;
   completed: number;
   isActive: boolean;
-  nav: {
-    name: string;
-  };
+  sheetName: string;
   status: number;
 }
 
@@ -26,46 +24,29 @@ class Checklist {
   checklist: checklistProps[] = [
     {
       id: 1,
-      title: 'Vehicle verification',
-      completionTime: '10s',
+      title: 'Verify your identity',
+      completionTime: '20s',
       completed: 0,
       isActive: true,
-      nav: {
-        name: 'Overlays',
-      },
+      sheetName: 'verifyIdentitySheet',
       status: 0,
     },
     {
       id: 2,
-      title: 'Personal identity',
-      completionTime: '10s',
+      title: 'Guarantor Form',
+      completionTime: '1m.5s',
       completed: 0,
       isActive: true,
-      nav: {
-        name: 'Settings',
-      },
+      sheetName: 'GuarantorFormSheet',
       status: 0,
     },
     {
       id: 3,
-      title: 'Guarantor form',
-      completionTime: '1m.30s',
+      title: 'Set your default address',
+      completionTime: '20s',
       completed: 0,
       isActive: true,
-      nav: {
-        name: 'AccountVerification',
-      },
-      status: 0,
-    },
-    {
-      id: 4,
-      title: 'Working hours',
-      completionTime: '10s',
-      completed: 0,
-      isActive: true,
-      nav: {
-        name: 'Auth',
-      },
+      sheetName: 'addressSheetNewIOS',
       status: 0,
     },
   ];
@@ -92,6 +73,16 @@ class Checklist {
     this.checklist[listIndex] = val;
   }
 
+  updateCompletedByIndex(id: number) {
+    const index = this.checklist.findIndex(item => item.id === id);
+    if (index !== -1) {
+      runInAction(() => {
+        this.checklist[index].status = 1;
+        this.checklist[index].completed = 1;
+      });
+    }
+  }
+
   disableChecklistById(id: number) {
     const list = this.checklist;
     const index = list.findIndex(fill => fill.id === id);
@@ -101,6 +92,8 @@ class Checklist {
     }
     return false;
   }
+
+  verifyChecklist() {}
 
   async getStoredData() {
     return await getPersistedStore(this);
