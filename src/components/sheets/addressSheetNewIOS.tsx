@@ -59,6 +59,12 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
     enableFetchLocation: true,
   });
 
+  const closeAddressBox = () => {
+    SheetManager.hide('addressSheetNewIOS', {
+      payload: true,
+    });
+  };
+
   const createAddress = (addData: addAddressType) => {
     addAddress.mutate(addData, {
       onSuccess: (val: apiType) => {
@@ -66,9 +72,7 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
         if (val.status) {
           fetchAddress.refetch();
           userDetails.refetch();
-          SheetManager.hide('addressSheetNewIOS', {
-            payload: true,
-          });
+          closeAddressBox();
         }
       },
       onError: (e: any) => {
@@ -93,9 +97,7 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
         if (val.status) {
           fetchAddress.refetch();
           userDetails.refetch();
-          SheetManager.hide('addressSheetNewIOS', {
-            payload: true,
-          });
+          closeAddressBox();
         }
       },
       onError: (e: any) => {

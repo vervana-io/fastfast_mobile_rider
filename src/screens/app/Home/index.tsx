@@ -26,11 +26,13 @@ import {UsePusher} from '@hooks/usePusher';
 import {addressesStore} from '@store/addresses';
 import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
+import {functions} from '@helpers/functions';
 import io from 'socket.io-client';
 import {markersType} from '@types/mapTypes';
 import {myLocationNotification} from '@handlers/localNotifications';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
+import {useGeolocation} from '@hooks/useGeoLocation';
 import {useOrders} from '@hooks/useOrders';
 import {useUser} from '@hooks/useUser';
 
@@ -67,11 +69,12 @@ export const Home = observer((props: HomeProps) => {
   const {toggleOnlineStatus, userDetails} = useUser({enableFetchAddress: true});
   const {fetchOngoingOrders} = useOrders();
   const ordersOngoingCount = ordersStore.ongoingOrderCount;
+  const {geoCode} = useGeolocation();
 
   const GeoLocate = () => {
     Geolocation.getCurrentPosition(
       position => {
-        console.log('position', position);
+        // console.log('position', position);
 
         setRidersPosition({
           title: 'You',
@@ -129,44 +132,84 @@ export const Home = observer((props: HomeProps) => {
     });
   };
 
+  const updateOnlineStatus = useCallback((status: number) => {
+    toggleOnlineStatus.mutate(
+      {
+        status,
+      },
+      {
+        onSuccess: (val: apiType) => {
+          if (val.status) {
+            setOnlineStatus(true);
+            userDetails.refetch();
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: 'Online Status',
+              text2: val.message,
+            });
+          }
+        },
+      },
+    );
+  }, []);
+
   // set Rider status to Online
-  const goOnline = useCallback(() => {
-    if (address.street) {
-      toggleOnlineStatus.mutate(
-        {
-          status: onlineStatus ? 0 : 1,
-        },
-        {
-          onSuccess: (val: apiType) => {
-            if (val.status) {
-              myLocationNotification('Your app is sending Locations regularly');
-              setOnlineStatus(!onlineStatus);
-              userDetails.refetch();
-            } else {
-              Toast.show({
-                type: 'error',
-                text1: 'Online Status',
-                text2: val.message,
-              });
-            }
-          },
-        },
-      );
+  const goOnline = useCallback(async () => {
+    // first we check if user is online, then they go offline
+    if (!onlineStatus) {
+      // first we check if the user has an address set
+      if (address.latitude) {
+        // next we compare the users set address and his current ma position
+        const lat1 = parseInt(address.latitude, 10);
+        const lon1 = parseInt(address.longitude ?? '', 10);
+        const lat2 = ridersPosition.latitude;
+        const lon2 = ridersPosition.longitude;
+        const comparePositions = functions.areLocationsApproximatelySame(
+          lat1,
+          lon1,
+          lat2,
+          lon2,
+        );
+        if (comparePositions) {
+          console.log('got to compare right');
+          updateOnlineStatus(1);
+        } else {
+          const hasAddress = await SheetManager.show('addressSheetNewIOS');
+          console.log('got to compare wrong');
+          console.log('hasAddress', hasAddress);
+          if (hasAddress) {
+            updateOnlineStatus(1);
+          }
+        }
+      } else {
+        console.log('got to no address set');
+        Toast.show({
+          type: 'warning',
+          text1: 'Going Online?',
+          text2: 'You need to set your current address to go online',
+        });
+        const hasAddress = await SheetManager.show('addressSheetNewIOS');
+        if (hasAddress) {
+          updateOnlineStatus(1);
+        }
+      }
     } else {
-      Toast.show({
-        type: 'warning',
-        text1: 'Going Online?',
-        text2: 'You need to set your current address to go online',
-      });
-      setTimeout(() => {
-        SheetManager.show('addressSheetNewIOS');
-      }, 1000);
+      console.log('going offline');
+      updateOnlineStatus(0);
     }
-  }, [address.street, onlineStatus, toggleOnlineStatus, userDetails]);
+  }, [
+    address.latitude,
+    address.longitude,
+    onlineStatus,
+    ridersPosition.latitude,
+    ridersPosition.longitude,
+    updateOnlineStatus,
+  ]);
 
   // socket initialization
   useEffect(() => {
-    console.log('user', userD);
+    // console.log('user', userD);
     if (onlineStatus) {
       socket.current = io(process.env.SERVICE_URL);
 
@@ -259,28 +302,22 @@ export const Home = observer((props: HomeProps) => {
     });
   }, []);
   useEffect(() => {
-    if (ordersOngoingCount) {
-      const intervalId = setInterval(() => {
-        GeoLocate();
-      }, 5000);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [GeoLocate, ordersOngoingCount]);
+    // if (ordersOngoingCount) {
+    //   const intervalId = setInterval(() => {
+    //     GeoLocate();
+    //   }, 5000);
+    //   return () => clearInterval(intervalId);
+    // }
+  }, [ordersOngoingCount]);
   useEffect(() => {
     if (ordersOngoingCount && !selectedOrder.id) {
       // throw notification of order ongoing
+      myLocationNotification('Your app is sending Locations regularly');
       Toast.show({
         type: 'info',
         text1: 'Order Ongoing',
         text2: `You have ${ordersOngoingCount} orders ongoing, navigate to orders to view them`,
         autoHide: false,
-        onPress: () => {
-          console.log('====================================');
-          console.log('clicked');
-          console.log('====================================');
-          navigation.navigate('Orders');
-        },
       });
     }
   }, [navigation, ordersOngoingCount, selectedOrder.id]);
@@ -389,7 +426,10 @@ export const Home = observer((props: HomeProps) => {
           px={4}>
           <Pressable
             mt={Platform.OS === 'ios' ? '8' : 0}
-            onPress={() => navigation.openDrawer()}
+            onPress={() => {
+              SheetManager.hide('orderDetailsSheet');
+              navigation.openDrawer();
+            }}
             w="45px"
             h="44px">
             <Center

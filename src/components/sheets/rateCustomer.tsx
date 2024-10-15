@@ -23,9 +23,11 @@ import {StarIcon} from '@assets/svg/StarIcon';
 import {StarIcon2} from '@assets/svg/StarIcon2';
 // import { StarIcon } from '@assets/svg/StarIcon';
 import {WIN_HEIGHT} from '../../config';
+import {authStore} from '@store/auth';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
+import { useOrders } from '@hooks/useOrders';
 
 interface ratingType {
   message: string;
@@ -85,14 +87,20 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
   const [message, setMessage] = useState('');
   const [showRating, setShowRating] = useState(true);
 
+  const userD = authStore.auth;
+
   const payload: any = props.payload;
   const delivery_fee = payload?.delivery_fee ?? 0;
   const customer_id = payload?.customer_id ?? 0;
   // const {customer_id, delivery_fee} = payload;
 
+  const {} = useOrders();
+
   const handleRatingPress = (selected: number) => {
     setSelectedRating(selected);
   };
+
+  const doRating = () => {};
 
   const badRatingResponse = () => (
     <>
@@ -178,7 +186,8 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
         <ScrollView>
           <VStack mt={4} px={4}>
             <Text fontWeight="bold">
-              How was your delivery with your customer, David?
+              How was your delivery with your customer,{' '}
+              {userD.rider?.first_name}?
             </Text>
             <HStack mt={6} justifyContent="space-between">
               {rating.map(index => (
@@ -214,7 +223,7 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
         </ScrollView>
       </Box>
     );
-  }, [message, rating, selectedRating]);
+  }, [message, rating, selectedRating, userD.rider?.first_name]);
 
   return (
     <ActionSheet

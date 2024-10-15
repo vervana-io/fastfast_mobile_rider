@@ -126,10 +126,10 @@ const MapView = observer((props: MapTypes) => {
             },
             heading: 0,
             pitch: 1,
-            zoom: markers ? 14 : 14,
+            zoom: markers ? 12 : 14,
           }}
           loadingEnabled
-          zoomEnabled={false}
+          zoomEnabled={true}
           // followsUserLocation
           showsMyLocationButton={true}
           showsCompass={false}

@@ -40,7 +40,9 @@ import {useOrders} from '@hooks/useOrders';
 
 export const OrderDetailsSheet = observer((props: SheetProps) => {
   const orderDetailsSheetRef = useRef<ActionSheetRef>(null);
-  const [hasFullDetails, setFullDetails] = useState(false);
+  const [hasViewDetails, setViewDetails] = useState<'small' | 'mid' | 'full'>(
+    'mid',
+  );
   const [uploadedOrder, setUploadedOrder] = useState<uploadedOrderType[]>([]);
   const allowedUpload = 2;
   const [errorMessage, setErrorMessage] = useState('');
@@ -205,6 +207,72 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
     }
   }, [isFocused, order_id]);
 
+  const SmallContent = useCallback(() => {
+    return (
+      <Box bg="themeLight.primary.base" roundedTop="2xl">
+        <Pressable
+          onPress={() => orderDetailsSheetRef.current?.snapToOffset(100)}>
+          <Center py={1}>
+            <Text color="white" fontWeight="bold">
+              Swipe up to see more
+            </Text>
+          </Center>
+        </Pressable>
+        <Box bg="#1B1B1B" h="full" roundedTop="2xl">
+          <Center p={4}>
+            <Box bg="trueGray.400" w="12" h="1" rounded="full" />
+          </Center>
+          <Box py={6} px={4}>
+            <HStack justifyContent="space-between" space={2}>
+              <VStack flex={1} space={2}>
+                <Text fontWeight="bold" color="white" fontSize="lg">
+                  {ordersData?.seller?.trading_name}
+                </Text>
+                <Text color="themeLight.gray.2" fontSize="xs">
+                  {ordersData?.seller?.address}
+                </Text>
+              </VStack>
+              <HStack space={2}>
+                <Button
+                  leftIcon={<QuestionIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={() => SheetManager.show('orderHelpSheet')}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+                <Button
+                  leftIcon={<PhoneIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={callCustomer}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+              </HStack>
+            </HStack>
+            <Box mt={2}>
+              <Text color="white" fontWeight="bold">
+                Fee: ₦{ordersData?.sub_total}
+              </Text>
+              <Text color="white" fontWeight="bold">
+                Delivery Fee: ₦{ordersData?.delivery_fee}
+              </Text>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }, [
+    callCustomer,
+    ordersData?.delivery_fee,
+    ordersData?.seller?.address,
+    ordersData?.seller?.trading_name,
+    ordersData?.sub_total,
+  ]);
+
   const Content = useCallback(() => {
     return (
       <Box bg="themeLight.primary.base" roundedTop="2xl">
@@ -258,7 +326,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
               <Text color="white" fontWeight="bold">
                 Delivery Fee: ₦{ordersData?.delivery_fee}
               </Text>
-              <VStack bg="white" rounded="lg" h="155px" my={4} p={4} space={2}>
+              <VStack bg="white" rounded="lg" my={4} p={4} space={2}>
                 {ordersData.order_products &&
                   ordersData.order_products?.map((el, i) => (
                     <Text key={i} color="black">
@@ -282,6 +350,9 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
                   _text={{fontWeight: 'bold'}}
                   rounded="full"
                   py={4}
+                  isLoading={arrivalOrder.isLoading}
+                  isLoadingText="Setting arrival"
+                  isDisabled={arrivalOrder.isLoading}
                   onPress={doArrival}>
                   I have arrived
                 </Button>
@@ -302,6 +373,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
       </Box>
     );
   }, [
+    arrivalOrder.isLoading,
     callCustomer,
     deliveredOrder.isLoading,
     doArrival,
@@ -488,6 +560,8 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
                 py={4}
                 mt={3}
                 isLoading={deliveredOrder.isLoading}
+                isLoadingText="Setting delivery"
+                isDisabled={deliveredOrder.isLoading}
                 onPress={doDelivered}>
                 I have delivered
               </Button>
@@ -603,16 +677,21 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         // console.log('reached top', offsetFromBottom);
         setTimeout(() => {
           if (offsetFromBottom > 600) {
-            setFullDetails(true);
+            setViewDetails('full');
+          } else if (offsetFromBottom < 271) {
+            setViewDetails('small');
           } else {
-            setFullDetails(false);
+            setViewDetails('mid');
           }
         }, 500);
       }}
+      disableDragBeyondMinimumSnapPoint={true}
       backgroundInteractionEnabled={true}
       isModal={false}
-      snapPoints={[25, 55, 100]}
-      initialSnapIndex={1}
+      closable={false}
+      // snapPoints={[(WIN_HEIGHT / 100) * 2.5, (WIN_HEIGHT / 100) * 5.5, 100]}
+      snapPoints={[30, 60, 100]}
+      initialSnapIndex={0}
       gestureEnabled={true}
       containerStyle={{
         height: WIN_HEIGHT,
@@ -625,10 +704,12 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         <FullPin />
       ) : orderCompleted ? (
         <OrderComplete />
-      ) : hasFullDetails ? (
+      ) : hasViewDetails === 'full' ? (
         ContentFull()
-      ) : (
+      ) : hasViewDetails === 'mid' ? (
         Content()
+      ) : (
+        SmallContent()
       )}
     </ActionSheet>
   );
