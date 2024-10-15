@@ -4297,7 +4297,7 @@ __metadata:
     prettier: 2.8.8
     react: 18.2.0
     react-native: 0.73.4
-    react-native-actions-sheet: ^0.9.2
+    react-native-actions-sheet: ^0.9.7
     react-native-android-location-enabler: ^2.0.1
     react-native-animatable: ^1.4.0
     react-native-biometrics: ^3.0.1
@@ -4307,7 +4307,7 @@ __metadata:
     react-native-flipper: ^0.212.0
     react-native-fs: ^2.20.0
     react-native-geolocation-service: ^5.3.1
-    react-native-gesture-handler: ^2.15.0
+    react-native-gesture-handler: ^2.20.0
     react-native-google-places-autocomplete: ^2.5.6
     react-native-image-picker: ^7.1.2
     react-native-inappbrowser-reborn: ^3.7.0
@@ -9990,15 +9990,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-actions-sheet@npm:^0.9.2":
-  version: 0.9.2
-  resolution: "react-native-actions-sheet@npm:0.9.2"
-  dependencies:
-    react-native-safe-area-context: ^4.8.2
+"react-native-actions-sheet@npm:^0.9.7":
+  version: 0.9.7
+  resolution: "react-native-actions-sheet@npm:0.9.7"
   peerDependencies:
     react-native: "*"
     react-native-gesture-handler: "*"
-  checksum: 5c10b8b79869f71df599479d9477c6d7f7e5d4e3698d2bd09ff1c1adb0a29e52ea783d5c62753910f2c6cfffed1c4227e287cb4c15b002544fab8b96bec962d0
+    react-native-safe-area-context: "*"
+  checksum: 48c6eeb7bf7e4607346dfaccdcbb09c6f74d306f9674941174475e54ec6ca0b9efab1c0dc250e19e1cd10b70afece013fc1758acf413c5cf33cfd73bbcf82431
   languageName: node
   linkType: hard
 
@@ -10102,19 +10101,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-gesture-handler@npm:^2.15.0":
-  version: 2.15.0
-  resolution: "react-native-gesture-handler@npm:2.15.0"
+"react-native-gesture-handler@npm:^2.20.0":
+  version: 2.20.0
+  resolution: "react-native-gesture-handler@npm:2.20.0"
   dependencies:
     "@egjs/hammerjs": ^2.0.17
     hoist-non-react-statics: ^3.3.0
     invariant: ^2.2.4
-    lodash: ^4.17.21
     prop-types: ^15.7.2
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 4db52e7b38b047bad677ed570a0ef4c2ddfc413bbbce5ed21f487c9d86c60588ee6b2c9f74bb842e5654284b0d1e6a8af81f68000e737d8a7f1e030b6d3fe6b6
+  checksum: f573bc3717ae0209ff30bf62b95b3c7f11bd97f4797090211bce416c250388f55d1995aac0a7f1bbc99b06223ea64cbeae8d4ef88dcb8c877201b49163ea0e4b
   languageName: node
   linkType: hard
 
@@ -10258,7 +10256,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:^4.8.2, react-native-safe-area-context@npm:^4.9.0":
+"react-native-safe-area-context@npm:^4.9.0":
   version: 4.9.0
   resolution: "react-native-safe-area-context@npm:4.9.0"
   peerDependencies:

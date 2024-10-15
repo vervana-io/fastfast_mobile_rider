@@ -1,5 +1,3 @@
-import * as Progress from 'react-native-progress';
-
 import {
   Box,
   Button,
@@ -14,6 +12,7 @@ import React, {useCallback, useEffect, useState} from 'react';
 
 import {SheetManager} from 'react-native-actions-sheet';
 import {StyleSheet} from 'react-native';
+import {UsePusher} from '@hooks/usePusher';
 import {WIN_WIDTH} from '../../../../config';
 import {addressesStore} from '@store/addresses';
 import {authStore} from '@store/auth';
@@ -25,6 +24,8 @@ export const Todos = observer(() => {
   const addressStore = addressesStore.selectedAddress;
 
   const userD = authStore.auth;
+
+  const {subscribe, pusherEvent} = UsePusher();
 
   const [showProgress, setShowProgress] = useState(false);
 

@@ -88,3 +88,39 @@ export interface orderLogs {
   created_at: string;
   updated_at: string;
 }
+
+export interface notificationsType {
+  data: orderNotifications;
+  order_id: string;
+  request_id: string;
+  rider_id: string;
+  title: string;
+  user_id: string;
+}
+
+export interface orderNotifications {
+  order_id: number;
+  amount: number;
+  delivery_pin: string;
+  id: number;
+  pick_up_pin: string;
+  reference: string;
+  rider_id: number;
+  sub_total: number;
+  delivery_fee: number;
+  title: string;
+  address: {
+    house_number: string;
+    street: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
+  customer_address: {
+    house_number: string;
+    street: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
+}

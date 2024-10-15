@@ -30,13 +30,13 @@ import {ExpandIcon} from '@assets/svg/Expand';
 import {PhoneIcon} from '@assets/svg/PhoneIcon';
 import {QuestionIcon} from '@assets/svg/QuestionIcon';
 import {apiType} from '@types/index';
+import io from 'socket.io-client';
 import {observer} from 'mobx-react-lite';
 import {orderType} from '@types/orderTypes';
 import {ordersStore} from '@store/orders';
 import {uploadedOrderType} from '@types/generalType';
 import {useIsFocused} from '@react-navigation/native';
 import {useOrders} from '@hooks/useOrders';
-import io from 'socket.io-client';
 
 export const OrderDetailsSheet = observer((props: SheetProps) => {
   const orderDetailsSheetRef = useRef<ActionSheetRef>(null);
@@ -168,9 +168,9 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         onSuccess: (val: apiType) => {
           if (val.status) {
             getOrderInfo();
-            socket.current = io('https://service.fastfastapp.com');
+            socket.current = io(process.env.SERVICE_URL);
 
-            socket.current.emit('createRoom', '456', (response: any) => {
+            socket.current.emit('createRoom', order_id, (response: any) => {
               if (response.success) {
                 console.log('Room created:', response.message);
                 // reject(response);
@@ -207,80 +207,97 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
 
   const Content = useCallback(() => {
     return (
-      <Box py={6} px={4} bg="#1B1B1B" h="full" roundedTop="2xl">
-        <HStack justifyContent="space-between" space={2}>
-          <VStack flex={1} space={2}>
-            <Text fontWeight="bold" color="white" fontSize="lg">
-              {ordersData?.seller?.trading_name}
+      <Box bg="themeLight.primary.base" roundedTop="2xl">
+        <Pressable
+          onPress={() => orderDetailsSheetRef.current?.snapToOffset(100)}>
+          <Center py={1}>
+            <Text color="white" fontWeight="bold">
+              Swipe up to see more
             </Text>
-            <Text color="themeLight.gray.2" fontSize="xs">
-              {ordersData?.seller?.address}
-            </Text>
-          </VStack>
-          <HStack space={2}>
-            <Button
-              leftIcon={<QuestionIcon />}
-              w="44px"
-              h="44px"
-              rounded="2xl"
-              onPress={() => SheetManager.show('orderHelpSheet')}
-              bg="white"
-              _pressed={{bg: 'rgba(255,255,255, .4)'}}
-            />
-            <Button
-              leftIcon={<PhoneIcon />}
-              w="44px"
-              h="44px"
-              rounded="2xl"
-              onPress={callCustomer}
-              bg="white"
-              _pressed={{bg: 'rgba(255,255,255, .4)'}}
-            />
-          </HStack>
-        </HStack>
-        <Box mt={2}>
-          <Text color="white" fontWeight="bold">
-            Fee: ₦{ordersData?.sub_total}
-          </Text>
-          <Text color="white" fontWeight="bold">
-            Delivery Fee: ₦{ordersData?.delivery_fee}
-          </Text>
-          <VStack bg="white" rounded="lg" h="155px" my={4} p={4} space={2}>
-            {ordersData.order_products &&
-              ordersData.order_products?.map((el, i) => (
-                <Text key={i} color="black">
-                  {el.quantity}x {el.product?.title}
+          </Center>
+        </Pressable>
+        <Box bg="#1B1B1B" h="full" roundedTop="2xl">
+          <Center p={4}>
+            <Box bg="trueGray.400" w="12" h="1" rounded="full" />
+          </Center>
+          <Box py={6} px={4}>
+            <HStack justifyContent="space-between" space={2}>
+              <VStack flex={1} space={2}>
+                <Text fontWeight="bold" color="white" fontSize="lg">
+                  {ordersData?.seller?.trading_name}
                 </Text>
-              ))}
-          </VStack>
-          {ordersData.status === 3 &&
-          ordersData.is_rider_customer_arrived === 1 ? (
-            <Button
-              _text={{fontWeight: 'bold'}}
-              rounded="full"
-              py={4}
-              isLoading={deliveredOrder.isLoading}
-              onPress={doDelivered}>
-              I have delivered
-            </Button>
-          ) : ordersData.status === 3 &&
-            ordersData.is_rider_customer_arrived === 0 ? (
-            <Button
-              _text={{fontWeight: 'bold'}}
-              rounded="full"
-              py={4}
-              onPress={doArrival}>
-              I have arrived
-            </Button>
-          ) : (
-            <Button
-              _text={{fontWeight: 'bold'}}
-              rounded="full"
-              py={4}
-              onPress={() => orderDetailsSheetRef.current?.snapToOffset(100)}>
-              Proceed
-            </Button>
-          )}
+                <Text color="themeLight.gray.2" fontSize="xs">
+                  {ordersData?.seller?.address}
+                </Text>
+              </VStack>
+              <HStack space={2}>
+                <Button
+                  leftIcon={<QuestionIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={() => SheetManager.show('orderHelpSheet')}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+                <Button
+                  leftIcon={<PhoneIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={callCustomer}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+              </HStack>
+            </HStack>
+            <Box mt={2}>
+              <Text color="white" fontWeight="bold">
+                Fee: ₦{ordersData?.sub_total}
+              </Text>
+              <Text color="white" fontWeight="bold">
+                Delivery Fee: ₦{ordersData?.delivery_fee}
+              </Text>
+              <VStack bg="white" rounded="lg" h="155px" my={4} p={4} space={2}>
+                {ordersData.order_products &&
+                  ordersData.order_products?.map((el, i) => (
+                    <Text key={i} color="black">
+                      {el.quantity}x {el.product?.title}
+                    </Text>
+                  ))}
+              </VStack>
+              {ordersData.status === 3 &&
+              ordersData.is_rider_customer_arrived === 1 ? (
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  isLoading={deliveredOrder.isLoading}
+                  onPress={doDelivered}>
+                  I have delivered
+                </Button>
+              ) : ordersData.status === 3 &&
+                ordersData.is_rider_customer_arrived === 0 ? (
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  onPress={doArrival}>
+                  I have arrived
+                </Button>
+              ) : (
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  onPress={() =>
+                    orderDetailsSheetRef.current?.snapToOffset(100)
+                  }>
+                  Proceed
+                </Button>
+              )}
+            </Box>
+          </Box>
         </Box>
       </Box>
     );
@@ -302,7 +319,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
     () => (
       <Box py={6} px={4} bg="white" h="full" roundedTop="2xl">
         <Pressable
-          onPress={() => orderDetailsSheetRef.current?.snapToOffset(60)}>
+          onPress={() => orderDetailsSheetRef.current?.snapToOffset(50)}>
           <Box
             w={45}
             h={45}
@@ -311,7 +328,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
             rounded="lg"
           />
           <Pressable
-            onPress={() => orderDetailsSheetRef.current?.snapToOffset(60)}
+            onPress={() => orderDetailsSheetRef.current?.snapToOffset(50)}
             position="absolute"
             zIndex={4}
             top={3}
@@ -593,8 +610,9 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         }, 500);
       }}
       backgroundInteractionEnabled={true}
-      snapPoints={[60, 100]}
-      initialSnapIndex={0}
+      isModal={false}
+      snapPoints={[25, 55, 100]}
+      initialSnapIndex={1}
       gestureEnabled={true}
       containerStyle={{
         height: WIN_HEIGHT,

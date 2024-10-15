@@ -5,6 +5,7 @@ import ActionSheet, {
   SheetProps,
 } from 'react-native-actions-sheet';
 import {Alert, Modal, Platform, TouchableOpacity} from 'react-native';
+import {Alerts, AlertsProps} from '@components/ui';
 /* eslint-disable react-native/no-inline-styles */
 import {
   Box,
@@ -48,6 +49,11 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
   const isFocused = useIsFocused();
 
   const {addAddress, updateAddress, userDetails, fetchAddress} = useUser();
+
+  const [errorMessage, setErrorMessage] = useState<{
+    type: AlertsProps['status'];
+    message: any;
+  }>();
 
   const {location, geoCode} = useGeolocation({
     enableFetchLocation: true,
@@ -122,7 +128,15 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
         address_id: details.id,
       };
       console.log('to update', det);
-      updateUserAddress(det);
+      if (det.street) {
+        updateUserAddress(det);
+      } else {
+        setErrorMessage({
+          type: 'error',
+          message:
+            'The address you have entered does not supply enough information',
+        });
+      }
     } else {
       const payload = {
         city: functions.filterGeoData(
@@ -152,7 +166,15 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
         is_primary: 1,
       };
       console.log('to add', payload);
-      createAddress(payload);
+      if (payload.street) {
+        createAddress(payload);
+      } else {
+        setErrorMessage({
+          type: 'error',
+          message:
+            'The address you have entered does not supply enough information',
+        });
+      }
     }
   };
 
@@ -281,6 +303,13 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
               <CloseIconSolid fill="#757575" />
             </Pressable>
           </HStack>
+          {errorMessage?.message && (
+            <Alerts
+              status={errorMessage.type}
+              title={errorMessage.message}
+              variant="outline"
+            />
+          )}
           <ScrollView
             contentContainerStyle={{marginTop: 20}}
             showsVerticalScrollIndicator={false}>

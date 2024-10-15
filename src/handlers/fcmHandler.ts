@@ -87,7 +87,7 @@ export function registerListenerWithFCM() {
       remoteMessage?.notification?.title &&
       remoteMessage?.notification?.body
     ) {
-      ordersStore.setNotifiedOrder(remoteMessage);
+      ordersStore.setNotifiedOrder(remoteMessage?.data);
       playEffectForNotifications();
       onDisplayNotification(
         remoteMessage.notification?.title,
@@ -103,7 +103,7 @@ export function registerListenerWithFCM() {
         break;
       case EventType.PRESS:
         console.log('User pressed notification', detail.notification);
-        ordersStore.setNotifiedOrder(detail.notification);
+        ordersStore.setNotifiedOrder(detail.notification?.data);
         playEffectForNotifications();
         // if (detail?.notification?.data?.clickAction) {
         //   onNotificationClickActionHandling(
@@ -115,7 +115,7 @@ export function registerListenerWithFCM() {
   });
 
   messaging().onNotificationOpenedApp(async remoteMessage => {
-    ordersStore.setNotifiedOrder(remoteMessage);
+    ordersStore.setNotifiedOrder(remoteMessage.data);
     playEffectForNotifications();
     console.log(
       'onNotificationOpenedApp Received',
@@ -130,7 +130,7 @@ export function registerListenerWithFCM() {
     .getInitialNotification()
     .then(remoteMessage => {
       if (remoteMessage) {
-        ordersStore.setNotifiedOrder(remoteMessage);
+        ordersStore.setNotifiedOrder(remoteMessage.data);
         playEffectForNotifications();
         console.log(
           'Notification caused app to open from quit state:',

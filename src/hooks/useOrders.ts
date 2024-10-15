@@ -104,7 +104,7 @@ export const useOrders = () => {
   );
 
   const acceptOrder = useMutation(
-    async (data: {order_id: number; request_id: number}) => {
+    async (data: {order_id: string | number; request_id: number}) => {
       try {
         const req: any = await http.post('orders/accept', data);
         return req.data;
@@ -115,7 +115,7 @@ export const useOrders = () => {
   );
 
   const reassignOrder = useMutation(
-    async (data: {order_id: number; request_id: number}) => {
+    async (data: {order_id: string | number; request_id: number}) => {
       try {
         const req: any = await http.post('orders/reject', data);
         return req.data;

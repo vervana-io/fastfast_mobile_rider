@@ -72,7 +72,11 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
             if (license === 'l') {
               setLicense('');
             } else {
-              const upd = {...regData, ...values};
+              const upd = {
+                ...regData,
+                ...values,
+                drivers_license_base64: license,
+              };
               navigate('SignUpStep4', {data: upd});
             }
           }}>

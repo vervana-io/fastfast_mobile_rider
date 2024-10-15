@@ -18,9 +18,11 @@ import {BicycleIcon} from '@assets/svg/BicycleIcon';
 import {DefaultLayout} from '@layouts/default';
 import MapView from '@components/ui/map/mapView';
 import {OrderRequest} from './components/orderRequest';
+import {PusherEvent} from '@pusher/pusher-websocket-react-native';
 import {SheetManager} from 'react-native-actions-sheet';
 import Toast from 'react-native-toast-message';
 import {Todos} from './components/todos';
+import {UsePusher} from '@hooks/usePusher';
 import {addressesStore} from '@store/addresses';
 import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
@@ -29,7 +31,7 @@ import {markersType} from '@types/mapTypes';
 import {myLocationNotification} from '@handlers/localNotifications';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
-import {requestLocationPermission} from '@handlers/LocationPermissionHandler';
+import {useOrders} from '@hooks/useOrders';
 import {useUser} from '@hooks/useUser';
 
 enableLatestRenderer();
@@ -47,28 +49,29 @@ export const Home = observer((props: HomeProps) => {
     AppState.currentState,
   );
 
+  const [ridersPosition, setRidersPosition] = useState({
+    title: 'You',
+    latitude: location?.coords.latitude ?? 0,
+    longitude: location?.coords.longitude ?? 0,
+  });
+
+  const {subscribe} = UsePusher();
+
   const socket: any = useRef<ReturnType<typeof io> | null>(null);
   const intervalRef: any = useRef<NodeJS.Timeout | null>(null);
-
-  // const [riderPosition] = useState(
-  //   new AnimatedRegion({
-  //     latitude: 9.033918,
-  //     longitude: 7.44668,
-  //     latitudeDelta: 0.005,
-  //     longitudeDelta: 0.005,
-  //   }),
-  // );
 
   const userD = authStore.auth;
   const selectedOrder = ordersStore.selectedOrder;
   const address = addressesStore.selectedAddress;
 
   const {toggleOnlineStatus, userDetails} = useUser({enableFetchAddress: true});
+  const {fetchOngoingOrders} = useOrders();
+  const ordersOngoingCount = ordersStore.ongoingOrderCount;
 
   const GeoLocate = () => {
     Geolocation.getCurrentPosition(
       position => {
-        // console.log('position', position);
+        console.log('position', position);
 
         setRidersPosition({
           title: 'You',
@@ -161,10 +164,11 @@ export const Home = observer((props: HomeProps) => {
     }
   }, [address.street, onlineStatus, toggleOnlineStatus, userDetails]);
 
+  // socket initialization
   useEffect(() => {
     console.log('user', userD);
     if (onlineStatus) {
-      socket.current = io('https://service.fastfastapp.com');
+      socket.current = io(process.env.SERVICE_URL);
 
       // Handle connection event
       socket.current.on('connect', () => {
@@ -188,7 +192,7 @@ export const Home = observer((props: HomeProps) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [onlineStatus, appState, location]);
+  }, [onlineStatus, appState, location, userD]);
 
   const OnlineSection = useCallback(
     () => (
@@ -239,70 +243,48 @@ export const Home = observer((props: HomeProps) => {
     [goOnline, onlineStatus, toggleOnlineStatus.isLoading],
   );
 
-  // this triggers the location function to get location if permissions has been set in default layout
-  const getLocation = (res: boolean) => {
-    if (res) {
-      GeoLocate();
-    }
-  };
-
   // we trigger the location on page load assuming location is already set from onset
   useEffect(() => {
-    getLocation(true);
+    GeoLocate();
   }, []);
 
-  // const animateRider = coordinates => {
-  //   let index = 0;
-
-  //   const move = () => {
-  //     if (index < coordinates.length) {
-  //       const nextCoordinate = coordinates[index];
-  //       index++;
-
-  //       riderPosition
-  //         .timing({
-  //           latitude: nextCoordinate.latitude,
-  //           longitude: nextCoordinate.longitude,
-  //           duration: 2000, // Time for each point in milliseconds
-  //           useNativeDriver: false,
-  //         })
-  //         .start(() => {
-  //           move(); // Move to the next point after animation completes
-  //         });
-  //     }
-  //   };
-
-  //   move(); // Start moving
-  // };
-  // useEffect(() => {
-  //   animateRider(routeCoordinates);
-  // }, []);
-
-  const [ridersPosition, setRidersPosition] = useState({
-    title: 'You',
-    latitude: location?.coords.latitude ?? 0,
-    longitude: location?.coords.longitude ?? 0,
-  });
-
-  // const routeCoordinates = [
-  //   {latitude: 9.024, longitude: 7.431809},
-  //   {latitude: 9.011029, longitude: 7.420028},
-  //   {latitude: 8.999554, longitude: 7.409764},
-  //   {latitude: 8.990526, longitude: 7.397513},
-  //   {latitude: 8.982651, longitude: 7.383899},
-  //   {latitude: 8.968244, longitude: 7.353756},
-  //   {latitude: 8.95326, longitude: 7.335087},
-  //   {latitude: 8.939429, longitude: 7.310972},
-  //   {latitude: 8.942927, longitude: 7.293336}, // Final destination point
-  // ];
-
+  // check for ongoing orders and if there are any, keep sending rider location updates
+  // also notify the rider that they have an ongoing order
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      GeoLocate();
-    }, 5000);
-
-    return () => clearInterval(intervalId);
+    // fetch the orders
+    fetchOngoingOrders.mutate({
+      page: 1,
+      per_page: 6,
+      status: '1',
+    });
   }, []);
+  useEffect(() => {
+    if (ordersOngoingCount) {
+      const intervalId = setInterval(() => {
+        GeoLocate();
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [GeoLocate, ordersOngoingCount]);
+  useEffect(() => {
+    if (ordersOngoingCount && !selectedOrder.id) {
+      // throw notification of order ongoing
+      Toast.show({
+        type: 'info',
+        text1: 'Order Ongoing',
+        text2: `You have ${ordersOngoingCount} orders ongoing, navigate to orders to view them`,
+        autoHide: false,
+        onPress: () => {
+          console.log('====================================');
+          console.log('clicked');
+          console.log('====================================');
+          navigation.navigate('Orders');
+        },
+      });
+    }
+  }, [navigation, ordersOngoingCount, selectedOrder.id]);
+  // End ongoing order checks
 
   useEffect(() => {
     // here we get the sellers address and the riders address if picked_up time is null
@@ -343,7 +325,7 @@ export const Home = observer((props: HomeProps) => {
   ]);
 
   useEffect(() => {
-    // set onloine status
+    // set online status
     if (userD.rider) {
       setOnlineStatus(userD.rider?.status === 1 ? true : false);
     }
@@ -357,12 +339,46 @@ export const Home = observer((props: HomeProps) => {
     // SheetManager.show('rateCustomerSheet');
   }, [selectedOrder]);
 
+  // pusher event setup
+  useEffect(() => {
+    subscribe('FastFast', (data: PusherEvent) => {
+      if (data.eventName === 'user_compliance_approve') {
+        userDetails.refetch();
+        Toast.show({
+          type: 'success',
+          text1: 'Compliance Approval',
+          text2:
+            'Your compliance has been approved you can now go online to receive orders.',
+          swipeable: true,
+          visibilityTime: 6000,
+        });
+      }
+      if (data.eventName === 'user_compliance_reject') {
+        userDetails.refetch();
+        Toast.show({
+          type: 'error',
+          text1: 'Compliance Approval',
+          text2: 'Your compliance has been rejected',
+          swipeable: true,
+          visibilityTime: 6000,
+        });
+      }
+      if (data.eventName === 'rider_new_order') {
+        const dData = data.data;
+        const parsed = JSON.parse(dData);
+        ordersStore.setNotifiedOrder(parsed);
+      }
+      if (data.eventName === 'rider_cancel_order') {
+      }
+    });
+  }, [subscribe, userDetails]);
+
   return (
     <DefaultLayout
       refreshable={false}
       useKeyboardScroll={false}
       checkPermissions
-      hasPermissionSet={getLocation}>
+      hasPermissionSet={GeoLocate}>
       <Box flex={1} bg="themeLight.gray.3" style={styles.container}>
         <HStack
           position="absolute"

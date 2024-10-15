@@ -49,7 +49,7 @@ const MapView = observer((props: MapTypes) => {
           useNativeDriver: false,
           toValue: 0,
           latitudeDelta: 0,
-          longitudeDelta: 0
+          longitudeDelta: 0,
         })
         .start();
     }
@@ -126,18 +126,17 @@ const MapView = observer((props: MapTypes) => {
             },
             heading: 0,
             pitch: 1,
-            zoom: markers ? 14 : 15,
+            zoom: markers ? 14 : 14,
           }}
           loadingEnabled
           zoomEnabled={false}
           // followsUserLocation
-          showsUserLocation
-          showsMyLocationButton={false}
+          showsMyLocationButton={true}
           showsCompass={false}
           // loadingBackgroundColor="white"
           style={StyleSheet.absoluteFillObject}
           rotateEnabled={false}>
-          <Marker.Animated
+          {/* <Marker.Animated
             anchor={{x: 0.5, y: 0.6}}
             coordinate={markerPosition}
             flat
@@ -149,15 +148,15 @@ const MapView = observer((props: MapTypes) => {
                 },
               ],
             }}>
-            {/* <View style={styles.dotContainer}>
+            <View style={styles.dotContainer}>
               <View style={[styles.arrow]} />
               <View style={styles.dot} />
-            </View> */}
+            </View>
             <Image
               source={require('@assets/img/marker.png')}
               style={{width: 30, height: 30}}
             />
-          </Marker.Animated>
+          </Marker.Animated> */}
           <Circle
             center={{
               latitude: initialRegion.latitude,

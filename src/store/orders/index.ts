@@ -5,15 +5,15 @@ import {
   makePersistable,
   stopPersisting,
 } from 'mobx-persist-store';
-import {orderType, orderTypes} from '@types/orderTypes';
+import {notificationsType, orderType} from '@types/orderTypes';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Notification} from '@notifee/react-native';
 import {makeAutoObservable} from 'mobx';
 
 class OrdersStore {
-  notifiedOrder: Notification = {};
-  orders: orderTypes[] = [];
+  notifiedOrder: Partial<notificationsType> = {};
+  orders: orderType[] = [];
   ongoingOrderCount: number = 0;
   selectedOrderId: number = 0;
   selectedOrder: Partial<orderType> = {};
@@ -36,11 +36,11 @@ class OrdersStore {
     });
   }
 
-  setNotifiedOrder(val: Notification) {
+  setNotifiedOrder(val: notificationsType) {
     this.notifiedOrder = val;
   }
 
-  setOrders(val: orderTypes[], count: number) {
+  setOrders(val: orderType[], count: number) {
     this.orders = val;
     this.ongoingOrderCount = count;
   }

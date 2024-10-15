@@ -1,6 +1,6 @@
+import {AuthType, registerFieldType} from '@types/authType';
 import {useMutation, useQuery} from 'react-query';
 
-import {AuthType} from '@types/authType';
 import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
 import {http} from '../config';
@@ -73,16 +73,7 @@ export const useAuth = () => {
   );
 
   const register = useMutation(
-    async (data: {
-      username: string;
-      phone_number: string;
-      email: string;
-      password: string;
-      first_name: string;
-      last_name: string;
-      latitude: string;
-      longitude: string;
-    }) => {
+    async (data: registerFieldType) => {
       try {
         const req: any = await http.post('auth/register', data);
         return req.data;

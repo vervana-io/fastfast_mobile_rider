@@ -4,35 +4,35 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {Box, Button, Center, HStack, Text, VStack} from 'native-base';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {apiType, notificationsType, orderNotifications} from '@types/index';
 
 import {LocationPin} from '@assets/svg/LocationPin';
+import {PusherEvent} from '@pusher/pusher-websocket-react-native';
 import {SheetManager} from 'react-native-actions-sheet';
 import {SmilleyTear} from '@assets/svg/SmilleyTear';
+import {StyleSheet} from 'react-native';
 import Toast from 'react-native-toast-message';
+import {UsePusher} from '@hooks/usePusher';
 import {WIN_HEIGHT} from '../../../../config';
-import {apiType} from '@types/index';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
 import {useOrders} from '@hooks/useOrders';
-import {subscribeToEvent} from '@handlers/pusherHandler';
 
 export const OrderRequest = observer(() => {
   const NotificationOrder: any = ordersStore.notifiedOrder;
-  const notification = NotificationOrder.data?.data;
-  const notificationData = notification ? JSON.parse(notification) : null;
+  // const notificationData = notification ? JSON.parse(notification) : null;
   const [showReassign, setShowReassign] = useState(false);
   const [showOrder, setShowOrder] = useState<boolean>(true);
-  const [pusherOrder, setPusherOrder] = useState({});
+  const [mainNotificationOrder, setMainNotificationOrder] =
+    useState<Partial<notificationsType>>();
 
   const [boxChangeableHeight, setBoxChangeableHeight] = useState(0);
   const boxHeight = useSharedValue(WIN_HEIGHT * boxChangeableHeight);
 
   const {acceptOrder, reassignOrder} = useOrders();
-
-  console.log('NotificationOrder', NotificationOrder);
+  const {subscribe} = UsePusher();
 
   const triggerReassign = () => {
     setShowReassign(true);
@@ -40,8 +40,8 @@ export const OrderRequest = observer(() => {
   };
 
   const doReassign = () => {
-    if (pusherOrder.order_id) {
-      const order_id = pusherOrder.order_id;
+    if (mainNotificationOrder?.order_id) {
+      const order_id = mainNotificationOrder.order_id;
       const request_id = NotificationOrder.data.request_id;
       if (order_id) {
         reassignOrder.mutate(
@@ -73,11 +73,11 @@ export const OrderRequest = observer(() => {
   };
 
   const triggerAccept = useCallback(() => {
-    if (pusherOrder.order_id) {
-      const order_id = pusherOrder?.order_id;
+    if (mainNotificationOrder?.order_id) {
+      const order_id = mainNotificationOrder?.order_id;
 
       console.log('order_id', order_id);
-      const request_id = NotificationOrder?.data?.request_id || '234';
+      const request_id = mainNotificationOrder?.request_id || '234';
       console.log('request_id', request_id);
 
       acceptOrder.mutate(
@@ -106,7 +106,11 @@ export const OrderRequest = observer(() => {
         },
       );
     }
-  }, [NotificationOrder?.data?.request_id, pusherOrder?.order_id]);
+  }, [
+    acceptOrder,
+    mainNotificationOrder?.order_id,
+    mainNotificationOrder?.request_id,
+  ]);
 
   const Request = useCallback(
     () => (
@@ -115,11 +119,11 @@ export const OrderRequest = observer(() => {
           <Text color="white" fontWeight="bold" fontSize="30px">
             ₦
             {formatter.formatCurrencySimple(
-              parseInt(pusherOrder?.delivery_fee, 10),
+              mainNotificationOrder?.data?.delivery_fee ?? 0,
             )}
           </Text>
-          <Text color="white">{pusherOrder?.title}</Text>
-          {/* <Text color="white">{pusherOrder.trading_name}</Text> */}
+          <Text color="white">{mainNotificationOrder?.title}</Text>
+          {/* <Text color="white">{mainNotificationOrder.trading_name}</Text> */}
         </Center>
         <VStack mt={4}>
           <VStack>
@@ -134,8 +138,9 @@ export const OrderRequest = observer(() => {
                 <Box />
               </Center>
               <Text color="white" flex={1}>
-                {pusherOrder?.address?.house_number}{' '}
-                {pusherOrder?.address?.street} {pusherOrder?.address?.city}
+                {mainNotificationOrder?.data?.address.house_number}{' '}
+                {mainNotificationOrder?.data?.address?.street}{' '}
+                {mainNotificationOrder?.data?.address?.city}
               </Text>
             </HStack>
             <Box
@@ -152,9 +157,9 @@ export const OrderRequest = observer(() => {
             <HStack alignItems="center" space={2}>
               <LocationPin fill="white" />
               <Text color="white" flex={1}>
-                {pusherOrder?.customer_address?.house_number}{' '}
-                {pusherOrder?.customer_address?.street}{' '}
-                {pusherOrder?.customer_address?.city}
+                {mainNotificationOrder?.data?.customer_address?.house_number}{' '}
+                {mainNotificationOrder?.data?.customer_address?.street}{' '}
+                {mainNotificationOrder?.data?.customer_address?.city}
               </Text>
             </HStack>
           </VStack>
@@ -181,14 +186,14 @@ export const OrderRequest = observer(() => {
     ),
     [
       acceptOrder.isLoading,
-      pusherOrder?.address?.city,
-      pusherOrder?.address?.house_number,
-      pusherOrder?.address?.street,
-      pusherOrder?.customer_address?.city,
-      pusherOrder?.customer_address?.house_number,
-      pusherOrder?.customer_address?.street,
-      pusherOrder?.delivery_fee,
-      pusherOrder?.title,
+      mainNotificationOrder?.data?.address?.city,
+      mainNotificationOrder?.data?.address.house_number,
+      mainNotificationOrder?.data?.address?.street,
+      mainNotificationOrder?.data?.customer_address?.city,
+      mainNotificationOrder?.data?.customer_address?.house_number,
+      mainNotificationOrder?.data?.customer_address?.street,
+      mainNotificationOrder?.data?.delivery_fee,
+      mainNotificationOrder?.title,
       triggerAccept,
     ],
   );
@@ -235,61 +240,30 @@ export const OrderRequest = observer(() => {
   });
 
   useEffect(() => {
-    setPusherOrder(notificationData);
-    // setPusherOrder({
-    //   order_id: '456',
-    //   amount: 3900,
-    //   delivery_pin: '4244',
-    //   id: 1,
-    //   pick_up_pin: '6302',
-    //   reference: '#ORDER_1722718197643990',
-    //   rider_id: 0,
-    //   sub_total: 3400,
-    //   delivery_fee: 400,
-    //   title: 'Chicken Repulblic',
-    //   address: {
-    //     house_number: '2A',
-    //     street: 'Abuja Street',
-    //     city: 'Ilupeju, Lagos',
-    //   },
-    //   customer_address: {
-    //     house_number: '13',
-    //     street: 'Ajangbadi Street',
-    //     city: 'Festac, Lagos',
-    //   },
-    // });
-  }, []);
-
-  useEffect(() => {
-    subscribeToEvent(event => {
-      if (event?.eventName === 'rider_new_order') {
-        console.log('EventName', event);
-        setPusherOrder(JSON.parse(event?.data));
-      }
-    });
-  }, []);
-
-  useEffect(() => {
-    console.log('noti', notificationData);
-    console.log('NotificationOrder', NotificationOrder);
-    if (pusherOrder?.amount || notificationData?.amount) {
-      // clearNotificationById(NotificationOrder.messageId);
+    if (NotificationOrder.data) {
+      const data = NotificationOrder;
+      const payload: notificationsType = {
+        data: JSON.parse(data.data),
+        order_id: data.order_id ?? '',
+        request_id: data.request_id ?? '',
+        rider_id: data.rider_id ?? '',
+        title: data.title ?? '',
+        user_id: data.user_id ?? '',
+      };
+      setMainNotificationOrder(payload);
+      ordersStore.clearNotifiedOrder();
       setTimeout(() => {
         toggleBoxHeight();
       }, 500);
     }
-  }, [
-    NotificationOrder,
-    notificationData,
-    pusherOrder?.amount,
-    toggleBoxHeight,
-  ]);
+  }, [NotificationOrder, toggleBoxHeight]);
 
   return (
     <Animated.View style={[styles.box, animatedBoxStyle]}>
-      <Box px={3}>
+      <Box px={3} bg="white">
+        {mainNotificationOrder?.data?.amount}
         {/* {notificationData?.amount && !showReassign && <Request />}  */}
-        {pusherOrder?.amount || (notificationData?.amount && !showReassign) ? (
+        {mainNotificationOrder?.data?.amount && !showReassign ? (
           <Request />
         ) : null}
         {showReassign && <Reassign />}
