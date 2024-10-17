@@ -16,6 +16,7 @@ import {DefaultLayout} from '@layouts/default';
 import {Input} from '@components/inputs';
 import {Keyboard} from 'react-native';
 import Toast from 'react-native-toast-message';
+import { WIN_WIDTH } from '../../config';
 import {apiType} from '@types/apiTypes';
 import {navigate} from '@navigation/NavigationService';
 import {showMessage} from 'react-native-flash-message';
@@ -213,9 +214,8 @@ export const Validation = (props: ValidationType) => {
   };
 
   const proceed = () => {
-    console.log(redirectRule);
     if (redirectRule.status) {
-      navigation.navigate(redirectRule.route, {params: params});
+      navigation.navigate(redirectRule.route, {params: params.data});
     } else {
       doRegister();
     }
@@ -226,7 +226,7 @@ export const Validation = (props: ValidationType) => {
       <Box flex={1} p={6}>
         <BackButton />
         <VStack my={8} flex={1}>
-          <Box w="60%">
+          <Box w={WIN_WIDTH * 0.7}>
             <Heading mb={2} size="lg">
               Enter 4-digit Verification code
             </Heading>
@@ -369,7 +369,7 @@ export const Validation = (props: ValidationType) => {
               fontWeight: 'bold',
               color: 'themeLight.primary.base',
             }}>
-            Cencel
+            Cancel
           </Button>
           <Button
             borderColor="themeLight.primary.base"

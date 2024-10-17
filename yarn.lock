@@ -4301,6 +4301,7 @@ __metadata:
     react-native-android-location-enabler: ^2.0.1
     react-native-animatable: ^1.4.0
     react-native-biometrics: ^3.0.1
+    react-native-device-info: ^13.1.0
     react-native-dotenv: ^3.4.9
     react-native-error-boundary: ^1.2.4
     react-native-flash-message: ^0.4.2
@@ -10026,6 +10027,15 @@ __metadata:
   peerDependencies:
     react-native: ">=0.60.0"
   checksum: 3864fea4bbf3dee1d360daf048e4f9980083c4e919e95082a5e4646e3b22475bb2b592cae18cccd7fb55b50498dca29e5346cf98d958646cbfc26fed5654bc53
+  languageName: node
+  linkType: hard
+
+"react-native-device-info@npm:^13.1.0":
+  version: 13.1.0
+  resolution: "react-native-device-info@npm:13.1.0"
+  peerDependencies:
+    react-native: "*"
+  checksum: e05cd870981b8366bcb43f89d8565f123b1c3f727d399db03d7ac5e5cda6d06da3d326d06291e11d4920223dbd3db22631a50e2c3d58d8a8c62e196e59518e8e
   languageName: node
   linkType: hard
 

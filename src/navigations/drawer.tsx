@@ -7,9 +7,6 @@ import {
   Box,
   ChevronRightIcon,
   HStack,
-  Heading,
-  Icon,
-  IconButton,
   Image,
   Pressable,
   ScrollView,
@@ -17,6 +14,7 @@ import {
   Text,
   VStack,
 } from 'native-base';
+import {getBuildNumber, getVersion} from 'react-native-device-info';
 
 import {Dollar} from '@assets/svg/Dollar';
 import {Home} from '@screens/app';
@@ -59,6 +57,9 @@ const DrawerContent = observer(({navigation, state}: any) => {
 
   const userD = authStore.auth;
   const {city, house_number, street} = addressesStore.selectedAddress;
+
+  let version = getVersion();
+  let buildNumber = getBuildNumber();
 
   const selectedAddress = street
     ? `${house_number ?? ''} ${street ?? ''}, ${city ?? ''}, ${
@@ -214,6 +215,12 @@ const DrawerContent = observer(({navigation, state}: any) => {
               </HStack>
             </Pressable>
           </VStack>
+
+          <Box mt={8}>
+            <Text fontSize="sm" fontWeight="bold" color="trueGray.500">
+              v{version}.({buildNumber})
+            </Text>
+          </Box>
         </VStack>
       </ScrollView>
     </Box>

@@ -76,9 +76,7 @@ export const OrderRequest = observer(() => {
     if (mainNotificationOrder?.order_id) {
       const order_id = mainNotificationOrder?.order_id;
 
-      console.log('order_id', order_id);
       const request_id = mainNotificationOrder?.request_id || '234';
-      console.log('request_id', request_id);
 
       acceptOrder.mutate(
         {
@@ -91,6 +89,7 @@ export const OrderRequest = observer(() => {
               //clear notification and open order details sheet
               setShowOrder(false);
               ordersStore.clearNotifiedOrder();
+              setMainNotificationOrder({});
               ordersStore.setSelectedOrderId(order_id);
               SheetManager.show('orderDetailsSheet', {
                 payload: {order_id, request_id},
@@ -260,8 +259,7 @@ export const OrderRequest = observer(() => {
 
   return (
     <Animated.View style={[styles.box, animatedBoxStyle]}>
-      <Box px={3} bg="white">
-        {mainNotificationOrder?.data?.amount}
+      <Box px={3}>
         {/* {notificationData?.amount && !showReassign && <Request />}  */}
         {mainNotificationOrder?.data?.amount && !showReassign ? (
           <Request />

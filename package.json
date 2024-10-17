@@ -51,6 +51,7 @@
     "react-native-android-location-enabler": "^2.0.1",
     "react-native-animatable": "^1.4.0",
     "react-native-biometrics": "^3.0.1",
+    "react-native-device-info": "^13.1.0",
     "react-native-dotenv": "^3.4.9",
     "react-native-error-boundary": "^1.2.4",
     "react-native-flash-message": "^0.4.2",

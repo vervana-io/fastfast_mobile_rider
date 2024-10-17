@@ -34,7 +34,7 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
     'bike' | 'car' | 'none'
   >('bike');
 
-  const regData = route?.params?.data;
+  const regData = route?.params.params;
 
   const [license, setLicense] = useState('l');
 
@@ -58,6 +58,12 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
     vehicle_brand: string().required('Valid vehicle brand is required'),
   });
 
+  useEffect(() => {
+    console.log('=================Params===================');
+    console.log(route.params.params);
+    console.log('====================================');
+  }, [route.params]);
+
   return (
     <DefaultLayout>
       <Box flex={1} p={6}>
@@ -75,7 +81,8 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
               const upd = {
                 ...regData,
                 ...values,
-                drivers_license_base64: license,
+                vehicle_type: selectedVehicleType === 'bike' ? 1 : 2,
+                drivers_license_base64: 'data:image/png;base64,' + license,
               };
               navigate('SignUpStep4', {data: upd});
             }

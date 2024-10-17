@@ -1,7 +1,7 @@
 import {Alert, Platform} from 'react-native';
 import {Box, Button, Text, VStack} from 'native-base';
 import {Field, Formik} from 'formik';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   isValidEmail,
   isValidPassword,
@@ -14,6 +14,7 @@ import {BackButton} from '@components/ui';
 import {DefaultLayout} from '@layouts/default';
 import {Input} from '@components/inputs';
 import {SignupTop} from './components/signupTop';
+import Toast from 'react-native-toast-message';
 import {__passwords__} from '@helpers/regex/constants';
 import {apiType} from '@types/apiTypes';
 import {navigate} from '@navigation/NavigationService';
@@ -29,7 +30,7 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
 
   const regData = route?.params?.data;
 
-  const {sendToken, checkIfEmailExist} = useAuth();
+  const {sendToken, sendEmailToken, checkIfEmailExist} = useAuth();
   const [emailGood, setEmailGood] = useState<boolean>(false);
 
   const emref: any = useRef(null);
@@ -74,59 +75,59 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
     }
   };
 
-  const proceed = () => {
-    if (username !== '' && username.length >= 6 && username.length <= 10) {
-      if (isValidEmail(email)) {
-        if (isValidPhoneNumber(phone)) {
-          if (isValidPassword(password)) {
-            if (password === confirm) {
-              const old = JSON.parse(regData);
-              const number = handlePhoneNumberChange(phone);
-              const payload = {
-                username,
-                phone_number: number,
-                email,
-                first_name: firstname,
-                last_name: lastname,
-                password,
-              };
-              const upd = {...old, ...payload};
-              const res = JSON.stringify(upd);
-              sendToken.mutate(
-                {phone_number: number},
-                {
-                  onSuccess: (val: apiType) => {
-                    if (val.status) {
-                      navigate('Validation', {data: res});
-                    } else {
-                      showMessage({
-                        type: 'danger',
-                        message: 'Could not send validation token',
-                      });
-                    }
-                  },
-                },
-              );
-            } else {
-              Alert.alert('Passwords do not match');
-            }
-          } else {
-            Alert.alert(
-              'Password must match at least 1 Special character, a number, a capital letter and minimum of 6 digits',
-            );
-          }
-        } else {
-          Alert.alert('Please provide a valid phone number');
-        }
-      } else {
-        Alert.alert('Please provide a valid email');
-      }
-    } else {
-      Alert.alert(
-        'Username must not be greater than 10 or less than 6 characters',
-      );
-    }
-  };
+  // const proceed = () => {
+  //   if (username !== '' && username.length >= 6 && username.length <= 10) {
+  //     if (isValidEmail(email)) {
+  //       if (isValidPhoneNumber(phone)) {
+  //         if (isValidPassword(password)) {
+  //           if (password === confirm) {
+  //             const old = JSON.parse(regData);
+  //             const number = handlePhoneNumberChange(phone);
+  //             const payload = {
+  //               username,
+  //               phone_number: number,
+  //               email,
+  //               first_name: firstname,
+  //               last_name: lastname,
+  //               password,
+  //             };
+  //             const upd = {...old, ...payload};
+  //             const res = JSON.stringify(upd);
+  //             sendToken.mutate(
+  //               {phone_number: number},
+  //               {
+  //                 onSuccess: (val: apiType) => {
+  //                   if (val.status) {
+  //                     navigate('Validation', {data: res});
+  //                   } else {
+  //                     showMessage({
+  //                       type: 'danger',
+  //                       message: 'Could not send validation token',
+  //                     });
+  //                   }
+  //                 },
+  //               },
+  //             );
+  //           } else {
+  //             Alert.alert('Passwords do not match');
+  //           }
+  //         } else {
+  //           Alert.alert(
+  //             'Password must match at least 1 Special character, a number, a capital letter and minimum of 6 digits',
+  //           );
+  //         }
+  //       } else {
+  //         Alert.alert('Please provide a valid phone number');
+  //       }
+  //     } else {
+  //       Alert.alert('Please provide a valid email');
+  //     }
+  //   } else {
+  //     Alert.alert(
+  //       'Username must not be greater than 10 or less than 6 characters',
+  //     );
+  //   }
+  // };
 
   return (
     <DefaultLayout>
@@ -145,7 +146,33 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
           innerRef={emref}
           onSubmit={values => {
             const upd = {...regData, ...values};
-            navigate('SignUpStep3', {data: upd});
+            sendEmailToken.mutate(
+              {
+                email: upd.email,
+              },
+              {
+                onSuccess: (val: apiType) => {
+                  console.log('res', val);
+                  if (val.status) {
+                    const dpd = {
+                      email: values.email,
+                      data: upd,
+                      redirectRule: {status: true, route: 'SignUpStep3'},
+                    };
+                    navigate('Validation', {
+                      params: dpd,
+                    });
+                  } else {
+                    console.log(val);
+                    Toast.show({
+                      type: 'error',
+                      text1: 'Create Account',
+                      text2: val.message,
+                    });
+                  }
+                },
+              },
+            );
           }}>
           {({
             handleChange,
@@ -280,8 +307,8 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                 mb={3}
                 onPress={() => handleSubmit()}
                 bg="themeLight.accent"
-                isDisabled={!emailGood}
-                isLoading={sendToken.isLoading}
+                isDisabled={!emailGood || sendEmailToken.isLoading}
+                isLoading={sendEmailToken.isLoading}
                 isLoadingText="Processing..."
                 _text={{
                   color: 'white',

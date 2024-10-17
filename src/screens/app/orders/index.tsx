@@ -26,7 +26,7 @@ import {TimeIcon} from '@assets/svg/TimeIcon';
 import dayjs from 'dayjs';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
-import {orderTypes} from '@types/orderTypes';
+import {orderType} from '@types/index';
 import {ordersStore} from '@store/orders';
 import {useOrders} from '@hooks/useOrders';
 
@@ -181,9 +181,7 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                     </VStack>
                     <Text fontWeight="bold">
                       Code: #
-                      {item.status === '3'
-                        ? item.delivery_pin
-                        : item.pick_up_pin}
+                      {item.status === 3 ? item.delivery_pin : item.pick_up_pin}
                     </Text>
                   </HStack>
                   <Button
@@ -196,7 +194,7 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                 </Box>
               </Box>
             )}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item: orderType) => item.id.toString()}
           />
         ) : (
           <Center py={8}>
@@ -252,7 +250,7 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                   </HStack>
                   <Box mt={2}>
                     <Text fontWeight="bold">
-                      Fee: ₦{formatter.formatCurrencySimple(item.total_amount)}
+                      Fee: ₦{formatter.formatCurrencySimple(item.delivery_fee)}
                     </Text>
                     <VStack
                       bg="themeLight.gray.4"
@@ -274,7 +272,7 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                 </Box>
               </VStack>
             )}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item: orderType) => item.id.toString()}
           />
         ) : (
           <Center py={8}>

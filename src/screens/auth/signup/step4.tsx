@@ -81,6 +81,10 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
     const payload = {
       latitude: location?.coords.latitude ?? '0',
       longitude: location?.coords.longitude ?? '0',
+      bank_name: bankName.name,
+      bank_code: bankName.code,
+      account_number: validatedName.account_number,
+      account_name: validatedName.account_name,
     };
     const upd = {...regData, ...payload};
     console.log(upd);
@@ -160,28 +164,26 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
     GeoLocate();
   }, []);
 
-  const doValidateBank = () => {
-    if (accountNumber !== '' && accountNumber.length === 10) {
-      validateBank.mutate(
-        {
-          account_number: accountNumber,
-          bank_code: bankName.code?.toString() ?? '',
+  const doValidateBank = (number: string) => {
+    validateBank.mutate(
+      {
+        account_number: number,
+        bank_code: bankName.code?.toString() ?? '',
+      },
+      {
+        onSuccess: (val: apiType) => {
+          if (val.status) {
+            const data: any = val.data;
+            setValidatedName(data);
+          } else {
+            showMessage({
+              type: 'warning',
+              message: 'We could not validate your account',
+            });
+          }
         },
-        {
-          onSuccess: (val: apiType) => {
-            if (val.status) {
-              const data: any = val.data;
-              setValidatedName(data);
-            } else {
-              showMessage({
-                type: 'warning',
-                message: 'We could not validate your account',
-              });
-            }
-          },
-        },
-      );
-    }
+      },
+    );
   };
 
   const getLocation = (res: boolean) => {
@@ -194,10 +196,9 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
     setAccountNumber(val);
     console.log('length', val.length);
     if (val !== '') {
-      if (val.length >= 10) {
-        setTimeout(() => {
-          doValidateBank();
-        }, 500);
+      if (val.length > 9) {
+        console.log('greater than 9');
+        doValidateBank(val);
       }
     }
   };
@@ -234,8 +235,8 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
                 keyboardType="number-pad"
                 value={accountNumber}
                 py={4}
-                onChangeText={e => setAccountNumber(e)}
-                onEndEditing={() => doValidateBank()}
+                onChangeText={e => callValidate(e)}
+                // onEndEditing={() => doValidateBank()}
                 caption={validatedName.account_name}
               />
               {validateBank.isLoading && (
