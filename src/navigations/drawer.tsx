@@ -137,7 +137,7 @@ const DrawerContent = observer(({navigation, state}: any) => {
 
           <VStack mt={8} space={3}>
             <Pressable py={2} onPress={() => openSheet('addressSheetNewIOS')}>
-              <HStack alignItems="center" space={2}>
+              <HStack alignItems="center" space={2} justifyContent="flex-start">
                 <LocationPin />
                 <VStack flex={1}>
                   <Text>Change Area</Text>

@@ -27,13 +27,15 @@ import {addressesStore} from '@store/addresses';
 import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
 import {functions} from '@helpers/functions';
-import io from 'socket.io-client';
+// import io from 'socket.io-client';
 import {markersType} from '@types/mapTypes';
 import {myLocationNotification} from '@handlers/localNotifications';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
 import {useGeolocation} from '@hooks/useGeoLocation';
 import {useOrders} from '@hooks/useOrders';
+import useSocket from '@hooks/useSocket';
+import {useSocket2} from '@hooks/useSocket2';
 import {useUser} from '@hooks/useUser';
 
 enableLatestRenderer();
@@ -59,8 +61,13 @@ export const Home = observer((props: HomeProps) => {
 
   const {subscribe} = UsePusher();
 
-  const socket: any = useRef<ReturnType<typeof io> | null>(null);
-  const intervalRef: any = useRef<NodeJS.Timeout | null>(null);
+  // we initialize the socket here
+  // const {isConnected, emit} = useSocket2();
+  const {isConnected, emitMessage, checkUserIsInRoom, removeRoom, createRoom} =
+    useSocket({
+      url: process.env.BASE_SERVICE_URL ?? '',
+      isOnline: onlineStatus,
+    });
 
   const userD = authStore.auth;
   const selectedOrder = ordersStore.selectedOrder;
@@ -71,7 +78,30 @@ export const Home = observer((props: HomeProps) => {
   const ordersOngoingCount = ordersStore.ongoingOrderCount;
   const {geoCode} = useGeolocation();
 
-  const GeoLocate = () => {
+  // emit rider information to customer service
+  const SendToSocket = useCallback(
+    (position: GeoPosition) => {
+      if (selectedOrder.id) {
+        if (selectedOrder.picked_up_at !== null && selectedOrder.status !== 4) {
+          emitMessage('message', {
+            riderId: userD?.user?.id.toString(),
+            orderId: selectedOrder.id.toString(),
+            // message:location,
+            message: position,
+          });
+        }
+      }
+    },
+    [
+      emitMessage,
+      selectedOrder.id,
+      selectedOrder.picked_up_at,
+      selectedOrder.status,
+      userD?.user?.id,
+    ],
+  );
+
+  const GeoLocate = useCallback(() => {
     Geolocation.getCurrentPosition(
       position => {
         // console.log('position', position);
@@ -82,7 +112,7 @@ export const Home = observer((props: HomeProps) => {
           longitude: position?.coords?.longitude,
         });
         if (position?.coords?.latitude !== null) {
-          SendToSocket(position?.coords.latitude, position?.coords.longitude);
+          SendToSocket(position);
         }
       },
       error => {
@@ -104,33 +134,7 @@ export const Home = observer((props: HomeProps) => {
         showLocationDialog: true,
       },
     );
-  };
-
-  // emit rider information to customer service
-  const SendToSocket = (latitude: number, longitude: number) => {
-    socket.current?.emit('message', {
-      riderId: userD?.user?.id.toString(),
-      orderId: selectedOrder?.id ?? '',
-      // message:location,
-      message: {
-        message: {
-          coords: {
-            accuracy: 600,
-            altitude: 0,
-            altitudeAccuracy: 0,
-            heading: 0,
-            latitude: latitude,
-            longitude: longitude,
-            speed: 0,
-          },
-          mocked: false,
-          provider: 'fused',
-          timestamp: 1727774592688,
-        },
-        sender: '0UhHCw1nwc7haMLAAAF3',
-      },
-    });
-  };
+  }, [SendToSocket]);
 
   const updateOnlineStatus = useCallback((status: number) => {
     toggleOnlineStatus.mutate(
@@ -207,36 +211,6 @@ export const Home = observer((props: HomeProps) => {
     updateOnlineStatus,
   ]);
 
-  // socket initialization
-  useEffect(() => {
-    // console.log('user', userD);
-    if (onlineStatus) {
-      socket.current = io(process.env.SERVICE_URL);
-
-      // Handle connection event
-      socket.current.on('connect', () => {
-        console.log('Socket.IO connected');
-      });
-
-      // Handle disconnection
-      socket.current.on('disconnect', () => {
-        console.log('Socket.IO disconnected');
-      });
-    }
-
-    // Clean up WebSocket connection and interval on component unmount
-    return () => {
-      // subscription.remove();
-
-      if (socket.current) {
-        socket.current.disconnect();
-      }
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [onlineStatus, appState, location, userD]);
-
   const OnlineSection = useCallback(
     () => (
       <Center position="absolute" bottom={0} w="full" zIndex={1}>
@@ -301,18 +275,56 @@ export const Home = observer((props: HomeProps) => {
       status: '1',
     });
   }, []);
+
+  // if an order is selected, we now check if the order has been picked up
   useEffect(() => {
-    // if (ordersOngoingCount) {
-    //   const intervalId = setInterval(() => {
-    //     GeoLocate();
-    //   }, 5000);
-    //   return () => clearInterval(intervalId);
-    // }
-  }, [ordersOngoingCount]);
+    if (selectedOrder?.id) {
+      if (selectedOrder.picked_up_at !== null && selectedOrder.status !== 4) {
+        const intervalId = setInterval(() => {
+          GeoLocate();
+        }, 5000);
+        return () => clearInterval(intervalId);
+      }
+    }
+  }, [
+    GeoLocate,
+    isConnected,
+    selectedOrder?.id,
+    selectedOrder?.picked_up_at,
+    selectedOrder?.status,
+  ]);
+
+  useEffect(() => {
+    if (
+      selectedOrder?.id &&
+      selectedOrder?.picked_up_at !== null &&
+      selectedOrder?.status !== 4
+    ) {
+      checkUserIsInRoom(selectedOrder.id, (val: boolean) => {
+        if (!val) {
+          myLocationNotification('Your app is sending Locations regularly');
+          createRoom(selectedOrder?.id ?? 0);
+        }
+      });
+    } else {
+      // here we just remove the room
+      removeRoom(selectedOrder?.id ?? 0);
+    }
+  }, [
+    checkUserIsInRoom,
+    createRoom,
+    removeRoom,
+    selectedOrder?.id,
+    selectedOrder?.picked_up_at,
+    selectedOrder?.status,
+  ]);
+
   useEffect(() => {
     if (ordersOngoingCount && !selectedOrder.id) {
       // throw notification of order ongoing
-      myLocationNotification('Your app is sending Locations regularly');
+      myLocationNotification(
+        `You have ${ordersOngoingCount} orders ongoing, navigate to orders to view them`,
+      );
       Toast.show({
         type: 'info',
         text1: 'Order Ongoing',
@@ -427,7 +439,6 @@ export const Home = observer((props: HomeProps) => {
           <Pressable
             mt={Platform.OS === 'ios' ? '8' : 0}
             onPress={() => {
-              SheetManager.hide('orderDetailsSheet');
               navigation.openDrawer();
             }}
             w="45px"

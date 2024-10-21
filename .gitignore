@@ -72,3 +72,4 @@ yarn-error.log
 /android/app/release
 .yarn
 
+android/app/release/

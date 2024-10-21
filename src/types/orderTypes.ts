@@ -99,6 +99,7 @@ export interface notificationsType {
 }
 
 export interface orderNotifications {
+  notification_name: string;
   order_id: number;
   amount: number;
   delivery_pin: string;

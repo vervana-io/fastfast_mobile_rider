@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import {Image, StyleSheet, View} from 'react-native';
 import RNMapView, {AnimatedRegion, Circle, Marker} from 'react-native-maps';
 import React, {useEffect, useRef, useState} from 'react';
@@ -136,7 +137,7 @@ const MapView = observer((props: MapTypes) => {
           // loadingBackgroundColor="white"
           style={StyleSheet.absoluteFillObject}
           rotateEnabled={false}>
-          {/* <Marker.Animated
+          <Marker.Animated
             anchor={{x: 0.5, y: 0.6}}
             coordinate={markerPosition}
             flat
@@ -148,15 +149,15 @@ const MapView = observer((props: MapTypes) => {
                 },
               ],
             }}>
-            <View style={styles.dotContainer}>
+            {/* <View style={styles.dotContainer}>
               <View style={[styles.arrow]} />
               <View style={styles.dot} />
-            </View>
+            </View> */}
             <Image
               source={require('@assets/img/marker.png')}
               style={{width: 30, height: 30}}
             />
-          </Marker.Animated> */}
+          </Marker.Animated>
           <Circle
             center={{
               latitude: initialRegion.latitude,

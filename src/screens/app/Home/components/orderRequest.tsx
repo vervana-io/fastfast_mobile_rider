@@ -34,15 +34,20 @@ export const OrderRequest = observer(() => {
   const {acceptOrder, reassignOrder} = useOrders();
   const {subscribe} = UsePusher();
 
+  const allOrders = ordersStore.orders;
+
   const triggerReassign = () => {
     setShowReassign(true);
     setShowOrder(false);
+    console.log('================trigger order id====================');
+    console.log(mainNotificationOrder);
+    console.log('====================================');
   };
 
   const doReassign = () => {
-    if (mainNotificationOrder?.order_id) {
-      const order_id = mainNotificationOrder.order_id;
-      const request_id = NotificationOrder.data.request_id;
+    if (NotificationOrder.order_id) {
+      const order_id = NotificationOrder.order_id;
+      const request_id = NotificationOrder.request_id;
       if (order_id) {
         reassignOrder.mutate(
           {
@@ -56,6 +61,7 @@ export const OrderRequest = observer(() => {
                 setShowReassign(false);
                 setShowOrder(false);
                 ordersStore.clearNotifiedOrder();
+                setMainNotificationOrder({});
               } else {
                 Toast.show({
                   type: 'warning',
@@ -238,24 +244,43 @@ export const OrderRequest = observer(() => {
     };
   });
 
+  const checkForOrderById = useCallback(
+    (order_id: number) => {
+      console.log('checking order', order_id);
+      const order = allOrders.find(o => o.id === order_id);
+      console.log('order', order);
+      console.log('===============All orders=====================');
+      console.log(allOrders);
+      console.log('====================================');
+      return order;
+    },
+    [allOrders],
+  );
+
   useEffect(() => {
     if (NotificationOrder.data) {
       const data = NotificationOrder;
-      const payload: notificationsType = {
-        data: JSON.parse(data.data),
-        order_id: data.order_id ?? '',
-        request_id: data.request_id ?? '',
-        rider_id: data.rider_id ?? '',
-        title: data.title ?? '',
-        user_id: data.user_id ?? '',
-      };
-      setMainNotificationOrder(payload);
-      ordersStore.clearNotifiedOrder();
-      setTimeout(() => {
-        toggleBoxHeight();
-      }, 500);
+      const notification_name = JSON.parse(data.data)?.notification_name;
+      // here we check if the notification is for an order request
+      // after which we then check if we already have the order accepted
+      if (notification_name === 'order_request') {
+        if (!checkForOrderById(data.order_id)?.id) {
+          const payload: notificationsType = {
+            data: JSON.parse(data.data),
+            order_id: data.order_id ?? '',
+            request_id: data.request_id ?? '',
+            rider_id: data.rider_id ?? '',
+            title: data.title ?? '',
+            user_id: data.user_id ?? '',
+          };
+          setMainNotificationOrder(payload);
+          setTimeout(() => {
+            toggleBoxHeight();
+          }, 500);
+        }
+      }
     }
-  }, [NotificationOrder, toggleBoxHeight]);
+  }, [NotificationOrder, checkForOrderById, toggleBoxHeight]);
 
   return (
     <Animated.View style={[styles.box, animatedBoxStyle]}>

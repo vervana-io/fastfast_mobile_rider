@@ -112,6 +112,7 @@ export const Validation = (props: ValidationType) => {
           onSuccess: (val: apiType) => {
             if (val.status) {
               setValidated(false);
+              proceed();
             } else {
               resetPins();
               showMessage({
@@ -364,7 +365,7 @@ export const Validation = (props: ValidationType) => {
             borderColor="themeLight.primary.base"
             rounded="3xl"
             py={4}
-            onPress={() => navigate('SignUpStep3', undefined)}
+            onPress={() => navigate('SignUpStep2', {params: params})}
             _text={{
               fontWeight: 'bold',
               color: 'themeLight.primary.base',

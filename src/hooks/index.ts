@@ -4,3 +4,5 @@ export * from './useBanks';
 export * from './useUser';
 export * from './useOrders';
 export * from './usePusher';
+export * from './useSocket';
+export * from './useSocket2';

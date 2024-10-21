@@ -30,13 +30,13 @@ import {ExpandIcon} from '@assets/svg/Expand';
 import {PhoneIcon} from '@assets/svg/PhoneIcon';
 import {QuestionIcon} from '@assets/svg/QuestionIcon';
 import {apiType} from '@types/index';
-import io from 'socket.io-client';
 import {observer} from 'mobx-react-lite';
 import {orderType} from '@types/orderTypes';
 import {ordersStore} from '@store/orders';
 import {uploadedOrderType} from '@types/generalType';
 import {useIsFocused} from '@react-navigation/native';
 import {useOrders} from '@hooks/useOrders';
+import useSocket from '@hooks/useSocket';
 
 export const OrderDetailsSheet = observer((props: SheetProps) => {
   const orderDetailsSheetRef = useRef<ActionSheetRef>(null);
@@ -52,6 +52,12 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
 
   const isFocused = useIsFocused();
 
+  // we initialize the socket here
+  // const {isConnected, createRoom} = useSocket({
+  //   url: 'https://c371-105-113-112-189.ngrok-free.app',
+  //   isOnline: true,
+  // });
+
   const {fetchSingleOrder, pickUpOrder, arrivalOrder, deliveredOrder} =
     useOrders();
   // const {singleOrder} = orderStates;
@@ -60,7 +66,6 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
   const order_id = payload?.order_id ?? ordersStore.selectedOrderId;
   const ordersData = ordersStore.selectedOrder;
   const request_id = payload?.request_id ?? ordersData?.misc_rider_info?.id;
-  const socket: any = useRef<ReturnType<typeof io> | null>(null);
 
   const {colorMode} = useColorMode();
 
@@ -170,17 +175,6 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         onSuccess: (val: apiType) => {
           if (val.status) {
             getOrderInfo();
-            socket.current = io(process.env.SERVICE_URL);
-
-            socket.current.emit('createRoom', order_id, (response: any) => {
-              if (response.success) {
-                console.log('Room created:', response.message);
-                // reject(response);
-              } else {
-                console.error('Failed to create room:', response.message);
-                // reject(new Error(response.message));
-              }
-            });
           } else {
             setErrorMessage(val.message);
           }
@@ -538,7 +532,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
                     fetchSingleOrder.isLoading ? 'Updating records' : ''
                   }
                   onPress={doPickUp}>
-                  Proceed
+                  Pick up order
                 </Button>
               </>
             ) : ordersData.status === 3 &&
@@ -675,15 +669,16 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         // Get the offset from bottom
         const offsetFromBottom = height - position;
         // console.log('reached top', offsetFromBottom);
-        setTimeout(() => {
-          if (offsetFromBottom > 600) {
-            setViewDetails('full');
-          } else if (offsetFromBottom < 271) {
-            setViewDetails('small');
-          } else {
-            setViewDetails('mid');
-          }
-        }, 500);
+        // setTimeout(() => {
+
+        // }, 50);
+        if (offsetFromBottom > 600) {
+          setViewDetails('full');
+        } else if (offsetFromBottom < 271) {
+          setViewDetails('small');
+        } else {
+          setViewDetails('mid');
+        }
       }}
       disableDragBeyondMinimumSnapPoint={true}
       backgroundInteractionEnabled={true}
@@ -691,7 +686,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
       closable={false}
       // snapPoints={[(WIN_HEIGHT / 100) * 2.5, (WIN_HEIGHT / 100) * 5.5, 100]}
       snapPoints={[30, 60, 100]}
-      initialSnapIndex={0}
+      initialSnapIndex={1}
       gestureEnabled={true}
       containerStyle={{
         height: WIN_HEIGHT,
