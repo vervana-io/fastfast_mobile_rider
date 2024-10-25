@@ -88,7 +88,7 @@ export const Home = observer((props: HomeProps) => {
   } = useSocket({
     url: __DEV__
       ? 'https://6f6a-105-113-68-192.ngrok-free.app'
-      : process.env.BASE_SERVICE_URL ?? '',
+      : process.env.SERVICE_URL ?? '',
     isOnline: onlineStatus,
   });
 
@@ -138,7 +138,7 @@ export const Home = observer((props: HomeProps) => {
       error => Alert.alert('GetCurrentPosition Error', JSON.stringify(error)),
       {
         enableHighAccuracy: true,
-        timeout: 15000,
+        timeout: 25000,
         maximumAge: 10000,
         distanceFilter: 0,
         useSignificantChanges: true,
@@ -291,7 +291,7 @@ export const Home = observer((props: HomeProps) => {
   // we trigger the location on page load assuming location is already set from onset
   useEffect(() => {
     GeoLocate();
-  }, []);
+  }, [GeoLocate]);
 
   // check for ongoing orders and if there are any, keep sending rider location updates
   // also notify the rider that they have an ongoing order
@@ -497,12 +497,12 @@ export const Home = observer((props: HomeProps) => {
       const {delay} = taskData;
       console.log(BackgroundJob.isRunning(), delay);
       watchBackgroundUpdates();
-      // for (let i = 0; BackgroundJob.isRunning(); i++) {
-      //   console.log('Runned -> ', i);
-      //   // watchBackgroundUpdates();
-      //   // await BackgroundJob.updateNotification({taskDesc: 'Runned -> ' + i});
-      //   await sleep(delay);
-      // }
+      for (let i = 0; BackgroundJob.isRunning(); i++) {
+        console.log('Runned -> ', i);
+        // watchBackgroundUpdates();
+        await BackgroundJob.updateNotification({taskDesc: 'Runned -> ' + i});
+        await sleep(delay);
+      }
     });
   };
 

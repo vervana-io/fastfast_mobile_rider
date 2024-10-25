@@ -1,5 +1,5 @@
 import {Animated, View} from 'react-native';
-import {Box, Center, Image, Text} from 'native-base';
+import {Box, Center, Image, Spinner, Text} from 'native-base';
 import MapView, {Marker, PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
 /* eslint-disable react-native/no-inline-styles */
 import React, {useEffect, useRef} from 'react';
@@ -114,7 +114,11 @@ const RiderMap: React.FC<RiderMapProps> = ({
     }
   };
 
-  return (
+  return currentLocation.latitude === 0 ? (
+    <Center flex={1}>
+      <Spinner />
+    </Center>
+  ) : (
     <MapView
       ref={mapRef}
       provider="google"
