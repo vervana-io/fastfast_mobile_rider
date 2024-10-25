@@ -1,0 +1,648 @@
+/* eslint-disable react-native/no-inline-styles */
+import {
+  AddIcon,
+  Box,
+  Button,
+  Center,
+  CloseIcon,
+  DeleteIcon,
+  Divider,
+  HStack,
+  Image,
+  Pressable,
+  Text,
+  VStack,
+} from 'native-base';
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+  BottomSheetView,
+  useBottomSheet,
+} from '@gorhom/bottom-sheet';
+import {Linking, StyleSheet} from 'react-native';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
+
+import {ExpandIcon} from '@assets/svg/Expand';
+import {PhoneIcon} from '@assets/svg/PhoneIcon';
+import { QuestionIcon } from '@assets/svg/QuestionIcon';
+import {SheetManager} from 'react-native-actions-sheet';
+import {apiType} from '@types/apiTypes';
+import {bottomSheetStore} from '@store/bottom-sheet';
+import {launchImageLibrary} from 'react-native-image-picker';
+import {observer} from 'mobx-react-lite';
+import {ordersStore} from '@store/orders';
+import {uploadedOrderType} from '@types/generalType';
+import {useOrders} from '@hooks/useOrders';
+
+export const OrderDetailsViewSheet = observer(() => {
+  const sheetRef: any = useRef<BottomSheet>(null);
+  const sheetOpen = bottomSheetStore.sheets.orderDetailsView;
+
+  const [uploadedOrder, setUploadedOrder] = useState<uploadedOrderType[]>([]);
+  const allowedUpload = 2;
+  const [errorMessage, setErrorMessage] = useState('');
+  // const [ordersData, setOrdersData] = useState<Partial<orderType>>({});
+  const [orderCompleted, setOrderCompleted] = useState(false);
+  const [showFullPin, setShowFullPin] = useState(false);
+  const [hasViewDetails, setViewDetails] = useState<'mid' | 'full' | 'small'>(
+    'mid',
+  );
+
+  const {fetchSingleOrder, pickUpOrder, arrivalOrder, deliveredOrder} =
+    useOrders();
+
+  const {payload} = bottomSheetStore.sheetContentData;
+  const order_id = payload?.order_id ?? ordersStore.selectedOrderId;
+  const ordersData = ordersStore.selectedOrder;
+  const request_id =
+    payload?.request_id ?? ordersData?.misc_rider_info?.user_id;
+
+  // variables
+  const snapPoints = useMemo(() => ['25%', '60%', '85%'], []);
+
+  const _snapPhotoPic = useCallback(async () => {
+    if (uploadedOrder.length < allowedUpload) {
+      await launchImageLibrary(
+        {
+          mediaType: 'photo',
+          includeBase64: true,
+          quality: 1,
+          maxWidth: 320,
+          maxHeight: 230,
+        },
+        (response: any) => {
+          if (response) {
+            const pay: uploadedOrderType = {
+              uri: response?.assets[0].uri ?? '',
+              base64: `data:image/jpeg;base64,${response?.assets[0].base64}`,
+            };
+            setUploadedOrder(prev => [...prev, pay]);
+          }
+        },
+      );
+    }
+  }, [uploadedOrder.length]);
+
+  const removeImage = (i: number) => {
+    setUploadedOrder(prev => {
+      const newArr = [...prev];
+      newArr.splice(i, 1);
+      return newArr;
+    });
+  };
+
+  const doArrival = useCallback(() => {
+    setErrorMessage('');
+    arrivalOrder.mutate(
+      {
+        order_id,
+        request_id,
+      },
+      {
+        onSuccess: (val: apiType) => {
+          if (val.status) {
+            getOrderInfo();
+          } else {
+            setErrorMessage(val.message);
+          }
+        },
+      },
+    );
+  }, [order_id, request_id]);
+
+  const doDelivered = useCallback(() => {
+    setErrorMessage('');
+    deliveredOrder.mutate(
+      {
+        order_id,
+        request_id,
+      },
+      {
+        onSuccess: (val: apiType) => {
+          if (val.status) {
+            getOrderInfo();
+            const pay: any = {
+              customer_id: ordersData.customer_id,
+              delivery_fee: ordersData.delivery_fee,
+            };
+            SheetManager.show('rateCustomerSheet', {payload: pay});
+            // SheetManager.hide('orderDetailsSheet');
+          } else {
+            setErrorMessage(val.message);
+          }
+        },
+      },
+    );
+  }, [order_id, ordersData.customer_id, ordersData.delivery_fee, request_id]);
+
+  const doPickUp = useCallback(() => {
+    const list: string[] = [];
+    uploadedOrder.map(el => {
+      list.push(el.base64);
+    });
+    setErrorMessage('');
+    pickUpOrder.mutate(
+      {
+        order_id,
+        request_id,
+        media_base64: list,
+      },
+      {
+        onSuccess: (val: apiType) => {
+          if (val.status) {
+            getOrderInfo();
+          } else {
+            setErrorMessage(val.message);
+          }
+        },
+      },
+    );
+  }, [order_id, pickUpOrder, request_id, uploadedOrder]);
+
+  const getOrderInfo = () => {
+    fetchSingleOrder.mutate({id: order_id});
+  };
+
+  const callCustomer = useCallback(() => {
+    if (ordersData.customer?.phone_number_one) {
+      Linking.openURL(`tel:${ordersData.customer?.phone_number_one}`);
+    }
+  }, [ordersData.customer?.phone_number_one]);
+
+  // callbacks
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log('handleSheetChanges', index);
+    if (index === 2) {
+      setViewDetails('full');
+    } else if (index === 1) {
+      setViewDetails('mid');
+    } else {
+      setViewDetails('small');
+    }
+  }, []);
+
+  const handleSnapPress = useCallback((index: number) => {
+    sheetRef.current?.snapToIndex(index);
+  }, []);
+
+  // renders
+  const renderBackdrop = useCallback(
+    props => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={1}
+        appearsOnIndex={2}
+      />
+    ),
+    [],
+  );
+
+  const Content = useCallback(() => {
+    return (
+      <Box bg="themeLight.primary.base" roundedTop="2xl">
+        <Pressable
+          onPress={() =>
+            hasViewDetails === 'mid'
+              ? handleSnapPress(2)
+              : hasViewDetails === 'small'
+              ? handleSnapPress(1)
+              : handleSnapPress(0)
+          }>
+          <Center py={1}>
+            <Text color="white" fontWeight="bold">
+              Swipe up to see more
+            </Text>
+          </Center>
+        </Pressable>
+        <Box bg="#1B1B1B" h="full" roundedTop="2xl">
+          <Center p={4}>
+            <Box bg="trueGray.400" w="12" h="1" rounded="full" />
+          </Center>
+          <Box py={6} px={4}>
+            <HStack justifyContent="space-between" space={2}>
+              <VStack flex={1} space={2}>
+                <Text fontWeight="bold" color="white" fontSize="lg">
+                  {ordersData?.seller?.trading_name}
+                </Text>
+                <Text color="themeLight.gray.2" fontSize="xs">
+                  {ordersData?.seller?.address}
+                </Text>
+              </VStack>
+              <HStack space={2}>
+                <Button
+                  leftIcon={<QuestionIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={() => SheetManager.show('orderHelpSheet')}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+                <Button
+                  leftIcon={<PhoneIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={callCustomer}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+              </HStack>
+            </HStack>
+            <Box mt={2}>
+              <Text color="white" fontWeight="bold">
+                Fee: ₦{ordersData?.sub_total}
+              </Text>
+              <Text color="white" fontWeight="bold">
+                Delivery Fee: ₦{ordersData?.delivery_fee}
+              </Text>
+              <VStack bg="white" rounded="lg" my={4} p={4} space={2}>
+                {ordersData.order_products &&
+                  ordersData.order_products?.map((el, i) => (
+                    <Text key={i} color="black">
+                      {el.quantity}x {el.product?.title}
+                    </Text>
+                  ))}
+              </VStack>
+              {ordersData.status === 3 &&
+              ordersData.is_rider_customer_arrived === 1 ? (
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  isLoading={deliveredOrder.isLoading}
+                  onPress={doDelivered}>
+                  I have delivered
+                </Button>
+              ) : ordersData.status === 3 &&
+                ordersData.is_rider_customer_arrived === 0 ? (
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  isLoading={arrivalOrder.isLoading}
+                  isLoadingText="Setting arrival"
+                  isDisabled={arrivalOrder.isLoading}
+                  onPress={doArrival}>
+                  I have arrived
+                </Button>
+              ) : (
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  onPress={() => handleSnapPress(2)}>
+                  Proceed to pickup
+                </Button>
+              )}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }, [
+    arrivalOrder.isLoading,
+    callCustomer,
+    deliveredOrder.isLoading,
+    doArrival,
+    doDelivered,
+    handleSnapPress,
+    hasViewDetails,
+    ordersData?.delivery_fee,
+    ordersData.is_rider_customer_arrived,
+    ordersData.order_products,
+    ordersData?.seller?.address,
+    ordersData?.seller?.trading_name,
+    ordersData.status,
+    ordersData?.sub_total,
+  ]);
+
+  const ContentFull = useCallback(
+    () => (
+      <Box py={6} px={4} bg="white" h="full" roundedTop="2xl">
+        <Pressable onPress={() => handleSnapPress(1)}>
+          <Box
+            w={45}
+            h={45}
+            bg="themeLight.primary.base"
+            opacity={0.1}
+            rounded="lg"
+          />
+          <Pressable
+            onPress={() => handleSnapPress(1)}
+            position="absolute"
+            zIndex={4}
+            top={3}
+            left={3}>
+            <CloseIcon size={5} color="themeLight.primary.base" />
+          </Pressable>
+        </Pressable>
+        <BottomSheetScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+          }}>
+          <VStack mt={4}>
+            <Text color="themeLight.error">{errorMessage}</Text>
+            <VStack space={1}>
+              <Text fontWeight="bold" color="black" fontSize="lg">
+                {ordersData?.seller?.trading_name}
+              </Text>
+              <Text color="themeLight.gray.2" fontSize="xs">
+                {ordersData?.seller?.address}
+              </Text>
+            </VStack>
+            <HStack justifyContent="space-between" alignItems="center" mt={2}>
+              <VStack>
+                <Text fontWeight="bold" fontSize="md">
+                  Order #
+                  {ordersData?.status && ordersData?.status >= 3
+                    ? ordersData?.delivery_pin
+                    : ordersData?.pick_up_pin}
+                </Text>
+                <Text fontSize="xs" fontWeight="bold" color="themeLight.accent">
+                  {ordersData?.order_products?.length} Items
+                </Text>
+              </VStack>
+              <Pressable
+                onPress={() => {
+                  setShowFullPin(true);
+                }}>
+                <ExpandIcon />
+              </Pressable>
+            </HStack>
+            <VStack bg="themeLight.gray.4" rounded="lg" my={4} p={4} space={2}>
+              {ordersData.order_products &&
+                ordersData.order_products?.map((el, i) => (
+                  <Text key={i} color="black">
+                    {el.quantity}x {el.product?.title}
+                  </Text>
+                ))}
+            </VStack>
+            <HStack space={2}>
+              <VStack>
+                <Text fontWeight="bold">Fee</Text>
+                <Text color="themeLight.gray.2" fontWeight="light">
+                  ₦{ordersData?.sub_total}
+                </Text>
+              </VStack>
+              <Divider orientation="vertical" mx={2} />
+              <VStack>
+                <Text fontWeight="bold">Deliver Fee</Text>
+                <Text color="themeLight.gray.2" fontWeight="light">
+                  ₦{ordersData?.delivery_fee}
+                </Text>
+              </VStack>
+            </HStack>
+            <VStack mt={2}>
+              <Text>Note from business</Text>
+              <Text fontWeight="hairline" color="themeLight.gray.2">
+                {ordersData.order_detail}.{' '}
+              </Text>
+            </VStack>
+            {ordersData.status && ordersData.status < 3 ? (
+              <>
+                <VStack mt={2}>
+                  <HStack alignItems="center" space={1}>
+                    <Text fontWeight="bold">Photos</Text>
+                    <Text fontWeight="hairline" fontSize="xs">
+                      ({uploadedOrder.length}/{allowedUpload})
+                    </Text>
+                  </HStack>
+                  <HStack mt={2} space={2}>
+                    {uploadedOrder.map((el, i) => (
+                      <Center
+                        bg="themeLight.gray.4"
+                        w="90px"
+                        h="114px"
+                        rounded="md"
+                        key={i}>
+                        <Pressable
+                          onPress={() => removeImage(i)}
+                          position="absolute"
+                          top={2}
+                          right={2}
+                          bg="red.50"
+                          w="20px"
+                          h="20px"
+                          zIndex={1}
+                          rounded="md">
+                          <Center flex={1}>
+                            <DeleteIcon color="red.600" size="xs" />
+                          </Center>
+                        </Pressable>
+                        <Image
+                          width="100%"
+                          height="100%"
+                          alt="Image"
+                          rounded="md"
+                          source={{uri: el.uri}}
+                        />
+                      </Center>
+                    ))}
+                    <Pressable onPress={() => _snapPhotoPic()}>
+                      <Center
+                        bg="themeLight.gray.4"
+                        w="90px"
+                        h="114px"
+                        rounded="md">
+                        <Center>
+                          <AddIcon />
+                          <Text mt={3} fontSize="xs">
+                            Add more
+                          </Text>
+                        </Center>
+                      </Center>
+                    </Pressable>
+                  </HStack>
+                </VStack>
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  mt={3}
+                  isLoading={
+                    pickUpOrder.isLoading || fetchSingleOrder.isLoading
+                  }
+                  isLoadingText={
+                    fetchSingleOrder.isLoading ? 'Updating records' : ''
+                  }
+                  onPress={doPickUp}>
+                  Pick up order
+                </Button>
+              </>
+            ) : ordersData.status === 3 &&
+              ordersData.is_rider_customer_arrived === 0 ? (
+              <Button
+                _text={{fontWeight: 'bold'}}
+                rounded="full"
+                py={4}
+                mt={3}
+                isLoading={arrivalOrder.isLoading}
+                onPress={doArrival}>
+                I have arrived
+              </Button>
+            ) : ordersData.status === 3 &&
+              ordersData.is_rider_customer_arrived === 1 ? (
+              <Button
+                _text={{fontWeight: 'bold'}}
+                rounded="full"
+                py={4}
+                mt={3}
+                isLoading={deliveredOrder.isLoading}
+                isLoadingText="Setting delivery"
+                isDisabled={deliveredOrder.isLoading}
+                onPress={doDelivered}>
+                I have delivered
+              </Button>
+            ) : null}
+          </VStack>
+        </BottomSheetScrollView>
+      </Box>
+    ),
+    [
+      _snapPhotoPic,
+      arrivalOrder.isLoading,
+      deliveredOrder.isLoading,
+      doArrival,
+      doDelivered,
+      doPickUp,
+      errorMessage,
+      fetchSingleOrder.isLoading,
+      handleSnapPress,
+      ordersData?.delivery_fee,
+      ordersData?.delivery_pin,
+      ordersData.is_rider_customer_arrived,
+      ordersData.order_detail,
+      ordersData.order_products,
+      ordersData?.pick_up_pin,
+      ordersData?.seller?.address,
+      ordersData?.seller?.trading_name,
+      ordersData.status,
+      ordersData?.sub_total,
+      pickUpOrder.isLoading,
+      uploadedOrder,
+    ],
+  );
+
+  const OrderComplete = useCallback(
+    () => (
+      <Box py={6} px={4} bg="#fff" h="full" roundedTop="2xl">
+        <Center my={8}>
+          <Text fontSize="2xl" fontWeight="semibold" mb={8}>
+            Great Job 👍
+          </Text>
+          <Text fontSize="sm" color="themeLight.gray.2">
+            You just earned
+          </Text>
+          <HStack mb={40}>
+            <Text
+              fontWeight="bold"
+              fontSize="3xl"
+              color="themeLight.primary.base">
+              ₦1,700
+            </Text>
+            <AddIcon color="themeLight.primary.base" />
+          </HStack>
+          <Button
+            w="full"
+            rounded="full"
+            _text={{fontWeight: 'bold'}}
+            onPress={() => {
+              SheetManager.hide('orderDetailsSheet');
+              ordersStore.setSelectedOrder({});
+              ordersStore.setSelectedOrderId(0);
+            }}>
+            Back home
+          </Button>
+        </Center>
+      </Box>
+    ),
+    [],
+  );
+
+  const FullPin = useCallback(
+    () => (
+      <Box py={6} px={4} bg="#182819" h="full" roundedTop="2xl">
+        <Center flex={1}>
+          <Text
+            style={styles.rotateText}
+            fontSize="170px"
+            fontFamily="body"
+            w={WIN_HEIGHT * 0.7}
+            h={WIN_WIDTH * 0.8}
+            textAlign="center"
+            color="white"
+            fontWeight="bold">
+            #
+            {ordersData?.status && ordersData?.status >= 3
+              ? ordersData?.delivery_pin
+              : ordersData?.pick_up_pin}
+          </Text>
+        </Center>
+        <Center py={8}>
+          <Pressable
+            onPress={() => {
+              setShowFullPin(false);
+            }}>
+            <Text color="#15AA56" fontWeight="bold">
+              Go Back
+            </Text>
+          </Pressable>
+        </Center>
+      </Box>
+    ),
+    [ordersData?.delivery_pin, ordersData?.pick_up_pin, ordersData?.status],
+  );
+
+  const handleClosePress = () => sheetRef.current.close();
+  const handleExpand = () => sheetRef.current.expand();
+
+  useEffect(() => {
+    if (sheetOpen && order_id) {
+      setTimeout(() => {
+        getOrderInfo();
+      }, 1000);
+    }
+  }, [order_id, sheetOpen]);
+
+  useEffect(() => {
+    if (sheetOpen) {
+      handleExpand;
+    } else {
+      handleClosePress;
+      bottomSheetStore.SetSheet('orderDetailsView', false);
+    }
+  }, [sheetOpen]);
+
+  return (
+    sheetOpen && (
+      <BottomSheet
+        ref={sheetRef}
+        index={1}
+        snapPoints={snapPoints}
+        backdropComponent={renderBackdrop}
+        enableDynamicSizing={false}
+        handleComponent={null}
+        onChange={handleSheetChanges}>
+        <BottomSheetView>
+          {showFullPin ? (
+            <FullPin />
+          ) : orderCompleted ? (
+            <OrderComplete />
+          ) : hasViewDetails === 'full' ? (
+            ContentFull()
+          ) : (
+            Content()
+          )}
+        </BottomSheetView>
+      </BottomSheet>
+    )
+  );
+});
+
+const styles = StyleSheet.create({
+  rotateText: {
+    transform: [{rotate: '-90deg'}],
+  },
+});

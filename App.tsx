@@ -11,7 +11,7 @@ import {
   StorageManager,
   Text,
 } from 'native-base';
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect} from 'react';
 import {
   checkApplicationNotificationPermission,
   registerAppWithFCM,
@@ -20,12 +20,12 @@ import {
 
 import {AppNavigator} from '@navigation/index';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BottomSheet from '@gorhom/bottom-sheet';
 import {CheckMarkSolid} from '@assets/svg/CheckMarkSolid';
 import {CloseIconSolid} from '@assets/svg/closeIconSolid';
 import ErrorBoundary from 'react-native-error-boundary';
 import {ErrorFallback} from '@components/utils';
 import FlashMessage from 'react-native-flash-message';
-import FlipperAsyncStorage from 'rn-flipper-async-storage-advanced';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {InfoIconSolid} from '@assets/svg/infoIconSolid';
 import {LogBox} from 'react-native';
@@ -34,7 +34,6 @@ import Toast from 'react-native-toast-message';
 import {authStore} from '@store/auth';
 import crashlytics from '@react-native-firebase/crashlytics';
 import messaging from '@react-native-firebase/messaging';
-import {navigationRef} from '@navigation/NavigationService';
 import {rootClientQuery} from './src/config';
 import {rootConfig} from '@store/root';
 import {theme} from './theme';
@@ -152,6 +151,7 @@ export default function App() {
     'onAnimated',
     'If you do not provide children',
     'VirtualizedLists should',
+    '[Reanimated] Reading from `value`',
   ]);
 
   crashlytics().log('App mounted.'); // firebase crashlytics
@@ -220,7 +220,6 @@ export default function App() {
 
   return (
     <>
-      <FlipperAsyncStorage />
       <QueryClientProvider client={rootClientQuery}>
         <NativeBaseProvider theme={theme} colorModeManager={colorModeManager}>
           <GestureHandlerRootView style={{flex: 1}}>

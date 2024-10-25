@@ -1,9 +1,11 @@
 import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
+import {useCallback, useRef, useState} from 'react';
 import {useMutation, useQuery} from 'react-query';
 
 import {Double} from 'react-native/Libraries/Types/CodegenTypes';
+import {Platform} from 'react-native';
+import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import {http} from '../config';
-import {useState} from 'react';
 
 export type geoConfig = {
   enableFetchLocation?: boolean;

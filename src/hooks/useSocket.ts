@@ -1,6 +1,8 @@
 import io, {Socket} from 'socket.io-client';
 import {useEffect, useRef, useState} from 'react';
 
+import {GeoPosition} from 'react-native-geolocation-service';
+
 interface UseSocketOptions {
   url: string;
   options?: any;
@@ -93,6 +95,19 @@ const useSocket = ({url, options = {}, isOnline = false}: UseSocketOptions) => {
     }
   };
 
+  const updateRiderLocation = (
+    riderId: string,
+    position: GeoPosition['coords'],
+  ) => {
+    if (socketRef.current) {
+      console.log('updateRiderLocation', riderId);
+      socketRef.current.emit('updateRiderLocation', {
+        riderId,
+        position,
+      });
+    }
+  };
+
   // Function to manually disconnect the socket
   const disconnectSocket = () => {
     if (socketRef.current && isConnected) {
@@ -118,6 +133,7 @@ const useSocket = ({url, options = {}, isOnline = false}: UseSocketOptions) => {
     removeRoom,
     disconnectSocket,
     reconnectSocket,
+    updateRiderLocation,
   };
 };
 

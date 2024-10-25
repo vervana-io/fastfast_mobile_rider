@@ -136,7 +136,7 @@ const DrawerContent = observer(({navigation, state}: any) => {
           </Box>
 
           <VStack mt={8} space={3}>
-            <Pressable py={2} onPress={() => openSheet('addressSheetNewIOS')}>
+            {/* <Pressable py={2} onPress={() => openSheet('addressSheetNewIOS')}>
               <HStack alignItems="center" space={2} justifyContent="flex-start">
                 <LocationPin />
                 <VStack flex={1}>
@@ -146,7 +146,7 @@ const DrawerContent = observer(({navigation, state}: any) => {
                   </Text>
                 </VStack>
               </HStack>
-            </Pressable>
+            </Pressable> */}
             <Pressable py={2} onPress={() => openSheet('EarningsSheet')}>
               <HStack alignItems="center" space={2}>
                 <Dollar />
