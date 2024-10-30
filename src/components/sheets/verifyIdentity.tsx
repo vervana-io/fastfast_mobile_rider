@@ -30,7 +30,7 @@ import {StyleSheet} from 'react-native';
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT} from '../../config';
 import {apiType} from '@types/index';
-import { checklist } from '@store/checklist';
+import {checklist} from '@store/checklist';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {uploadedOrderType} from '@types/generalType';
 import {useCameraPermission} from 'react-native-vision-camera';
@@ -68,6 +68,7 @@ export const VerifyIdentitySheet = (props: SheetProps) => {
             });
             userDetails.refetch();
             setVerified(true);
+            SheetManager.hide('verifyIdentitySheet');
           } else {
             Toast.show({
               text1: 'Profile update',
@@ -130,7 +131,10 @@ export const VerifyIdentitySheet = (props: SheetProps) => {
   const VerifyDone = useCallback(
     () => (
       <Box w="full" h="full" py={6} px={4} bg="#ffffff">
-        <SheetHeader sheetToClose="profileSheet" title="Verify your identity" />
+        <SheetHeader
+          sheetToClose="verifyIdentitySheet"
+          title="Verify your identity"
+        />
         <Center px={5}>
           <Center
             w="104px"

@@ -76,9 +76,6 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
 
   const openOrder = useCallback(
     (order_id: number, item: orderType) => {
-      console.log('===============online status=====================');
-      console.log(userIsOnline);
-      console.log('====================================');
       navigation.navigate('Home');
       if (userIsOnline) {
         ordersStore.setSelectedOrderId(order_id);
@@ -360,10 +357,6 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
       });
     }
   };
-
-  useEffect(() => {
-    refreshData();
-  }, [index]);
 
   return (
     <DefaultLayout refreshable={true} shouldRefresh={refreshData}>

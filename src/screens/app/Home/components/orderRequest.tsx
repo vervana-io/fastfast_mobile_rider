@@ -36,18 +36,16 @@ export const OrderRequest = observer(() => {
 
   const allOrders = ordersStore.orders;
 
-  const triggerReassign = () => {
+  const triggerReassign = useCallback(() => {
     setShowReassign(true);
     setShowOrder(false);
-    console.log('================trigger order id====================');
-    console.log(mainNotificationOrder);
-    console.log('====================================');
-  };
+    setMainNotificationOrder(mainNotificationOrder);
+  }, [mainNotificationOrder]);
 
-  const doReassign = () => {
-    if (NotificationOrder.order_id) {
-      const order_id = NotificationOrder.order_id;
-      const request_id = NotificationOrder.request_id;
+  const doReassign = useCallback(() => {
+    if (mainNotificationOrder?.order_id && mainNotificationOrder?.request_id) {
+      const order_id = mainNotificationOrder.order_id;
+      const request_id = mainNotificationOrder.request_id;
       if (order_id) {
         reassignOrder.mutate(
           {
@@ -63,20 +61,23 @@ export const OrderRequest = observer(() => {
                 ordersStore.clearNotifiedOrder();
                 setMainNotificationOrder({});
               } else {
+                console.log('====================================');
+                console.log(val);
+                console.log('====================================');
                 Toast.show({
                   type: 'warning',
                   text1: 'Order Request',
                   text2: val.message,
                 });
                 setShowOrder(false);
-                ordersStore.clearNotifiedOrder();
+                // ordersStore.clearNotifiedOrder();
               }
             },
           },
         );
       }
     }
-  };
+  }, [mainNotificationOrder]);
 
   const triggerAccept = useCallback(() => {
     if (mainNotificationOrder?.order_id) {
@@ -200,6 +201,7 @@ export const OrderRequest = observer(() => {
       mainNotificationOrder?.data?.delivery_fee,
       mainNotificationOrder?.title,
       triggerAccept,
+      triggerReassign,
     ],
   );
 
@@ -226,7 +228,7 @@ export const OrderRequest = observer(() => {
         </Center>
       </Box>
     ),
-    [reassignOrder.isLoading],
+    [doReassign, reassignOrder.isLoading],
   );
 
   const toggleBoxHeight = useCallback(() => {
@@ -249,9 +251,6 @@ export const OrderRequest = observer(() => {
       console.log('checking order', order_id);
       const order = allOrders.find(o => o.id === order_id);
       console.log('order', order);
-      console.log('===============All orders=====================');
-      console.log(allOrders);
-      console.log('====================================');
       return order;
     },
     [allOrders],
@@ -263,8 +262,12 @@ export const OrderRequest = observer(() => {
       const notification_name = JSON.parse(data.data)?.notification_name;
       // here we check if the notification is for an order request
       // after which we then check if we already have the order accepted
+      console.log('====================================');
+      console.log(data);
+      console.log(notification_name);
+      console.log('====================================');
       if (notification_name === 'order_request') {
-        if (!checkForOrderById(data.order_id)?.id) {
+        if (!checkForOrderById(data.order_id)) {
           const payload: notificationsType = {
             data: JSON.parse(data.data),
             order_id: data.order_id ?? '',

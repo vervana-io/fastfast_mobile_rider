@@ -26,6 +26,7 @@
 		B3617B67800DBE33D6872E3C /* Pods_FastFastRider_FastFastRiderTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B22F20B381EBA9FCB9FA8D /* Pods_FastFastRider_FastFastRiderTests.framework */; };
 		E4EE0B93A1B14DB58C649977 /* RanyBold Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 5A8D9E78B1AB469AB19C2CD1 /* RanyBold Italic.otf */; };
 		E7D05EFF523B4C7D94DF83FE /* RanyMedium Italic.otf in Resources */ = {isa = PBXBuildFile; fileRef = 523E824FA7AA4E23B81C3BCC /* RanyMedium Italic.otf */; };
+		F0B39AB211D16F595EC1B6B9 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = ABB6A38AFDF3837109C23D85 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,7 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = FastFastRider/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-FastFastRider-FastFastRiderTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FastFastRider-FastFastRiderTests.release.xcconfig"; path = "Target Support Files/Pods-FastFastRider-FastFastRiderTests/Pods-FastFastRider-FastFastRiderTests.release.xcconfig"; sourceTree = "<group>"; };
 		9B6974CD64434AB69EFFC079 /* RanyBold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = RanyBold.otf; path = ../src/assets/fonts/rany/RanyBold.otf; sourceTree = "<group>"; };
+		ABB6A38AFDF3837109C23D85 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = FastFastRider/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B882E4E09ED1471A8B85CE4F /* RanyItalic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = RanyItalic.otf; path = ../src/assets/fonts/rany/RanyItalic.otf; sourceTree = "<group>"; };
 		C65EABD6D1784C598320DB6D /* Rany.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Rany.otf; path = ../src/assets/fonts/rany/Rany.otf; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -122,6 +124,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				ABB6A38AFDF3837109C23D85 /* PrivacyInfo.xcprivacy */,
 			);
 			name = FastFastRider;
 			sourceTree = "<group>";
@@ -303,6 +306,7 @@
 				0FA10DDB2BF4033C00485EBA /* FAST FAST PATTERN.png in Resources */,
 				4BF2C485FE934542B08F9BA5 /* RanyMedium.otf in Resources */,
 				0FA10DDF2BF4126100485EBA /* GoogleService-Info.plist in Resources */,
+				F0B39AB211D16F595EC1B6B9 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -553,7 +557,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = FastFastRider/FastFastRider.entitlements;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 9LPH58WY5R;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = FastFastRider/Info.plist;
@@ -584,7 +588,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = FastFastRider/FastFastRider.entitlements;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = 9LPH58WY5R;
 				INFOPLIST_FILE = FastFastRider/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "FastFast Rider";

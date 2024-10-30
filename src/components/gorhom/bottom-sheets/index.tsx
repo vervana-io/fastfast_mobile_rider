@@ -1,4 +1,4 @@
-import BottomSheet from '@gorhom/bottom-sheet';
+import {GuarantorFormSheet} from './guarantorFormViewSheet';
 import {OrderDetailsViewSheet} from './orderDetailsViewSheet';
 import {ProfileViewSheet} from './profileViewSheet';
 import React from 'react';
@@ -8,6 +8,7 @@ export const AllBottomSheets = () => {
     <>
       <ProfileViewSheet />
       <OrderDetailsViewSheet />
+      <GuarantorFormSheet />
     </>
   );
 };

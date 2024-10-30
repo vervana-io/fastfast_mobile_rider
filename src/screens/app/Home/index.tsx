@@ -22,6 +22,8 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import BackgroundJob from 'react-native-background-actions';
 import {BicycleIcon} from '@assets/svg/BicycleIcon';
+import {BottomActions} from '@components/utils';
+import {CancelOrderModal} from '@components/ui';
 import {DefaultLayout} from '@layouts/default';
 import {GeoPosition} from 'react-native-geolocation-service';
 // import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
@@ -46,6 +48,7 @@ import {myLocationNotification} from '@handlers/localNotifications';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
 import {rootConfig} from '@store/root';
+import {useDrawerStatus} from '@react-navigation/drawer';
 import {useOrders} from '@hooks/useOrders';
 import useSocket from '@hooks/useSocket';
 import {useUser} from '@hooks/useUser';
@@ -86,9 +89,10 @@ export const Home = observer((props: HomeProps) => {
     disconnectSocket,
     reconnectSocket,
   } = useSocket({
-    url: __DEV__
-      ? 'https://6f6a-105-113-68-192.ngrok-free.app'
-      : process.env.SERVICE_URL ?? '',
+    // url: __DEV__
+    //   ? 'https://6f6a-105-113-68-192.ngrok-free.app'
+    //   : process.env.SERVICE_URL ?? '',
+    url: process.env.SERVICE_URL ?? '',
     isOnline: onlineStatus,
   });
 
@@ -100,11 +104,15 @@ export const Home = observer((props: HomeProps) => {
   const {fetchOngoingOrders} = useOrders();
   const ordersOngoingCount = ordersStore.ongoingOrderCount;
   const [subscriptionId, setSubscriptionId] = useState<number | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [showRerender, setShowRerender] = useState(false);
+  const drawerStatus = useDrawerStatus();
+
+  const NotificationOrder: any = ordersStore.notifiedOrder;
 
   // emit rider information to customer service
   const SendToSocket = useCallback(
     (position: GeoPosition['coords']) => {
-      console.log(position.latitude, position.longitude);
       if (selectedOrder.id) {
         if (selectedOrder.picked_up_at !== null && selectedOrder.status !== 4) {
           emitMessage('message', {
@@ -135,16 +143,55 @@ export const Home = observer((props: HomeProps) => {
           longitude: position?.coords?.longitude,
         });
       },
-      error => Alert.alert('GetCurrentPosition Error', JSON.stringify(error)),
+      error => {
+        console.log('====================================');
+        console.log(error.code);
+        console.log('====================================');
+        if (error.code === 3) {
+          // GeoLocate();
+          console.log('====================================');
+          console.log('Retry: ' + retryCount);
+          console.log('====================================');
+          if (retryCount < 2) {
+            setRetryCount(retryCount + 1);
+          } else if (retryCount >= 3) {
+            console.log('====================================');
+            console.log('Got here: ' + retryCount);
+            console.log('====================================');
+            setShowRerender(true);
+          }
+          Toast.show({
+            type: 'error',
+            text1: 'Location',
+            text2: 'Location services timeout, retrying...',
+          });
+        } else if (error.code === 1) {
+          Toast.show({
+            type: 'error',
+            text1: 'Location',
+            text2:
+              'Location services are disabled, you need to permit this app to use location services',
+            autoHide: false,
+          });
+        } else if (error.code === 2) {
+          Toast.show({
+            type: 'error',
+            text1: 'Location',
+            text2:
+              'We are unable to get your current location, please close app and reopen again.',
+            visibilityTime: 6000,
+          });
+        }
+      },
       {
         enableHighAccuracy: true,
-        timeout: 25000,
+        timeout: 10000,
         maximumAge: 10000,
         distanceFilter: 0,
         useSignificantChanges: true,
       },
     );
-  }, []);
+  }, [retryCount]);
 
   const updateOnlineStatus = useCallback(
     (status: number) => {
@@ -332,14 +379,14 @@ export const Home = observer((props: HomeProps) => {
   useEffect(() => {
     if (ordersOngoingCount && !selectedOrder.id) {
       // throw notification of order ongoing
-      myLocationNotification(
-        `You have ${ordersOngoingCount} orders ongoing, navigate to orders to view them`,
-      );
+      // myLocationNotification(
+      //   `You have ${ordersOngoingCount} orders ongoing, navigate to orders to view them`,
+      // );
       Toast.show({
         type: 'info',
         text1: 'Order Ongoing',
         text2: `You have ${ordersOngoingCount} orders ongoing, navigate to orders to view them`,
-        autoHide: false,
+        visibilityTime: 6000,
       });
     }
   }, [navigation, ordersOngoingCount, selectedOrder.id]);
@@ -434,6 +481,17 @@ export const Home = observer((props: HomeProps) => {
     });
   }, [subscribe, userDetails]);
 
+  // open the order details sheet if we have a selected order
+  useEffect(() => {
+    if (drawerStatus === 'closed') {
+      const isOrderDetailsOpen =
+        bottomSheetStore.checkIfSheetIsOpen('orderDetailsView');
+      if (!isOrderDetailsOpen && selectedOrder.id) {
+        bottomSheetStore.SetSheet('orderDetailsView', true);
+      }
+    }
+  }, [selectedOrder.id]);
+
   /**
    * Here we are going to handle background location updates
    */
@@ -457,7 +515,51 @@ export const Home = observer((props: HomeProps) => {
             }
           }
         },
-        error => Alert.alert('WatchPosition Error', JSON.stringify(error)),
+        error => {
+          console.log('====================================');
+          console.log(error.code);
+          console.log('====================================');
+          if (error.code === 3) {
+            // GeoLocate();
+            console.log('====================================');
+            console.log('Retry: ' + retryCount);
+            console.log('====================================');
+            if (retryCount < 2) {
+              setRetryCount(retryCount + 1);
+            } else if (retryCount >= 3) {
+              console.log('====================================');
+              console.log('Got here: ' + retryCount);
+              console.log('====================================');
+              setShowRerender(true);
+            }
+            Toast.show({
+              type: 'error',
+              text1: 'Location',
+              text2: 'Location services timeout, retrying...',
+            });
+          } else if (error.code === 1) {
+            Toast.show({
+              type: 'error',
+              text1: 'Location',
+              text2:
+                'Location services are disabled, you need to permit this app to use location services',
+              autoHide: false,
+            });
+          } else if (error.code === 2) {
+            Toast.show({
+              type: 'error',
+              text1: 'Location',
+              text2:
+                'We are unable to get your current location, please close app and reopen again.',
+              visibilityTime: 6000,
+            });
+          }
+        },
+        // {
+        //   enableHighAccuracy: true,
+        //   distanceFilter: 1,
+        //   useSignificantChanges: true,
+        // },
       );
       setSubscriptionId(watchID);
     } catch (error) {
@@ -465,6 +567,7 @@ export const Home = observer((props: HomeProps) => {
     }
   }, [
     SendToSocket,
+    retryCount,
     selectedOrder?.id,
     selectedOrder.picked_up_at,
     selectedOrder.status,
@@ -491,6 +594,7 @@ export const Home = observer((props: HomeProps) => {
         'This task will not keep your app alive in the background by itself, use other library like react-native-track-player that use audio,',
         'geolocalization, etc. to keep your app alive in the background while you excute the JS from this library.',
       );
+      watchBackgroundUpdates();
     }
     await new Promise(async resolve => {
       // For loop with a delay
@@ -498,7 +602,7 @@ export const Home = observer((props: HomeProps) => {
       console.log(BackgroundJob.isRunning(), delay);
       watchBackgroundUpdates();
       for (let i = 0; BackgroundJob.isRunning(); i++) {
-        console.log('Runned -> ', i);
+        // console.log('Runned -> ', i);
         // watchBackgroundUpdates();
         await BackgroundJob.updateNotification({taskDesc: 'Runned -> ' + i});
         await sleep(delay);
@@ -541,6 +645,27 @@ export const Home = observer((props: HomeProps) => {
     bgUpdates();
   }, [onlineStatus]);
 
+  const cleanUp = useCallback(async () => {
+    if (!rootConfig.isOnline) {
+      setOnlineStatus(false);
+      disconnectSocket();
+      await BackgroundJob.stop();
+      clearWatch();
+    }
+  }, [disconnectSocket]);
+
+  // clean-up
+  useEffect(() => {
+    cleanUp();
+  }, [cleanUp]);
+
+  // useEffect(() => {
+  //   return Geolocation.setRNConfiguration({
+  //     enableBackgroundLocationUpdates: true,
+  //     skipPermissionRequests: false,
+  //   });
+  // }, []);
+
   return (
     <DefaultLayout
       refreshable={false}
@@ -580,7 +705,7 @@ export const Home = observer((props: HomeProps) => {
               <HamburgerIcon color="themeLight.primary.base" size={6} />
             </Center>
           </Pressable>
-          {ordersStore.selectedOrderId ? (
+          {/* {ordersStore.selectedOrderId ? (
             <Box safeArea>
               <Pressable
                 bg="white"
@@ -620,7 +745,7 @@ export const Home = observer((props: HomeProps) => {
                 </HStack>
               </Pressable>
             </Box>
-          ) : null}
+          ) : null} */}
         </HStack>
         {userD.user?.complaince_status !== 1 ? <Todos /> : null}
         <OrderRequest />
@@ -630,9 +755,11 @@ export const Home = observer((props: HomeProps) => {
             riderImage={require('@assets/img/marker.png')}
             destinationCoords={markers[1]}
             location={ridersPosition}
+            onLocationUpdate={loc => console.log(loc)}
           />
         </Box>
         <OnlineSection />
+        <BottomActions show={showRerender} navigation={navigation} />
       </Box>
     </DefaultLayout>
   );

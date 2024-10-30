@@ -13,20 +13,24 @@ import {
   Text,
   VStack,
 } from 'native-base';
+import {Alert, Linking, StyleSheet} from 'react-native';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
   BottomSheetView,
   useBottomSheet,
 } from '@gorhom/bottom-sheet';
-import {Linking, StyleSheet} from 'react-native';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
 
 import {ExpandIcon} from '@assets/svg/Expand';
+import {LocationPin} from '@assets/svg/LocationPin';
+import {LocationPin2} from '@assets/svg/LocationPin2';
+import {NavigationPin} from '@assets/svg/NavigationPin';
 import {PhoneIcon} from '@assets/svg/PhoneIcon';
-import { QuestionIcon } from '@assets/svg/QuestionIcon';
+import {QuestionIcon} from '@assets/svg/QuestionIcon';
 import {SheetManager} from 'react-native-actions-sheet';
+import Toast from 'react-native-toast-message';
 import {apiType} from '@types/apiTypes';
 import {bottomSheetStore} from '@store/bottom-sheet';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -59,7 +63,9 @@ export const OrderDetailsViewSheet = observer(() => {
     payload?.request_id ?? ordersData?.misc_rider_info?.user_id;
 
   // variables
-  const snapPoints = useMemo(() => ['25%', '60%', '85%'], []);
+  const snapPoints = useMemo(() => ['30%', '60%', '85%'], []);
+
+  const NotificationOrder: any = ordersStore.notifiedOrder;
 
   const _snapPhotoPic = useCallback(async () => {
     if (uploadedOrder.length < allowedUpload) {
@@ -73,11 +79,13 @@ export const OrderDetailsViewSheet = observer(() => {
         },
         (response: any) => {
           if (response) {
-            const pay: uploadedOrderType = {
-              uri: response?.assets[0].uri ?? '',
-              base64: `data:image/jpeg;base64,${response?.assets[0].base64}`,
-            };
-            setUploadedOrder(prev => [...prev, pay]);
+            if (response.assets && response.assets.length > 0) {
+              const pay: uploadedOrderType = {
+                uri: response?.assets[0]?.uri ?? '',
+                base64: `data:image/jpeg;base64,${response?.assets[0]?.base64}`,
+              };
+              setUploadedOrder(prev => [...prev, pay]);
+            }
           }
         },
       );
@@ -127,7 +135,7 @@ export const OrderDetailsViewSheet = observer(() => {
               delivery_fee: ordersData.delivery_fee,
             };
             SheetManager.show('rateCustomerSheet', {payload: pay});
-            // SheetManager.hide('orderDetailsSheet');
+            bottomSheetStore.SetSheet('orderDetailsView', false);
           } else {
             setErrorMessage(val.message);
           }
@@ -164,6 +172,21 @@ export const OrderDetailsViewSheet = observer(() => {
     fetchSingleOrder.mutate({id: order_id});
   };
 
+  // firebase push notification
+  useEffect(() => {
+    if (NotificationOrder.data) {
+      const data = NotificationOrder;
+      const notification_name = JSON.parse(data.data)?.notification_name;
+      // here we check if the notification is for an order request
+      // after which we then check if we already have the order accepted
+      if (notification_name === 'order_pickup') {
+        if (order_id === data.order_id) {
+          getOrderInfo();
+        }
+      }
+    }
+  }, [NotificationOrder, order_id]);
+
   const callCustomer = useCallback(() => {
     if (ordersData.customer?.phone_number_one) {
       Linking.openURL(`tel:${ordersData.customer?.phone_number_one}`);
@@ -198,104 +221,152 @@ export const OrderDetailsViewSheet = observer(() => {
     [],
   );
 
+  const openGoogleMaps = useCallback(() => {
+    let url = null;
+    if (ordersData.picked_up_at) {
+      const latitude = ordersData.address?.latitude;
+      const longitude = ordersData.address?.longitude;
+      url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    } else {
+      const latitude = ordersData.seller?.latitude;
+      const longitude = ordersData.seller?.longitude;
+      url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    }
+
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Error', 'Unable to open Google Maps');
+    });
+  }, [
+    ordersData.address?.latitude,
+    ordersData.address?.longitude,
+    ordersData.picked_up_at,
+    ordersData.seller?.latitude,
+    ordersData.seller?.longitude,
+  ]);
+
   const Content = useCallback(() => {
     return (
-      <Box bg="themeLight.primary.base" roundedTop="2xl">
-        <Pressable
-          onPress={() =>
-            hasViewDetails === 'mid'
-              ? handleSnapPress(2)
-              : hasViewDetails === 'small'
-              ? handleSnapPress(1)
-              : handleSnapPress(0)
-          }>
-          <Center py={1}>
-            <Text color="white" fontWeight="bold">
-              Swipe up to see more
-            </Text>
-          </Center>
-        </Pressable>
-        <Box bg="#1B1B1B" h="full" roundedTop="2xl">
-          <Center p={4}>
-            <Box bg="trueGray.400" w="12" h="1" rounded="full" />
-          </Center>
-          <Box py={6} px={4}>
-            <HStack justifyContent="space-between" space={2}>
-              <VStack flex={1} space={2}>
-                <Text fontWeight="bold" color="white" fontSize="lg">
-                  {ordersData?.seller?.trading_name}
-                </Text>
-                <Text color="themeLight.gray.2" fontSize="xs">
-                  {ordersData?.seller?.address}
-                </Text>
-              </VStack>
-              <HStack space={2}>
-                <Button
-                  leftIcon={<QuestionIcon />}
-                  w="44px"
-                  h="44px"
-                  rounded="2xl"
-                  onPress={() => SheetManager.show('orderHelpSheet')}
-                  bg="white"
-                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
-                />
-                <Button
-                  leftIcon={<PhoneIcon />}
-                  w="44px"
-                  h="44px"
-                  rounded="2xl"
-                  onPress={callCustomer}
-                  bg="white"
-                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
-                />
+      <Box>
+        <HStack
+          justifyContent="space-between"
+          alignItems="flex-end"
+          px={4}
+          py={1}>
+          <Box w="60px" h="23px">
+            <Image
+              alt="Google Logo"
+              source={require('@assets/img/google_text_logo.png')}
+              w="full"
+              h="full"
+            />
+          </Box>
+          <Pressable onPress={() => openGoogleMaps()}>
+            <Center
+              bg="themeLight.primary.light2"
+              rounded="full"
+              w="36px"
+              h="36px">
+              <LocationPin2 />
+            </Center>
+          </Pressable>
+        </HStack>
+        <Box bg="themeLight.primary.base" roundedTop="2xl">
+          <Pressable
+            onPress={() =>
+              hasViewDetails === 'mid'
+                ? handleSnapPress(2)
+                : hasViewDetails === 'small'
+                ? handleSnapPress(1)
+                : handleSnapPress(0)
+            }>
+            <Center py={1}>
+              <Text color="white" fontWeight="bold">
+                Swipe up to see more
+              </Text>
+            </Center>
+          </Pressable>
+          <Box bg="#1B1B1B" h="full" roundedTop="2xl">
+            <Center p={4}>
+              <Box bg="trueGray.400" w="12" h="1" rounded="full" />
+            </Center>
+            <Box py={6} px={4}>
+              <HStack justifyContent="space-between" space={2}>
+                <VStack flex={1} space={2}>
+                  <Text fontWeight="bold" color="white" fontSize="lg">
+                    {ordersData?.seller?.trading_name}
+                  </Text>
+                  <Text color="themeLight.gray.2" fontSize="xs">
+                    {ordersData?.seller?.address}
+                  </Text>
+                </VStack>
+                <HStack space={2}>
+                  <Button
+                    leftIcon={<QuestionIcon />}
+                    w="44px"
+                    h="44px"
+                    rounded="2xl"
+                    onPress={() => SheetManager.show('orderHelpSheet')}
+                    bg="white"
+                    _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                  />
+                  <Button
+                    leftIcon={<PhoneIcon />}
+                    w="44px"
+                    h="44px"
+                    rounded="2xl"
+                    onPress={callCustomer}
+                    bg="white"
+                    _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                  />
+                </HStack>
               </HStack>
-            </HStack>
-            <Box mt={2}>
-              <Text color="white" fontWeight="bold">
-                Fee: ₦{ordersData?.sub_total}
-              </Text>
-              <Text color="white" fontWeight="bold">
-                Delivery Fee: ₦{ordersData?.delivery_fee}
-              </Text>
-              <VStack bg="white" rounded="lg" my={4} p={4} space={2}>
-                {ordersData.order_products &&
-                  ordersData.order_products?.map((el, i) => (
-                    <Text key={i} color="black">
-                      {el.quantity}x {el.product?.title}
-                    </Text>
-                  ))}
-              </VStack>
-              {ordersData.status === 3 &&
-              ordersData.is_rider_customer_arrived === 1 ? (
-                <Button
-                  _text={{fontWeight: 'bold'}}
-                  rounded="full"
-                  py={4}
-                  isLoading={deliveredOrder.isLoading}
-                  onPress={doDelivered}>
-                  I have delivered
-                </Button>
-              ) : ordersData.status === 3 &&
-                ordersData.is_rider_customer_arrived === 0 ? (
-                <Button
-                  _text={{fontWeight: 'bold'}}
-                  rounded="full"
-                  py={4}
-                  isLoading={arrivalOrder.isLoading}
-                  isLoadingText="Setting arrival"
-                  isDisabled={arrivalOrder.isLoading}
-                  onPress={doArrival}>
-                  I have arrived
-                </Button>
-              ) : (
-                <Button
-                  _text={{fontWeight: 'bold'}}
-                  rounded="full"
-                  py={4}
-                  onPress={() => handleSnapPress(2)}>
-                  Proceed to pickup
-                </Button>
-              )}
+              <Box mt={2}>
+                <Text color="white" fontWeight="bold">
+                  Fee: ₦{ordersData?.sub_total}
+                </Text>
+                <Text color="white" fontWeight="bold">
+                  Delivery Fee: ₦{ordersData?.delivery_fee}
+                </Text>
+                <VStack bg="white" rounded="lg" my={4} p={4} space={2}>
+                  {ordersData.order_products &&
+                    ordersData.order_products?.map((el, i) => (
+                      <Text key={i} color="black">
+                        {el.quantity}x {el.product?.title}
+                      </Text>
+                    ))}
+                </VStack>
+                {ordersData.status === 3 &&
+                ordersData.is_rider_customer_arrived === 1 ? (
+                  <Button
+                    _text={{fontWeight: 'bold'}}
+                    rounded="full"
+                    py={4}
+                    isLoading={deliveredOrder.isLoading}
+                    onPress={doDelivered}>
+                    I have delivered
+                  </Button>
+                ) : ordersData.status === 3 &&
+                  ordersData.is_rider_customer_arrived === 0 ? (
+                  <Button
+                    _text={{fontWeight: 'bold'}}
+                    rounded="full"
+                    py={4}
+                    isLoading={arrivalOrder.isLoading}
+                    isLoadingText="Setting arrival"
+                    isDisabled={arrivalOrder.isLoading}
+                    onPress={doArrival}>
+                    I have arrived
+                  </Button>
+                ) : (
+                  <Button
+                    _text={{fontWeight: 'bold'}}
+                    rounded="full"
+                    py={4}
+                    onPress={() => handleSnapPress(2)}>
+                    Proceed to pickup
+                  </Button>
+                )}
+              </Box>
             </Box>
           </Box>
         </Box>
@@ -309,6 +380,7 @@ export const OrderDetailsViewSheet = observer(() => {
     doDelivered,
     handleSnapPress,
     hasViewDetails,
+    openGoogleMaps,
     ordersData?.delivery_fee,
     ordersData.is_rider_customer_arrived,
     ordersData.order_products,
@@ -467,6 +539,7 @@ export const OrderDetailsViewSheet = observer(() => {
                   isLoadingText={
                     fetchSingleOrder.isLoading ? 'Updating records' : ''
                   }
+                  isDisabled={ordersData.ready_at === null}
                   onPress={doPickUp}>
                   Pick up order
                 </Button>
@@ -516,6 +589,7 @@ export const OrderDetailsViewSheet = observer(() => {
       ordersData.order_detail,
       ordersData.order_products,
       ordersData?.pick_up_pin,
+      ordersData.ready_at,
       ordersData?.seller?.address,
       ordersData?.seller?.trading_name,
       ordersData.status,
@@ -622,8 +696,10 @@ export const OrderDetailsViewSheet = observer(() => {
         index={1}
         snapPoints={snapPoints}
         backdropComponent={renderBackdrop}
+        backgroundStyle={{backgroundColor: 'transparent'}}
         enableDynamicSizing={false}
         handleComponent={null}
+        // enablePanDownToClose
         onChange={handleSheetChanges}>
         <BottomSheetView>
           {showFullPin ? (

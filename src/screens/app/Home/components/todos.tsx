@@ -16,6 +16,7 @@ import {UsePusher} from '@hooks/usePusher';
 import {WIN_WIDTH} from '../../../../config';
 import {addressesStore} from '@store/addresses';
 import {authStore} from '@store/auth';
+import { bottomSheetStore } from '@store/bottom-sheet';
 import {checklist} from '@store/checklist';
 import {observer} from 'mobx-react-lite';
 
@@ -24,8 +25,6 @@ export const Todos = observer(() => {
   const addressStore = addressesStore.selectedAddress;
 
   const userD = authStore.auth;
-
-  const {subscribe, pusherEvent} = UsePusher();
 
   const [showProgress, setShowProgress] = useState(false);
 
@@ -67,8 +66,12 @@ export const Todos = observer(() => {
     }, 500);
   }, [updateChecklist]);
 
-  const openSheet = (sheetName: string) => {
-    SheetManager.show(sheetName);
+  const openSheet = (sheetName: any, sheetType: '1' | '2') => {
+    if (sheetType === '1') {
+      SheetManager.show(sheetName);
+    } else {
+      bottomSheetStore.SetSheet('guarantorView', true);
+    }
   };
 
   const Incomplete = useCallback(
@@ -132,7 +135,7 @@ export const Todos = observer(() => {
                 <Button
                   size="xs"
                   _text={{fontWeight: 'bold'}}
-                  onPress={() => openSheet(el.sheetName)}
+                  onPress={() => openSheet(el.sheetName, el.sheetType)}
                   colorScheme="primary">
                   Verify
                 </Button>

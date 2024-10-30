@@ -1,10 +1,10 @@
 import {Box, ChevronRightIcon, HStack, Text, VStack} from 'native-base';
+import React, { useEffect } from 'react';
 
 import {BackButton} from '@components/ui';
 import {Calendar} from '@assets/svg/Calendar';
 import {DefaultLayout} from '@layouts/default';
 import {PackageIcon} from '@assets/svg/PackageIcon';
-import React from 'react';
 import {SignupTop} from './components/signupTop';
 import {TimeIcon} from '@assets/svg/TimeIcon';
 import {TouchableOpacity} from 'react-native-gesture-handler';

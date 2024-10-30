@@ -102,6 +102,7 @@ export interface registerFieldType {
   avatar?: File;
   avatar_base64?: string;
   device_token: string;
+  device_version: string;
 }
 
 export interface bioLoginFieldType {

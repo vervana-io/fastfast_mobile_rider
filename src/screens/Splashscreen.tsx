@@ -47,12 +47,12 @@ export const Splashscreen = (props: SplashscreenProps) => {
         } else {
           // add toast here for not connected to internet
           setShowConnectivity(true);
-          showMessage({
-            type: 'danger',
-            message: 'You are not connected to the internet',
-            position: 'top',
-            autoHide: false,
-          });
+          // showMessage({
+          //   type: 'danger',
+          //   message: 'You are not connected to the internet',
+          //   position: 'top',
+          //   autoHide: false,
+          // });
         }
       });
       console.log('user is logged in');

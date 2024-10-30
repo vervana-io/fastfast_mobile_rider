@@ -83,6 +83,7 @@ const RiderMap: React.FC<RiderMapProps> = ({
             uri: selectedOrder.customer?.avatar,
           }}
           alt="image"
+          rounded="full"
           style={{width: 30, height: 30}}
         />
       );
@@ -143,6 +144,7 @@ const RiderMap: React.FC<RiderMapProps> = ({
         <Image
           alt="rider logo"
           source={riderImage}
+          rounded="full"
           style={{width: 40, height: 40}}
         />
       </Marker>
@@ -165,6 +167,7 @@ const RiderMap: React.FC<RiderMapProps> = ({
                   uri: selectedOrder.seller?.business_logo,
                 }}
                 alt="image"
+                rounded="full"
                 style={{width: 30, height: 30}}
               />
             ) : (

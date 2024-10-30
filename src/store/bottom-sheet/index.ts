@@ -12,6 +12,7 @@ import {makeAutoObservable} from 'mobx';
 export type AppSheets = {
   profileViewSheet?: boolean;
   orderDetailsView?: boolean;
+  guarantorView?: boolean;
 };
 
 interface sheetContentDataType {
@@ -56,6 +57,14 @@ class BottomSheetStore {
 
   async getStoredData() {
     return await getPersistedStore(this);
+  }
+
+  checkIfSheetIsOpen(tab: keyof AppSheets) {
+    const tabSheet = this.sheets[tab];
+    if (tabSheet) {
+      return true;
+    }
+    return false;
   }
 
   async clearPersisting() {

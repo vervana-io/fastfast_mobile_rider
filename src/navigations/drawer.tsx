@@ -24,10 +24,12 @@ import {SheetManager} from 'react-native-actions-sheet';
 import {WIN_WIDTH} from '../config';
 import {addressesStore} from '@store/addresses';
 import {authStore} from '@store/auth';
+import { bottomSheetStore } from '@store/bottom-sheet';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {createStackNavigator} from '@react-navigation/stack';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
+import { rootConfig } from '@store/root';
 import {useAuth} from '@hooks/useAuth';
 
 const navOptions = {
@@ -73,6 +75,8 @@ const DrawerContent = observer(({navigation, state}: any) => {
       {
         onSuccess: () => {
           navigation.closeDrawer();
+          rootConfig.setIsOnline(false);
+          bottomSheetStore.SetSheet('orderDetailsView', false);
           authStore.logout();
         },
       },
@@ -86,6 +90,7 @@ const DrawerContent = observer(({navigation, state}: any) => {
 
   const navigateToScreen = (screen: string) => {
     navigation.navigate(screen);
+    bottomSheetStore.SetSheet('orderDetailsView', false);
   };
 
   const openExtLink = (link: string) => {

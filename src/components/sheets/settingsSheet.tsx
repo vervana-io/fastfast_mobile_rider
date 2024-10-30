@@ -24,7 +24,9 @@ import {SheetHeader} from '@components/ui';
 import {TrashIcon} from '@assets/svg/TrashIcon';
 import {WIN_HEIGHT} from '../../config';
 import {authStore} from '@store/auth';
+import { bottomSheetStore } from '@store/bottom-sheet';
 import {observer} from 'mobx-react-lite';
+import { rootConfig } from '@store/root';
 import {useAuth} from '@hooks/useAuth';
 
 interface settingsListType {
@@ -126,6 +128,8 @@ export const SettingsSheet = observer((props: SheetProps) => {
       {
         onSuccess: () => {
           SheetManager.hide('settingsSheet');
+          rootConfig.setIsOnline(false);
+          bottomSheetStore.SetSheet('orderDetailsView', false);
           authStore.logout();
         },
       },
@@ -135,7 +139,11 @@ export const SettingsSheet = observer((props: SheetProps) => {
   const Content = useCallback(() => {
     return (
       <Box py={6} px={4} bg="#ffffff" h="full" roundedTop="2xl">
-        <SheetHeader sheetToClose="settingsSheet" title="Settings" />
+        <SheetHeader
+          sheetToClose="settingsSheet"
+          title="Settings"
+          sheetType="1"
+        />
         <VStack mt={4}>
           {list.map((el, i) => (
             <Pressable
@@ -173,7 +181,6 @@ export const SettingsSheet = observer((props: SheetProps) => {
               Log Out
             </Link>
           </HStack>
-          <Text color="themeLight.gray.2">Version 2.3</Text>
         </VStack>
       </Box>
     );

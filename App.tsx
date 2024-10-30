@@ -10,6 +10,7 @@ import {
   NativeBaseProvider,
   StorageManager,
   Text,
+  VStack,
 } from 'native-base';
 import React, {useEffect} from 'react';
 import {
@@ -31,6 +32,7 @@ import {InfoIconSolid} from '@assets/svg/infoIconSolid';
 import {LogBox} from 'react-native';
 import {QueryClientProvider} from 'react-query';
 import Toast from 'react-native-toast-message';
+import { WifiBallon } from '@assets/svg/WifiBallon';
 import {authStore} from '@store/auth';
 import crashlytics from '@react-native-firebase/crashlytics';
 import messaging from '@react-native-firebase/messaging';
@@ -140,6 +142,61 @@ const toastConfig = {
           </Text>
         </Box>
       </HStack>
+    </Box>
+  ),
+
+  noInternet: ({text1, props, text2}) => (
+    <Box w="full" h="50px" px={4}>
+      <Box bg="themeLight.error" w="full" h="full" rounded="lg" shadow={4}>
+        <HStack
+          flex={1}
+          justifyContent="space-between"
+          alignItems="center"
+          px={4}>
+          <HStack alignItems="center" space={4}>
+            <Box>
+              <WifiBallon width={30} height={30} fill="white" />
+            </Box>
+            <VStack>
+              <Text color="white" fontWeight="bold">
+                No Internet Connectivity
+              </Text>
+              <Text color="white" fontWeight="medium" fontSize="xs">
+                Waiting for connection
+              </Text>
+            </VStack>
+          </HStack>
+          <Box>
+            <Spinner color="white" />
+          </Box>
+        </HStack>
+      </Box>
+    </Box>
+  ),
+
+  hasInternet: ({text1, props, text2}) => (
+    <Box w="full" h="50px" px={4}>
+      <Box bg="themeLight.success" w="full" h="full" rounded="lg" shadow={4}>
+        <HStack
+          flex={1}
+          justifyContent="space-between"
+          alignItems="center"
+          px={4}>
+          <HStack alignItems="center" space={4}>
+            <Box>
+              <WifiBallon width={30} height={30} fill="white" />
+            </Box>
+            <VStack>
+              <Text color="white" fontWeight="bold">
+                Internet Connectivity
+              </Text>
+              <Text color="white" fontWeight="medium" fontSize="xs">
+                Connection Established
+              </Text>
+            </VStack>
+          </HStack>
+        </HStack>
+      </Box>
     </Box>
   ),
 };

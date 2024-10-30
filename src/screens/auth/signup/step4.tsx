@@ -23,6 +23,7 @@ import Toast from 'react-native-toast-message';
 import {apiType} from '@types/apiTypes';
 import {bankTypes} from '@types/bankTypes';
 import {functions} from '@helpers/functions';
+import {getApiLevel} from 'react-native-device-info';
 import {navigate} from '@navigation/NavigationService';
 import {showMessage} from 'react-native-flash-message';
 import {useAuth} from '@hooks/useAuth';
@@ -77,7 +78,8 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
     );
   };
 
-  const proceed = () => {
+  const proceed = async () => {
+    const deviceId = await getApiLevel();
     const payload = {
       latitude: location?.coords.latitude ?? '0',
       longitude: location?.coords.longitude ?? '0',
@@ -85,9 +87,10 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
       bank_code: bankName.code,
       account_number: validatedName.account_number,
       account_name: validatedName.account_name,
+      device_version: deviceId.toString(),
     };
     const upd = {...regData, ...payload};
-    console.log(upd);
+    // console.log(upd);
     register.mutate(upd, {
       onSuccess: (val: apiType) => {
         if (val.status) {

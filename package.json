@@ -19,7 +19,7 @@
     "refreshBuild": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
     "patch": "npx patch-package react-native-inappbrowser-reborn --use-yarn",
     "availableIOSSimulator": "xcrun simctl list devices",
-    "runOnSimulator15": "npx react-native run-ios --simulator='iPhone 15 Plus'"
+    "runOnSimulator15": "npx react-native run-ios --simulator='iPhone 16 Pro'"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5",
@@ -32,7 +32,7 @@
     "@react-native-community/push-notification-ios": "^1.11.0",
     "@react-native-firebase/app": "^19.0.1",
     "@react-native-firebase/crashlytics": "^19.0.1",
-    "@react-native-firebase/firestore": "19.0.1",
+    "@react-native-firebase/firestore": "^21.2.0",
     "@react-native-firebase/messaging": "^19.0.1",
     "@react-native-google-signin/google-signin": "^11.0.0",
     "@react-navigation/drawer": "^6.6.7",

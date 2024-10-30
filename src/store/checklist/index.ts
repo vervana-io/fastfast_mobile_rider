@@ -17,6 +17,7 @@ export interface checklistProps {
   completed: number;
   isActive: boolean;
   sheetName: string;
+  sheetType: '1' | '2'; // type 1 is for normal actions-sheet, 2 is for ghrhon sheet
   status: number;
 }
 
@@ -30,6 +31,7 @@ class Checklist {
       isActive: true,
       sheetName: 'verifyIdentitySheet',
       status: 0,
+      sheetType: '1',
     },
     {
       id: 2,
@@ -37,18 +39,19 @@ class Checklist {
       completionTime: '1m.5s',
       completed: 0,
       isActive: true,
-      sheetName: 'GuarantorFormSheet',
+      sheetName: 'guarantorView',
+      sheetType: '2',
       status: 0,
     },
-    {
-      id: 3,
-      title: 'Set your default address',
-      completionTime: '20s',
-      completed: 0,
-      isActive: true,
-      sheetName: 'addressSheetNewIOS',
-      status: 0,
-    },
+    // {
+    //   id: 3,
+    //   title: 'Set your default address',
+    //   completionTime: '20s',
+    //   completed: 0,
+    //   isActive: true,
+    //   sheetName: 'addressSheetNewIOS',
+    //   status: 0,
+    // },
   ];
 
   constructor() {

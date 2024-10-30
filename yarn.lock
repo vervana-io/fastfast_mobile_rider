@@ -3044,12 +3044,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-firebase/firestore@npm:19.0.1":
-  version: 19.0.1
-  resolution: "@react-native-firebase/firestore@npm:19.0.1"
+"@react-native-firebase/firestore@npm:^21.2.0":
+  version: 21.2.0
+  resolution: "@react-native-firebase/firestore@npm:21.2.0"
   peerDependencies:
-    "@react-native-firebase/app": 19.0.1
-  checksum: a06421dbe923e00e00e4bdeca1ab9a66de95a0ea94323bb46c42b2bcc12090a7c501ec1001cb6d9752595f7619ebfd1fdda69409626ff39dc4ff26d32bb3dde7
+    "@react-native-firebase/app": 21.2.0
+  checksum: 3157279779ab3ca309b7be5e45e101693d8b69942604b0fff4a504f5de0ac82a5588c1e0110fa3474a1332f5e18356546e4044f089445ebca59c032e7ac19f7c
   languageName: node
   linkType: hard
 
@@ -4247,7 +4247,7 @@ __metadata:
     "@react-native-community/push-notification-ios": ^1.11.0
     "@react-native-firebase/app": ^19.0.1
     "@react-native-firebase/crashlytics": ^19.0.1
-    "@react-native-firebase/firestore": 19.0.1
+    "@react-native-firebase/firestore": ^21.2.0
     "@react-native-firebase/messaging": ^19.0.1
     "@react-native-google-signin/google-signin": ^11.0.0
     "@react-native/babel-preset": 0.73.21
