@@ -5,16 +5,16 @@ import Animated, {
 } from 'react-native-reanimated';
 import {Box, Button, Center, HStack, Text, VStack} from 'native-base';
 import React, {useCallback, useEffect, useState} from 'react';
-import {apiType, notificationsType, orderNotifications} from '@types/index';
+import {apiType, notificationsType} from '@types/index';
 
 import {LocationPin} from '@assets/svg/LocationPin';
-import {PusherEvent} from '@pusher/pusher-websocket-react-native';
 import {SheetManager} from 'react-native-actions-sheet';
 import {SmilleyTear} from '@assets/svg/SmilleyTear';
 import {StyleSheet} from 'react-native';
 import Toast from 'react-native-toast-message';
 import {UsePusher} from '@hooks/usePusher';
 import {WIN_HEIGHT} from '../../../../config';
+import { bottomSheetStore } from '@store/bottom-sheet';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
@@ -32,7 +32,6 @@ export const OrderRequest = observer(() => {
   const boxHeight = useSharedValue(WIN_HEIGHT * boxChangeableHeight);
 
   const {acceptOrder, reassignOrder} = useOrders();
-  const {subscribe} = UsePusher();
 
   const allOrders = ordersStore.orders;
 
@@ -98,9 +97,7 @@ export const OrderRequest = observer(() => {
               ordersStore.clearNotifiedOrder();
               setMainNotificationOrder({});
               ordersStore.setSelectedOrderId(order_id);
-              SheetManager.show('orderDetailsSheet', {
-                payload: {order_id, request_id},
-              });
+              bottomSheetStore.SetSheet('orderDetailsView', true);
             } else {
               Toast.show({
                 type: 'warning',

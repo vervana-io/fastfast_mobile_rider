@@ -242,7 +242,8 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
         backgroundColor: 'white',
         // backgroundColor: colorMode === 'dark' ? '#111827' : '#fff',
       }}>
-      {showRating ? Content() : Complete()}
+      {/* {showRating ? Content() : Complete()} */}
+      {Complete()}
     </ActionSheet>
   );
 });

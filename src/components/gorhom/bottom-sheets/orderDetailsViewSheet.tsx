@@ -18,15 +18,12 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
   BottomSheetView,
-  useBottomSheet,
 } from '@gorhom/bottom-sheet';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
 
 import {ExpandIcon} from '@assets/svg/Expand';
-import {LocationPin} from '@assets/svg/LocationPin';
 import {LocationPin2} from '@assets/svg/LocationPin2';
-import {NavigationPin} from '@assets/svg/NavigationPin';
 import {PhoneIcon} from '@assets/svg/PhoneIcon';
 import {QuestionIcon} from '@assets/svg/QuestionIcon';
 import {SheetManager} from 'react-native-actions-sheet';
@@ -36,7 +33,9 @@ import {bottomSheetStore} from '@store/bottom-sheet';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
+import {toastConfig} from '@helpers/toastConfig';
 import {uploadedOrderType} from '@types/generalType';
+import {useAppState} from '@hooks/useAppState';
 import {useOrders} from '@hooks/useOrders';
 
 export const OrderDetailsViewSheet = observer(() => {
@@ -53,14 +52,20 @@ export const OrderDetailsViewSheet = observer(() => {
     'mid',
   );
 
-  const {fetchSingleOrder, pickUpOrder, arrivalOrder, deliveredOrder} =
-    useOrders();
+  const {
+    fetchSingleOrder,
+    fetchOngoingOrders,
+    pickUpOrder,
+    arrivalOrder,
+    deliveredOrder,
+  } = useOrders();
 
   const {payload} = bottomSheetStore.sheetContentData;
   const order_id = payload?.order_id ?? ordersStore.selectedOrderId;
   const ordersData = ordersStore.selectedOrder;
-  const request_id =
-    payload?.request_id ?? ordersData?.misc_rider_info?.user_id;
+  const request_id = payload?.request_id ?? ordersData?.misc_rider_info?.id;
+
+  const {isBackground, isForeground, currentAppState} = useAppState();
 
   // variables
   const snapPoints = useMemo(() => ['30%', '60%', '85%'], []);
@@ -111,8 +116,14 @@ export const OrderDetailsViewSheet = observer(() => {
         onSuccess: (val: apiType) => {
           if (val.status) {
             getOrderInfo();
+            // ordersStore.setArrival({has_arrived: true, order_id: order_id});
           } else {
             setErrorMessage(val.message);
+            Toast.show({
+              type: 'error',
+              text1: 'Order Arrival',
+              text2: val.message,
+            });
           }
         },
       },
@@ -130,14 +141,24 @@ export const OrderDetailsViewSheet = observer(() => {
         onSuccess: (val: apiType) => {
           if (val.status) {
             getOrderInfo();
+            fetchOngoingOrders.mutate({
+              page: 1,
+              per_page: 6,
+              status: '1',
+            });
             const pay: any = {
               customer_id: ordersData.customer_id,
               delivery_fee: ordersData.delivery_fee,
+              skip: true,
             };
             SheetManager.show('rateCustomerSheet', {payload: pay});
             bottomSheetStore.SetSheet('orderDetailsView', false);
           } else {
-            setErrorMessage(val.message);
+            Toast.show({
+              type: 'error',
+              text1: 'Order Delivery',
+              text2: val.message,
+            });
           }
         },
       },
@@ -161,7 +182,11 @@ export const OrderDetailsViewSheet = observer(() => {
           if (val.status) {
             getOrderInfo();
           } else {
-            setErrorMessage(val.message);
+            Toast.show({
+              type: 'error',
+              text1: 'Order Pickup',
+              text2: val.message,
+            });
           }
         },
       },
@@ -321,9 +346,9 @@ export const OrderDetailsViewSheet = observer(() => {
                 </HStack>
               </HStack>
               <Box mt={2}>
-                <Text color="white" fontWeight="bold">
+                {/* <Text color="white" fontWeight="bold">
                   Fee: ₦{ordersData?.sub_total}
-                </Text>
+                </Text> */}
                 <Text color="white" fontWeight="bold">
                   Delivery Fee: ₦{ordersData?.delivery_fee}
                 </Text>
@@ -336,17 +361,19 @@ export const OrderDetailsViewSheet = observer(() => {
                     ))}
                 </VStack>
                 {ordersData.status === 3 &&
-                ordersData.is_rider_customer_arrived === 1 ? (
+                ordersData.is_rider_customer_arrived ? (
                   <Button
                     _text={{fontWeight: 'bold'}}
                     rounded="full"
+                    variant="outline"
+                    borderColor="themeLight.primary.base"
                     py={4}
                     isLoading={deliveredOrder.isLoading}
                     onPress={doDelivered}>
                     I have delivered
                   </Button>
                 ) : ordersData.status === 3 &&
-                  ordersData.is_rider_customer_arrived === 0 ? (
+                  ordersData.picked_up_at !== null ? (
                   <Button
                     _text={{fontWeight: 'bold'}}
                     rounded="full"
@@ -384,10 +411,10 @@ export const OrderDetailsViewSheet = observer(() => {
     ordersData?.delivery_fee,
     ordersData.is_rider_customer_arrived,
     ordersData.order_products,
+    ordersData.picked_up_at,
     ordersData?.seller?.address,
     ordersData?.seller?.trading_name,
     ordersData.status,
-    ordersData?.sub_total,
   ]);
 
   const ContentFull = useCallback(
@@ -452,13 +479,13 @@ export const OrderDetailsViewSheet = observer(() => {
                 ))}
             </VStack>
             <HStack space={2}>
-              <VStack>
+              {/* <VStack>
                 <Text fontWeight="bold">Fee</Text>
                 <Text color="themeLight.gray.2" fontWeight="light">
                   ₦{ordersData?.sub_total}
                 </Text>
               </VStack>
-              <Divider orientation="vertical" mx={2} />
+              <Divider orientation="vertical" mx={2} /> */}
               <VStack>
                 <Text fontWeight="bold">Deliver Fee</Text>
                 <Text color="themeLight.gray.2" fontWeight="light">
@@ -539,7 +566,6 @@ export const OrderDetailsViewSheet = observer(() => {
                   isLoadingText={
                     fetchSingleOrder.isLoading ? 'Updating records' : ''
                   }
-                  isDisabled={ordersData.ready_at === null}
                   onPress={doPickUp}>
                   Pick up order
                 </Button>
@@ -562,6 +588,8 @@ export const OrderDetailsViewSheet = observer(() => {
                 rounded="full"
                 py={4}
                 mt={3}
+                variant="outline"
+                borderColor="themeLight.primary.base"
                 isLoading={deliveredOrder.isLoading}
                 isLoadingText="Setting delivery"
                 isDisabled={deliveredOrder.isLoading}
@@ -589,11 +617,9 @@ export const OrderDetailsViewSheet = observer(() => {
       ordersData.order_detail,
       ordersData.order_products,
       ordersData?.pick_up_pin,
-      ordersData.ready_at,
       ordersData?.seller?.address,
       ordersData?.seller?.trading_name,
       ordersData.status,
-      ordersData?.sub_total,
       pickUpOrder.isLoading,
       uploadedOrder,
     ],
@@ -689,6 +715,13 @@ export const OrderDetailsViewSheet = observer(() => {
     }
   }, [sheetOpen]);
 
+  // if app returns from the background, we refetch order details
+  useEffect(() => {
+    if (isForeground) {
+      getOrderInfo();
+    }
+  }, [isForeground]);
+
   return (
     sheetOpen && (
       <BottomSheet
@@ -711,6 +744,7 @@ export const OrderDetailsViewSheet = observer(() => {
           ) : (
             Content()
           )}
+          <Toast config={toastConfig} />
         </BottomSheetView>
       </BottomSheet>
     )

@@ -11,12 +11,21 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Notification} from '@notifee/react-native';
 import {makeAutoObservable} from 'mobx';
 
+interface hasArrivedType {
+  order_id: number;
+  has_arrived: boolean;
+}
+
 class OrdersStore {
   notifiedOrder: Partial<notificationsType> = {};
   orders: orderType[] = [];
   ongoingOrderCount: number = 0;
   selectedOrderId: number = 0;
   selectedOrder: Partial<orderType> = {};
+  tempHasArrived: hasArrivedType = {
+    order_id: 0,
+    has_arrived: false,
+  };
 
   constructor() {
     makeAutoObservable(this);
@@ -32,12 +41,16 @@ class OrdersStore {
     );
     makePersistable(this, {
       name: 'ordersStore',
-      properties: ['orders', 'ongoingOrderCount'],
+      properties: ['orders', 'ongoingOrderCount', 'tempHasArrived'],
     });
   }
 
   setNotifiedOrder(val: notificationsType) {
     this.notifiedOrder = val;
+  }
+
+  setArrival(val: hasArrivedType) {
+    this.tempHasArrived = val;
   }
 
   setOrders(val: orderType[], count: number) {

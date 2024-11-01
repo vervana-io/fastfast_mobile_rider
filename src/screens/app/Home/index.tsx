@@ -18,6 +18,7 @@ import {
   Text,
   VStack,
 } from 'native-base';
+import Geoloc, {GeoPosition} from 'react-native-geolocation-service';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import BackgroundJob from 'react-native-background-actions';
@@ -25,7 +26,6 @@ import {BicycleIcon} from '@assets/svg/BicycleIcon';
 import {BottomActions} from '@components/utils';
 import {CancelOrderModal} from '@components/ui';
 import {DefaultLayout} from '@layouts/default';
-import {GeoPosition} from 'react-native-geolocation-service';
 // import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
 import Geolocation from '@react-native-community/geolocation';
 import MapView from '@components/ui/map/mapView';
@@ -134,7 +134,7 @@ export const Home = observer((props: HomeProps) => {
   );
 
   const GeoLocate = useCallback(() => {
-    Geolocation.getCurrentPosition(
+    Geoloc.getCurrentPosition(
       position => {
         console.log('position', position);
         setRidersPosition({
@@ -188,7 +188,7 @@ export const Home = observer((props: HomeProps) => {
         timeout: 10000,
         maximumAge: 10000,
         distanceFilter: 0,
-        useSignificantChanges: true,
+        // useSignificantChanges: true,
       },
     );
   }, [retryCount]);
@@ -478,6 +478,15 @@ export const Home = observer((props: HomeProps) => {
       }
       if (data.eventName === 'rider_cancel_order') {
       }
+      if (data.eventName === 'rider_order_pickup') {
+        Toast.show({
+          type: 'success',
+          text1: 'Order Ready for Pickup',
+          text2: 'Your order is ready for pickup',
+          swipeable: true,
+          visibilityTime: 6000,
+        });
+      }
     });
   }, [subscribe, userDetails]);
 
@@ -509,7 +518,11 @@ export const Home = observer((props: HomeProps) => {
             ) {
               const intervalId = setInterval(() => {
                 SendToSocket(position.coords);
-                setRidersPosition(position.coords);
+                setRidersPosition({
+                  // title: 'You',
+                  latitude: position?.coords?.latitude,
+                  longitude: position?.coords?.longitude,
+                });
               }, 5000);
               return () => clearInterval(intervalId);
             }
