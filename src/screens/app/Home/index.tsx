@@ -340,9 +340,7 @@ export const Home = observer((props: HomeProps) => {
 
   // we trigger the location on page load assuming location is already set from onset
   useEffect(() => {
-    setTimeout(() => {
-      GeoLocate();
-    }, 1000);
+    GeoLocate();
   }, [GeoLocate]);
 
   // check for ongoing orders and if there are any, keep sending rider location updates
@@ -680,9 +678,7 @@ export const Home = observer((props: HomeProps) => {
   // on focus, get users current location
   useEffect(() => {
     if (isForeground) {
-      setTimeout(() => {
-        GeoLocate();
-      }, 1000);
+      GeoLocate();
     }
   }, [GeoLocate, isForeground]);
 
