@@ -14,20 +14,16 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import {InlineError, apiType} from '@types/index';
 import React, {useCallback, useState} from 'react';
-import {getInlineError, setInlineError} from '@helpers/componentErrorHandler';
 import {object, ref, string} from 'yup';
 
 import {DefaultLayout} from '@layouts/default';
-import {FBIcon} from '@assets/svg/FBIcon';
 import {Formik} from 'formik';
-import {GoogleIcon} from '@assets/svg/GoogleIcon';
 import {Input} from '@components/inputs';
-import {LogoTextPrimary} from '@assets/svg/LogoTextPrimary';
 import {Pattern} from '@assets/svg/Pattern';
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT} from '../../../config';
+import {apiType} from '@types/index';
 import {authStore} from '@store/auth';
 import messaging from '@react-native-firebase/messaging';
 import {navigate} from '@navigation/NavigationService';
@@ -44,8 +40,6 @@ interface LoginProp {
 
 export const Login = (props: LoginProp) => {
   const {navigation} = props;
-  const [field, setField] = useState('');
-  const [password, setPassword] = useState('');
 
   const {login} = useAuth();
 
@@ -99,25 +93,6 @@ export const Login = (props: LoginProp) => {
     ),
     [],
   );
-
-  const doGoogleSignIn = async () => {
-    try {
-      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
-      const userInfo = await GoogleSignin.signIn();
-      console.log('signin', userInfo);
-    } catch (error: any) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        // operation (e.g. sign in) is in progress already
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-      } else {
-        // some other error happened
-      }
-      console.log('error', error);
-    }
-  };
 
   const doLogin = async (values: any) => {
     const token = await messaging().getToken();

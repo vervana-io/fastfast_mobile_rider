@@ -48,6 +48,7 @@ import {myLocationNotification} from '@handlers/localNotifications';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
 import {rootConfig} from '@store/root';
+import {useAppState} from '@hooks/useAppState';
 import {useDrawerStatus} from '@react-navigation/drawer';
 import {useOrders} from '@hooks/useOrders';
 import useSocket from '@hooks/useSocket';
@@ -107,6 +108,8 @@ export const Home = observer((props: HomeProps) => {
   const [retryCount, setRetryCount] = useState(0);
   const [showRerender, setShowRerender] = useState(false);
   const drawerStatus = useDrawerStatus();
+
+  const {isForeground} = useAppState();
 
   const NotificationOrder: any = ordersStore.notifiedOrder;
 
@@ -337,7 +340,9 @@ export const Home = observer((props: HomeProps) => {
 
   // we trigger the location on page load assuming location is already set from onset
   useEffect(() => {
-    GeoLocate();
+    setTimeout(() => {
+      GeoLocate();
+    }, 1000);
   }, [GeoLocate]);
 
   // check for ongoing orders and if there are any, keep sending rider location updates
@@ -671,6 +676,15 @@ export const Home = observer((props: HomeProps) => {
   useEffect(() => {
     cleanUp();
   }, [cleanUp]);
+
+  // on focus, get users current location
+  useEffect(() => {
+    if (isForeground) {
+      setTimeout(() => {
+        GeoLocate();
+      }, 1000);
+    }
+  }, [GeoLocate, isForeground]);
 
   // useEffect(() => {
   //   return Geolocation.setRNConfiguration({

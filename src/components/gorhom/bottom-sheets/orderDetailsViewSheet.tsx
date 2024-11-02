@@ -717,10 +717,10 @@ export const OrderDetailsViewSheet = observer(() => {
 
   // if app returns from the background, we refetch order details
   useEffect(() => {
-    if (isForeground) {
+    if (isForeground && sheetOpen) {
       getOrderInfo();
     }
-  }, [isForeground]);
+  }, [isForeground, sheetOpen]);
 
   return (
     sheetOpen && (
