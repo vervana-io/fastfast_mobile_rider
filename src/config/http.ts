@@ -6,7 +6,7 @@ import {authStore} from '@store/auth';
 //   ? 'https://fastrider.zipu.app/api/'
 //   : 'https://fastrider.zipu.app/api/';
 
-const BASE_URL = __DEV__ ? process.env.BASE_URL_DEV : process.env.BASE_URL_DEV;
+const BASE_URL = __DEV__ ? process.env.BASE_URL_DEV : process.env.BASE_URL_PROD;
 
 class Http {
   async get(path: string, options: any = {}) {
