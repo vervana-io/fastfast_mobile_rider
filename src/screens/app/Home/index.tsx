@@ -620,7 +620,7 @@ export const Home = observer((props: HomeProps) => {
       for (let i = 0; BackgroundJob.isRunning(); i++) {
         // console.log('Runned -> ', i);
         // watchBackgroundUpdates();
-        await BackgroundJob.updateNotification({taskDesc: 'Runned -> ' + i});
+        // await BackgroundJob.updateNotification({taskDesc: 'Runned -> ' + i});
         await sleep(delay);
       }
     });
