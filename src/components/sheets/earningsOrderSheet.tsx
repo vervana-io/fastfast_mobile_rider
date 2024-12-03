@@ -1,24 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 import ActionSheet, {
   ActionSheetRef,
-  ScrollView,
-  SheetManager,
   SheetProps,
 } from 'react-native-actions-sheet';
-import {
-  Box,
-  Button,
-  Center,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  Divider,
-  HStack,
-  Text,
-  VStack,
-} from 'native-base';
+import {Box, Divider, HStack, Text, VStack} from 'native-base';
 import React, {useCallback, useRef} from 'react';
 
-import {BagIcon} from '@assets/svg/BagIcon';
 import {LocationPin3} from '@assets/svg/LocationPin3';
 import {SheetHeader} from '@components/ui';
 import {TransactionsType} from '@types/transactionsType';
@@ -81,7 +68,7 @@ export const EarningsOrderSheet = observer((props: SheetProps) => {
         </VStack>
       </Box>
     );
-  }, [data.amount, data.created_at]);
+  }, [data.amount, data.created_at, data.reference]);
 
   return (
     <ActionSheet

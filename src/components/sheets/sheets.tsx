@@ -1,3 +1,4 @@
+import { AddBankSheet } from './AddBankSheet';
 import {AddressSheetsNew} from './addressSheetNew';
 import {AddressSheetsNewIOS} from './addressSheetNewIOS';
 import {BanksSheet} from './BanksSheet';
@@ -13,6 +14,7 @@ import {RateCustomerSheet} from './rateCustomer';
 import {SettingsSheet} from './settingsSheet';
 import {VehicleDetailsSheet} from './vehicleDetailsSheet';
 import {VerifyIdentitySheet} from './verifyIdentity';
+import {WithdrawSheet} from './withdrawSheet';
 import {WorkDurationSheet} from './WorkDurationSheet';
 import {registerSheet} from 'react-native-actions-sheet';
 
@@ -32,3 +34,5 @@ registerSheet('ComplaintSheet', ComplaintSheet);
 registerSheet('GuarantorFormSheet', GuarantorFormSheet);
 registerSheet('WorkDurationSheet', WorkDurationSheet);
 registerSheet('VehicleDetailsSheet', VehicleDetailsSheet);
+registerSheet('WithdrawSheet', WithdrawSheet);
+registerSheet('AddBankSheet', AddBankSheet);

@@ -380,7 +380,7 @@ export const Home = observer((props: HomeProps) => {
   ]);
 
   useEffect(() => {
-    if (ordersOngoingCount && !selectedOrder.id) {
+    if (ordersOngoingCount > 0 && !selectedOrder.id) {
       // throw notification of order ongoing
       // myLocationNotification(
       //   `You have ${ordersOngoingCount} orders ongoing, navigate to orders to view them`,

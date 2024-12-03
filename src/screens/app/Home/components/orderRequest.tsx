@@ -14,7 +14,7 @@ import {StyleSheet} from 'react-native';
 import Toast from 'react-native-toast-message';
 import {UsePusher} from '@hooks/usePusher';
 import {WIN_HEIGHT} from '../../../../config';
-import { bottomSheetStore } from '@store/bottom-sheet';
+import {bottomSheetStore} from '@store/bottom-sheet';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
@@ -264,19 +264,26 @@ export const OrderRequest = observer(() => {
       console.log(notification_name);
       console.log('====================================');
       if (notification_name === 'order_request') {
-        if (!checkForOrderById(data.order_id)) {
-          const payload: notificationsType = {
-            data: JSON.parse(data.data),
-            order_id: data.order_id ?? '',
-            request_id: data.request_id ?? '',
-            rider_id: data.rider_id ?? '',
-            title: data.title ?? '',
-            user_id: data.user_id ?? '',
-          };
-          setMainNotificationOrder(payload);
-          setTimeout(() => {
-            toggleBoxHeight();
-          }, 500);
+        // first we check if the rider already has an ongoing order
+        if (ordersStore.ongoingOrderCount <= 0) {
+          // here we check if this order is already being handled by the user
+          // with this, the rider can only have one order at a time
+          if (!checkForOrderById(data.order_id)) {
+            const payload: notificationsType = {
+              data: JSON.parse(data.data),
+              order_id: data.order_id ?? '',
+              request_id: data.request_id ?? '',
+              rider_id: data.rider_id ?? '',
+              title: data.title ?? '',
+              user_id: data.user_id ?? '',
+            };
+            setMainNotificationOrder(payload);
+            setTimeout(() => {
+              toggleBoxHeight();
+            }, 500);
+          }
+        } else {
+          ordersStore.clearNotifiedOrder();
         }
       }
     }

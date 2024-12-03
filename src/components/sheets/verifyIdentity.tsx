@@ -162,6 +162,7 @@ export const VerifyIdentitySheet = (props: SheetProps) => {
         <SheetHeader
           sheetToClose="verifyIdentitySheet"
           title="Verify your identity"
+          sheetType="1"
         />
         <Center p={8}>
           <Box

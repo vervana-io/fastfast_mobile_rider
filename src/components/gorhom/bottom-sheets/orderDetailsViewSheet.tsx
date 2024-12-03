@@ -131,11 +131,16 @@ export const OrderDetailsViewSheet = observer(() => {
   }, [order_id, request_id]);
 
   const doDelivered = useCallback(() => {
+    const list: string[] = [];
+    uploadedOrder.map(el => {
+      list.push(el.base64);
+    });
     setErrorMessage('');
     deliveredOrder.mutate(
       {
         order_id,
         request_id,
+        media_base64: list,
       },
       {
         onSuccess: (val: apiType) => {
@@ -146,6 +151,7 @@ export const OrderDetailsViewSheet = observer(() => {
               per_page: 6,
               status: '1',
             });
+            setUploadedOrder([]);
             const pay: any = {
               customer_id: ordersData.customer_id,
               delivery_fee: ordersData.delivery_fee,
@@ -163,7 +169,13 @@ export const OrderDetailsViewSheet = observer(() => {
         },
       },
     );
-  }, [order_id, ordersData.customer_id, ordersData.delivery_fee, request_id]);
+  }, [
+    order_id,
+    ordersData.customer_id,
+    ordersData.delivery_fee,
+    request_id,
+    uploadedOrder,
+  ]);
 
   const doPickUp = useCallback(() => {
     const list: string[] = [];
@@ -181,6 +193,7 @@ export const OrderDetailsViewSheet = observer(() => {
         onSuccess: (val: apiType) => {
           if (val.status) {
             getOrderInfo();
+            setUploadedOrder([]);
           } else {
             Toast.show({
               type: 'error',
@@ -369,7 +382,7 @@ export const OrderDetailsViewSheet = observer(() => {
                     borderColor="themeLight.primary.base"
                     py={4}
                     isLoading={deliveredOrder.isLoading}
-                    onPress={doDelivered}>
+                    onPress={() => handleSnapPress(2)}>
                     I have delivered
                   </Button>
                 ) : ordersData.status === 3 &&
@@ -404,7 +417,6 @@ export const OrderDetailsViewSheet = observer(() => {
     callCustomer,
     deliveredOrder.isLoading,
     doArrival,
-    doDelivered,
     handleSnapPress,
     hasViewDetails,
     openGoogleMaps,
@@ -583,19 +595,75 @@ export const OrderDetailsViewSheet = observer(() => {
               </Button>
             ) : ordersData.status === 3 &&
               ordersData.is_rider_customer_arrived === 1 ? (
-              <Button
-                _text={{fontWeight: 'bold'}}
-                rounded="full"
-                py={4}
-                mt={3}
-                variant="outline"
-                borderColor="themeLight.primary.base"
-                isLoading={deliveredOrder.isLoading}
-                isLoadingText="Setting delivery"
-                isDisabled={deliveredOrder.isLoading}
-                onPress={doDelivered}>
-                I have delivered
-              </Button>
+              <>
+                <VStack mt={2}>
+                  <HStack alignItems="center" space={1}>
+                    <Text fontWeight="bold">Photos</Text>
+                    <Text fontWeight="hairline" fontSize="xs">
+                      ({uploadedOrder.length}/{allowedUpload})
+                    </Text>
+                  </HStack>
+                  <HStack mt={2} space={2}>
+                    {uploadedOrder.map((el, i) => (
+                      <Center
+                        bg="themeLight.gray.4"
+                        w="90px"
+                        h="114px"
+                        rounded="md"
+                        key={i}>
+                        <Pressable
+                          onPress={() => removeImage(i)}
+                          position="absolute"
+                          top={2}
+                          right={2}
+                          bg="red.50"
+                          w="20px"
+                          h="20px"
+                          zIndex={1}
+                          rounded="md">
+                          <Center flex={1}>
+                            <DeleteIcon color="red.600" size="xs" />
+                          </Center>
+                        </Pressable>
+                        <Image
+                          width="100%"
+                          height="100%"
+                          alt="Image"
+                          rounded="md"
+                          source={{uri: el.uri}}
+                        />
+                      </Center>
+                    ))}
+                    <Pressable onPress={() => _snapPhotoPic()}>
+                      <Center
+                        bg="themeLight.gray.4"
+                        w="90px"
+                        h="114px"
+                        rounded="md">
+                        <Center>
+                          <AddIcon />
+                          <Text mt={3} fontSize="xs">
+                            Add more
+                          </Text>
+                        </Center>
+                      </Center>
+                    </Pressable>
+                  </HStack>
+                </VStack>
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  mt={3}
+                  variant="outline"
+                  borderColor="themeLight.primary.base"
+                  isLoading={deliveredOrder.isLoading}
+                  isLoadingText="Setting delivery"
+                  isDisabled={deliveredOrder.isLoading}
+                  onPress={doDelivered}>
+                  I have delivered
+                </Button>
+              </>
             ) : null}
           </VStack>
         </BottomSheetScrollView>
@@ -664,10 +732,10 @@ export const OrderDetailsViewSheet = observer(() => {
   const FullPin = useCallback(
     () => (
       <Box py={6} px={4} bg="#182819" h="full" roundedTop="2xl">
-        <Center flex={1}>
+        <Center flex={1} alignItems="center" justifyContent="center">
           <Text
             style={styles.rotateText}
-            fontSize="170px"
+            fontSize="9xl"
             fontFamily="body"
             w={WIN_HEIGHT * 0.7}
             h={WIN_WIDTH * 0.8}
@@ -754,5 +822,7 @@ export const OrderDetailsViewSheet = observer(() => {
 const styles = StyleSheet.create({
   rotateText: {
     transform: [{rotate: '-90deg'}],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

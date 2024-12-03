@@ -165,7 +165,11 @@ export const useOrders = () => {
   );
 
   const deliveredOrder = useMutation(
-    async (data: {order_id: number; request_id: number}) => {
+    async (data: {
+      order_id: number;
+      request_id: number;
+      media_base64: string[];
+    }) => {
       try {
         const req: any = await http.post('orders/delivered', data);
         return req.data;

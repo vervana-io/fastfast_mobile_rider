@@ -5,7 +5,7 @@ export const __passwords__ = {
   M8L1: {
     // Minimum eight characters, at least one letter:
     type: 'M8L1',
-    expression: /^(?=.*[A-Za-z])[A-Za-z\d]{8,}$/,
+    expression: /^(?=.*[A-Za-z])[A-Za-z\d@$!%*#?&]{8,}$/,
   },
   M8L1D1: {
     // Minimum eight characters, at least one letter and one number:

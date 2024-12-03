@@ -18,7 +18,6 @@ import Toast from 'react-native-toast-message';
 import {__passwords__} from '@helpers/regex/constants';
 import {apiType} from '@types/apiTypes';
 import {navigate} from '@navigation/NavigationService';
-import {showMessage} from 'react-native-flash-message';
 import {useAuth} from '@hooks/useAuth';
 
 interface SignUpStep2Type {
@@ -42,8 +41,8 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
     email: string().email().required('Email is required'),
     password: string()
       .matches(
-        __passwords__.M8L1D1S1.expression,
-        'Password must contain Minimum eight characters, at least one letter, one number and one special character',
+        __passwords__.M8L1.expression,
+        'Minimum eight characters, at least one letter',
       )
       .required('Password is required'),
     confirm: string()

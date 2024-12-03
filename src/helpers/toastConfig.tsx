@@ -1,10 +1,10 @@
-import { Box, Center, HStack, Heading, Spinner, Text, VStack } from "native-base";
+import {Box, Center, HStack, Heading, Spinner, Text, VStack} from 'native-base';
 
 /* eslint-disable react/react-in-jsx-scope */
-import { CheckMarkSolid } from "@assets/svg/CheckMarkSolid";
-import { CloseIconSolid } from "@assets/svg/closeIconSolid";
-import { InfoIconSolid } from "@assets/svg/infoIconSolid";
-import { WifiBallon } from "@assets/svg/WifiBallon";
+import {CheckMarkSolid} from '@assets/svg/CheckMarkSolid';
+import {CloseIconSolid} from '@assets/svg/closeIconSolid';
+import {InfoIconSolid} from '@assets/svg/infoIconSolid';
+import {WifiBallon} from '@assets/svg/WifiBallon';
 
 export const toastConfig = {
   success: ({text1, props, text2}: any) => (

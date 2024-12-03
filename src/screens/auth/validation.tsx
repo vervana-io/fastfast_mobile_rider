@@ -79,6 +79,7 @@ export const Validation = (props: ValidationType) => {
         break;
       case 4:
         setPin4(value);
+        handleLastInputChange(value);
         break;
       // case 5:
       //   setPin5(value);

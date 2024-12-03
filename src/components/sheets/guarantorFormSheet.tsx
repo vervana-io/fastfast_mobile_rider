@@ -76,6 +76,7 @@ export const GuarantorFormSheet = observer((props: SheetProps) => {
         onSuccess: (val: apiType) => {
           if (val.status) {
             userDetails.refetch();
+            SheetManager.hide('GuarantorFormSheet');
             Toast.show({
               type: 'success',
               text1: 'Profile Update',
