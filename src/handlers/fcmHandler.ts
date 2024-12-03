@@ -3,7 +3,7 @@ import notifee, {EventType} from '@notifee/react-native';
 
 import messaging from '@react-native-firebase/messaging';
 import {ordersStore} from '@store/orders';
-import { playEffectForNotifications } from './playEffect';
+import {playEffectForNotifications} from './playEffect';
 
 //method was called to get FCM tiken for notification
 export const getFcmToken = async () => {
@@ -87,13 +87,15 @@ export function registerListenerWithFCM() {
       remoteMessage?.notification?.title &&
       remoteMessage?.notification?.body
     ) {
-      ordersStore.setNotifiedOrder(remoteMessage?.data);
-      playEffectForNotifications();
-      onDisplayNotification(
-        remoteMessage.notification?.title,
-        remoteMessage.notification?.body,
-        remoteMessage?.data,
-      );
+      if (ordersStore.ongoingOrderCount === 0) {
+        ordersStore.setNotifiedOrder(remoteMessage?.data);
+        playEffectForNotifications();
+        onDisplayNotification(
+          remoteMessage.notification?.title,
+          remoteMessage.notification?.body,
+          remoteMessage?.data,
+        );
+      }
     }
   });
   notifee.onForegroundEvent(({type, detail}) => {
@@ -103,8 +105,10 @@ export function registerListenerWithFCM() {
         break;
       case EventType.PRESS:
         console.log('User pressed notification', detail.notification);
-        ordersStore.setNotifiedOrder(detail.notification?.data);
-        playEffectForNotifications();
+        if (ordersStore.ongoingOrderCount === 0) {
+          ordersStore.setNotifiedOrder(detail.notification?.data);
+          playEffectForNotifications();
+        }
         // if (detail?.notification?.data?.clickAction) {
         //   onNotificationClickActionHandling(
         //     detail.notification.data.clickAction
@@ -115,8 +119,10 @@ export function registerListenerWithFCM() {
   });
 
   messaging().onNotificationOpenedApp(async remoteMessage => {
-    ordersStore.setNotifiedOrder(remoteMessage.data);
-    playEffectForNotifications();
+    if (ordersStore.ongoingOrderCount === 0) {
+      ordersStore.setNotifiedOrder(remoteMessage.data);
+      playEffectForNotifications();
+    }
     console.log(
       'onNotificationOpenedApp Received',
       JSON.stringify(remoteMessage),
@@ -130,8 +136,10 @@ export function registerListenerWithFCM() {
     .getInitialNotification()
     .then(remoteMessage => {
       if (remoteMessage) {
-        ordersStore.setNotifiedOrder(remoteMessage.data);
-        playEffectForNotifications();
+        if (ordersStore.ongoingOrderCount === 0) {
+          ordersStore.setNotifiedOrder(remoteMessage.data);
+          playEffectForNotifications();
+        }
         console.log(
           'Notification caused app to open from quit state:',
           remoteMessage.notification,

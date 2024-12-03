@@ -259,13 +259,9 @@ export const OrderRequest = observer(() => {
       const notification_name = JSON.parse(data.data)?.notification_name;
       // here we check if the notification is for an order request
       // after which we then check if we already have the order accepted
-      console.log('====================================');
-      console.log(data);
-      console.log(notification_name);
-      console.log('====================================');
       if (notification_name === 'order_request') {
         // first we check if the rider already has an ongoing order
-        if (ordersStore.ongoingOrderCount <= 0) {
+        if (ordersStore.ongoingOrderCount === 0) {
           // here we check if this order is already being handled by the user
           // with this, the rider can only have one order at a time
           if (!checkForOrderById(data.order_id)) {

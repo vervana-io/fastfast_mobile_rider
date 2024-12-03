@@ -19,7 +19,6 @@ import {BackButton} from '@components/ui';
 import {BikeIcon} from '@assets/svg/BikeIcon';
 import {DefaultLayout} from '@layouts/default';
 import {LocationPin} from '@assets/svg/LocationPin';
-import {LocationPin2} from '@assets/svg/LocationPin2';
 import {PhoneIcon} from '@assets/svg/PhoneIcon';
 import {SheetManager} from 'react-native-actions-sheet';
 import {TimeIcon} from '@assets/svg/TimeIcon';

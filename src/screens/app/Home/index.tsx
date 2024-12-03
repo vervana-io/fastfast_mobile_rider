@@ -46,6 +46,7 @@ import {functions} from '@helpers/functions';
 import {markersType} from '@types/mapTypes';
 import {myLocationNotification} from '@handlers/localNotifications';
 import {observer} from 'mobx-react-lite';
+import { orderType } from '@types/index';
 import {ordersStore} from '@store/orders';
 import {rootConfig} from '@store/root';
 import {useAppState} from '@hooks/useAppState';
@@ -391,6 +392,7 @@ export const Home = observer((props: HomeProps) => {
         text2: `You have ${ordersOngoingCount} orders ongoing, navigate to orders to view them`,
         visibilityTime: 6000,
       });
+      navigation.navigate('Orders');
     }
   }, [navigation, ordersOngoingCount, selectedOrder.id]);
   // End ongoing order checks
