@@ -10,6 +10,7 @@ import {notificationsType, orderType} from '@types/orderTypes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Notification} from '@notifee/react-native';
 import {makeAutoObservable} from 'mobx';
+import { playEffectForNotifications } from '@handlers/playEffect';
 
 interface hasArrivedType {
   order_id: number;
@@ -46,7 +47,13 @@ class OrdersStore {
   }
 
   setNotifiedOrder(val: notificationsType) {
-    this.notifiedOrder = val;
+    console.log('=================order===================');
+    console.log(val);
+    console.log('====================================');
+    if (this.ongoingOrderCount < 1) {
+      playEffectForNotifications();
+      this.notifiedOrder = val;
+    }
   }
 
   setArrival(val: hasArrivedType) {

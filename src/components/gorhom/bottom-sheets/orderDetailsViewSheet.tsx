@@ -576,7 +576,7 @@ export const OrderDetailsViewSheet = observer(() => {
                     pickUpOrder.isLoading || fetchSingleOrder.isLoading
                   }
                   isLoadingText={
-                    fetchSingleOrder.isLoading ? 'Updating records' : ''
+                    pickUpOrder.isLoading ? 'Updating records' : ''
                   }
                   onPress={doPickUp}>
                   Pick up order

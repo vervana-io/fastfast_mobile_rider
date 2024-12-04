@@ -87,15 +87,12 @@ export function registerListenerWithFCM() {
       remoteMessage?.notification?.title &&
       remoteMessage?.notification?.body
     ) {
-      if (ordersStore.ongoingOrderCount === 0) {
-        ordersStore.setNotifiedOrder(remoteMessage?.data);
-        playEffectForNotifications();
-        onDisplayNotification(
-          remoteMessage.notification?.title,
-          remoteMessage.notification?.body,
-          remoteMessage?.data,
-        );
-      }
+      ordersStore.setNotifiedOrder(remoteMessage?.data);
+      onDisplayNotification(
+        remoteMessage.notification?.title,
+        remoteMessage.notification?.body,
+        remoteMessage?.data,
+      );
     }
   });
   notifee.onForegroundEvent(({type, detail}) => {
@@ -105,10 +102,8 @@ export function registerListenerWithFCM() {
         break;
       case EventType.PRESS:
         console.log('User pressed notification', detail.notification);
-        if (ordersStore.ongoingOrderCount === 0) {
-          ordersStore.setNotifiedOrder(detail.notification?.data);
-          playEffectForNotifications();
-        }
+        ordersStore.setNotifiedOrder(detail.notification?.data);
+
         // if (detail?.notification?.data?.clickAction) {
         //   onNotificationClickActionHandling(
         //     detail.notification.data.clickAction
@@ -119,10 +114,8 @@ export function registerListenerWithFCM() {
   });
 
   messaging().onNotificationOpenedApp(async remoteMessage => {
-    if (ordersStore.ongoingOrderCount === 0) {
-      ordersStore.setNotifiedOrder(remoteMessage.data);
-      playEffectForNotifications();
-    }
+    ordersStore.setNotifiedOrder(remoteMessage.data);
+
     console.log(
       'onNotificationOpenedApp Received',
       JSON.stringify(remoteMessage),
@@ -136,10 +129,8 @@ export function registerListenerWithFCM() {
     .getInitialNotification()
     .then(remoteMessage => {
       if (remoteMessage) {
-        if (ordersStore.ongoingOrderCount === 0) {
-          ordersStore.setNotifiedOrder(remoteMessage.data);
-          playEffectForNotifications();
-        }
+        ordersStore.setNotifiedOrder(remoteMessage.data);
+
         console.log(
           'Notification caused app to open from quit state:',
           remoteMessage.notification,

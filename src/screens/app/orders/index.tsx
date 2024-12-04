@@ -189,9 +189,9 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                       <Text fontWeight="bold">
                         Delivery Fee: ₦{item.delivery_fee}
                       </Text>
-                      <Text fontWeight="bold">
+                      {/* <Text fontWeight="bold">
                         Order Fee: ₦{item.sub_total}
-                      </Text>
+                      </Text> */}
                     </VStack>
                     <Text fontWeight="bold">
                       Code: #

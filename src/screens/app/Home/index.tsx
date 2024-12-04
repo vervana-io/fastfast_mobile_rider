@@ -392,7 +392,9 @@ export const Home = observer((props: HomeProps) => {
         text2: `You have ${ordersOngoingCount} orders ongoing, navigate to orders to view them`,
         visibilityTime: 6000,
       });
-      navigation.navigate('Orders');
+      if (!selectedOrder.id) {
+        navigation.navigate('Orders');
+      }
     }
   }, [navigation, ordersOngoingCount, selectedOrder.id]);
   // End ongoing order checks
