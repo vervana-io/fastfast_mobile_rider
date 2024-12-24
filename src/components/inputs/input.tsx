@@ -14,10 +14,10 @@ import {
   Text,
   useColorMode,
 } from 'native-base';
+import {Pressable, TextInputProps} from 'react-native';
 
 import {EyeOff} from '@assets/svg/EyeOff';
 import {EyeOn} from '@assets/svg/EyeOn';
-import {Pressable} from 'react-native';
 
 interface InputProps {
   label: string;
@@ -81,6 +81,7 @@ interface InputProps {
   labelElementRight?: any;
   bgColor?: string;
   height?: string | number;
+  autoComplete?: TextInputProps['autoComplete'];
 }
 
 export const Input = React.forwardRef<typeof NBInput, InputProps>(
@@ -137,6 +138,7 @@ export const Input = React.forwardRef<typeof NBInput, InputProps>(
       labelElementRight,
       bgColor,
       height = 52,
+      autoComplete,
     } = props;
     const [show, setShow] = React.useState(true);
 
@@ -271,6 +273,7 @@ export const Input = React.forwardRef<typeof NBInput, InputProps>(
                 onChangeText={(e: any) => props?.onChangeText(e)}
                 onSubmitEditing={onSubmitEditing}
                 onFocus={onFocus}
+                autoComplete={autoComplete}
                 leftElement={
                   hasIcon && iconPosition === 'left' ? <RenderIcon /> : []
                 }

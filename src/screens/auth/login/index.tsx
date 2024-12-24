@@ -188,6 +188,7 @@ export const Login = (props: LoginProp) => {
                     errorMessage={errors.email}
                     hasError={errors.email && touched.email ? true : false}
                     value={values.email}
+                    autoComplete="email"
                   />
                 </Box>
                 <Box w="full" mt={3}>
@@ -198,6 +199,7 @@ export const Login = (props: LoginProp) => {
                     hasIcon
                     iconPosition="right"
                     onChangeText={handleChange('password')}
+                    autoComplete="current-password"
                     onBlur={handleBlur('password')}
                     errorMessage={errors.password}
                     hasError={

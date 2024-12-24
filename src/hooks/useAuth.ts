@@ -116,6 +116,17 @@ export const useAuth = () => {
     }
   });
 
+  const checkIfPhoneExist = useMutation(
+    async (data: {phone_number: string}) => {
+      try {
+        const req: any = await http.post('auth/phone_number_exists', data);
+        return req.data;
+      } catch (error) {
+        throw error;
+      }
+    },
+  );
+
   return {
     login,
     register,
@@ -125,5 +136,6 @@ export const useAuth = () => {
     checkIfEmailExist,
     sendEmailToken,
     validateEmailToken,
+    checkIfPhoneExist,
   };
 };

@@ -10,15 +10,17 @@ import {
 } from 'native-base';
 import React, {useCallback, useEffect, useState} from 'react';
 
+import {AuthLayout} from '@layouts/authLayout';
 import {BackButton} from '@components/ui';
 import Clipboard from '@react-native-clipboard/clipboard';
-import {DefaultLayout} from '@layouts/default';
 import {Input} from '@components/inputs';
 import {Keyboard} from 'react-native';
 import Toast from 'react-native-toast-message';
-import { WIN_WIDTH } from '../../config';
+import {WIN_WIDTH} from '../../config';
 import {apiType} from '@types/apiTypes';
+import {authStore} from '@store/auth';
 import {navigate} from '@navigation/NavigationService';
+import {registerStoreType} from '@types/authType';
 import {showMessage} from 'react-native-flash-message';
 import {useAuth} from '@hooks/useAuth';
 import {useFocusEffect} from '@react-navigation/native';
@@ -66,26 +68,33 @@ export const Validation = (props: ValidationType) => {
     // setPin5('');
   };
 
-  const handleInputChange = (value: string, inputNumber: number) => {
-    switch (inputNumber) {
-      case 1:
-        setPin1(value);
-        break;
-      case 2:
-        setPin2(value);
-        break;
-      case 3:
-        setPin3(value);
-        break;
-      case 4:
-        setPin4(value);
-        handleLastInputChange(value);
-        break;
-      // case 5:
-      //   setPin5(value);
-      //   break;
-      default:
-        break;
+  const handleInputChange = async (value: string, inputNumber: number) => {
+    if (value === '') {
+      switch (inputNumber) {
+        case 1:
+          pin1Ref?.current.focus();
+          setPin1(value);
+          break;
+        case 2:
+          pin1Ref?.current.focus();
+          setPin2(value);
+          break;
+        case 3:
+          pin2Ref?.current.focus();
+          setPin3(value);
+          break;
+        case 4:
+          pin3Ref?.current.focus();
+          setPin4(value);
+          break;
+        // case 5:
+        //   setPin5(value);
+        //   break;
+        default:
+          break;
+      }
+    } else {
+      checkClipboard(value, inputNumber);
     }
   };
 
@@ -100,12 +109,19 @@ export const Validation = (props: ValidationType) => {
     }
   };
 
+  const manualValidateTrigger = () => {
+    const allInputValues = [pin1, pin2, pin3, pin4];
+    // Call your function with all input values
+    Keyboard.dismiss();
+    processCode(allInputValues);
+  };
+
   const processCode = (inputValues: string[]) => {
     const pin = inputValues;
     let nPin = pin.join(',');
     nPin = nPin.replaceAll(',', '');
-    console.log(nPin);
     Clipboard.setString('');
+    console.log('N Pin', nPin);
     if (nPin.length > 0) {
       validateEmailToken.mutate(
         {email: params.email, token: nPin},
@@ -120,7 +136,7 @@ export const Validation = (props: ValidationType) => {
                 type: 'danger',
                 message: val.message,
               });
-              setValidated(false);
+              setValidated(true);
             }
           },
         },
@@ -147,16 +163,37 @@ export const Validation = (props: ValidationType) => {
   };
 
   // detect clipboard for code
-  const checkClipboard = async () => {
+  const checkClipboard = async (value: string, inputNumber: number) => {
     const content = await Clipboard.getString();
     if (content.length === 4 && /^\d+$/.test(content)) {
-      console.log(content.split(''));
+      pin1Ref?.current.focus();
       setPin1(content[0]);
       setPin2(content[1]);
       setPin3(content[2]);
       setPin4(content[3]);
       processCode(content.split(''));
       // setCode(content.split(''));
+    } else {
+      switch (inputNumber) {
+        case 1:
+          setPin1(value);
+          break;
+        case 2:
+          setPin2(value);
+          break;
+        case 3:
+          setPin3(value);
+          break;
+        case 4:
+          setPin4(value);
+          handleLastInputChange(value);
+          break;
+        // case 5:
+        //   setPin5(value);
+        //   break;
+        default:
+          break;
+      }
     }
   };
 
@@ -176,15 +213,15 @@ export const Validation = (props: ValidationType) => {
   }, [countdown]);
 
   // we use this to detect clipboard for code
-  useFocusEffect(
-    useCallback(() => {
-      if (pin1 === '') {
-        checkClipboard();
-        const interval = setInterval(checkClipboard, 1000); // Check every second
-        return () => clearInterval(interval);
-      }
-    }, [pin1]),
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     if (pin1 === '') {
+  //       checkClipboard();
+  //       const interval = setInterval(checkClipboard, 1000); // Check every second
+  //       return () => clearInterval(interval);
+  //     }
+  //   }, [pin1]),
+  // );
 
   // Convert seconds to minutes and seconds
   const minutes = Math.floor(countdown / 60);
@@ -217,14 +254,28 @@ export const Validation = (props: ValidationType) => {
 
   const proceed = () => {
     if (redirectRule.status) {
+      const det: registerStoreType = {
+        registerData: params.data,
+        step: 3,
+      };
+      authStore.setRegisterData(det);
       navigation.navigate(redirectRule.route, {params: params.data});
     } else {
       doRegister();
     }
   };
 
+  // we need to check if we have any params and we don't have step, if we do then
+  // we assume the user is a returning user so reset the request button
+  useEffect(() => {
+    const step = params?.step;
+    if (step) {
+      setCountdown(0);
+    }
+  }, [params, params?.step]);
+
   return (
-    <DefaultLayout>
+    <AuthLayout>
       <Box flex={1} p={6}>
         <BackButton />
         <VStack my={8} flex={1}>
@@ -373,20 +424,35 @@ export const Validation = (props: ValidationType) => {
             }}>
             Cancel
           </Button>
-          <Button
-            borderColor="themeLight.primary.base"
-            bg="themeLight.accent"
-            rounded="3xl"
-            py={4}
-            isLoading={register.isLoading}
-            isLoadingText="Registering..."
-            isDisabled={validated}
-            onPress={proceed}
-            _text={{fontWeight: 'bold', color: 'white'}}>
-            Next
-          </Button>
+          {!validated ? (
+            <Button
+              borderColor="themeLight.primary.base"
+              bg="themeLight.accent"
+              rounded="3xl"
+              py={4}
+              isLoading={register.isLoading}
+              isLoadingText="Registering..."
+              isDisabled={validated}
+              onPress={proceed}
+              _text={{fontWeight: 'bold', color: 'white'}}>
+              Next
+            </Button>
+          ) : (
+            <Button
+              borderColor="themeLight.primary.base"
+              bg="themeLight.accent"
+              rounded="3xl"
+              py={4}
+              isLoading={validateEmailToken.isLoading}
+              isLoadingText="Validating..."
+              isDisabled={validateEmailToken.isLoading}
+              onPress={manualValidateTrigger}
+              _text={{fontWeight: 'bold', color: 'white'}}>
+              Validate Token
+            </Button>
+          )}
         </VStack>
       </Box>
-    </DefaultLayout>
+    </AuthLayout>
   );
 };

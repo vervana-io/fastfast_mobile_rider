@@ -11,6 +11,7 @@ import {
 import React, {useEffect, useState} from 'react';
 import {object, string} from 'yup';
 
+import { AuthLayout } from '@layouts/authLayout';
 import {BackButton} from '@components/ui';
 import {BikeIcon} from '@assets/svg/BikeIcon';
 import {DefaultLayout} from '@layouts/default';
@@ -21,8 +22,10 @@ import {Platform} from 'react-native';
 import {SignupTop} from './components/signupTop';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {VehicleIcon} from '@assets/svg/VehicleIcon';
+import { authStore } from '@store/auth';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {navigate} from '@navigation/NavigationService';
+import { registerStoreType } from '@types/authType';
 
 interface SignUpStep3Type {
   route?: any;
@@ -65,7 +68,7 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
   }, [route.params]);
 
   return (
-    <DefaultLayout>
+    <AuthLayout>
       <Box flex={1} p={6}>
         <BackButton />
         <Formik
@@ -84,6 +87,11 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
                 vehicle_type: selectedVehicleType === 'bike' ? 1 : 2,
                 drivers_license_base64: 'data:image/png;base64,' + license,
               };
+              const det: registerStoreType = {
+                registerData: upd,
+                step: 4,
+              };
+              authStore.setRegisterData(det);
               navigate('SignUpStep4', {data: upd});
             }
           }}>
@@ -192,6 +200,7 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
                       label="Plate Number"
                       placeholder="Vehicle plate number"
                       onChangeText={handleChange('vehicle_plate_number')}
+                      caption="If your vehicle is a bicycle, then you can use bicycle has the text here, this would also be verified"
                       onBlur={handleBlur('vehicle_plate_number')}
                       errorMessage={errors.vehicle_plate_number}
                       hasError={
@@ -224,6 +233,6 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
           )}
         </Formik>
       </Box>
-    </DefaultLayout>
+    </AuthLayout>
   );
 };

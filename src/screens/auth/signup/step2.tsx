@@ -10,6 +10,7 @@ import {
 } from '@helpers/regex';
 import {object, ref, string} from 'yup';
 
+import {AuthLayout} from '@layouts/authLayout';
 import {BackButton} from '@components/ui';
 import {DefaultLayout} from '@layouts/default';
 import {Input} from '@components/inputs';
@@ -17,7 +18,9 @@ import {SignupTop} from './components/signupTop';
 import Toast from 'react-native-toast-message';
 import {__passwords__} from '@helpers/regex/constants';
 import {apiType} from '@types/apiTypes';
+import {authStore} from '@store/auth';
 import {navigate} from '@navigation/NavigationService';
+import {registerStoreType} from '@types/authType';
 import {useAuth} from '@hooks/useAuth';
 
 interface SignUpStep2Type {
@@ -29,8 +32,10 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
 
   const regData = route?.params?.data;
 
-  const {sendToken, sendEmailToken, checkIfEmailExist} = useAuth();
+  const {sendToken, checkIfPhoneExist, sendEmailToken, checkIfEmailExist} =
+    useAuth();
   const [emailGood, setEmailGood] = useState<boolean>(false);
+  const [phoneGood, setPhoneGood] = useState<boolean>(false);
 
   const emref: any = useRef(null);
 
@@ -66,6 +71,32 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
               setEmailGood(false);
               emref?.current?.setErrors({
                 ['email']: 'Could not validate email',
+              });
+            }
+          },
+        },
+      );
+    }
+  };
+
+  const checkPhoneNumber = (phone: string) => {
+    if (phone !== '') {
+      checkIfPhoneExist.mutate(
+        {phone_number: phone},
+        {
+          onSuccess: (val: apiType) => {
+            if (val.status) {
+              setPhoneGood(false);
+              emref?.current?.setErrors({
+                ['phone_number']: 'Phone number is already registered',
+              });
+            } else if (!val.status) {
+              setPhoneGood(true);
+              emref?.current?.setErrors({});
+            } else {
+              setPhoneGood(false);
+              emref?.current?.setErrors({
+                ['phone_number']: 'Could not validate phone number',
               });
             }
           },
@@ -129,7 +160,7 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
   // };
 
   return (
-    <DefaultLayout>
+    <AuthLayout>
       <Box flex={1} p={6}>
         <BackButton />
         <Formik
@@ -145,6 +176,11 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
           innerRef={emref}
           onSubmit={values => {
             const upd = {...regData, ...values};
+            const det: registerStoreType = {
+              registerData: upd,
+              step: 5,
+            };
+            authStore.setRegisterData(det);
             sendEmailToken.mutate(
               {
                 email: upd.email,
@@ -202,6 +238,7 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       onChangeText={handleChange('first_name')}
                       onBlur={handleBlur('first_name')}
                       errorMessage={errors.first_name}
+                      autoComplete="name"
                       hasError={
                         errors.first_name && touched.first_name ? true : false
                       }
@@ -215,6 +252,7 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       placeholder="Your legal last name"
                       onChangeText={handleChange('last_name')}
                       onBlur={handleBlur('last_name')}
+                      autoComplete="family-name"
                       errorMessage={errors.last_name}
                       hasError={
                         errors.last_name && touched.last_name ? true : false
@@ -229,6 +267,7 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       placeholder=""
                       onChangeText={handleChange('phone_number')}
                       onBlur={handleBlur('phone_number')}
+                      autoComplete="tel"
                       errorMessage={errors.phone_number}
                       hasError={
                         errors.phone_number && touched.phone_number
@@ -236,9 +275,19 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                           : false
                       }
                       value={values.phone_number}
-                      // py={Platform.OS === 'ios' ? 4 : 2}
+                      // onEndEditing={() => checkPhoneNumber(values.phone_number)}
                       keyboardType="phone-pad"
                     />
+                    {checkIfPhoneExist.isLoading && (
+                      <Box
+                        bg="themeLight.primary.light1"
+                        rounded="lg"
+                        px={2}
+                        position="absolute"
+                        right={0}>
+                        <Text>Validating...</Text>
+                      </Box>
+                    )}
                   </Box>
                   <Box w="full" mt={3}>
                     <Input
@@ -246,9 +295,11 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       placeholder="Your email address"
                       onChangeText={handleChange('email')}
                       onBlur={handleBlur('email')}
+                      autoComplete="email"
                       errorMessage={errors.email}
                       hasError={errors.email && touched.email ? true : false}
                       value={values.email}
+                      autoCapitalize="none"
                       // py={Platform.OS === 'ios' ? 4 : 2}
                       onEndEditing={() => checkEmail(values.email)}
                       keyboardType="email-address"
@@ -271,6 +322,7 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       isSecure
                       hasIcon
                       iconPosition="right"
+                      autoComplete="password"
                       onChangeText={handleChange('password')}
                       onBlur={handleBlur('password')}
                       errorMessage={errors.password}
@@ -288,6 +340,7 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
                       isSecure
                       hasIcon
                       iconPosition="right"
+                      autoComplete="password"
                       onChangeText={handleChange('confirm')}
                       onBlur={handleBlur('confirm')}
                       errorMessage={errors.confirm}
@@ -320,6 +373,6 @@ export const SignUpStep2 = (props: SignUpStep2Type) => {
           )}
         </Formik>
       </Box>
-    </DefaultLayout>
+    </AuthLayout>
   );
 };

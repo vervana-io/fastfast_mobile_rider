@@ -1,3 +1,4 @@
+import {AuthType, registerStoreType} from '@types/authType';
 import {
   clearPersistedStore,
   configurePersistable,
@@ -7,7 +8,6 @@ import {
 } from 'mobx-persist-store';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {AuthType} from '@types/authType';
 import NavigationService from '@navigation/NavigationService';
 import { addressesStore } from '@store/addresses';
 import { checklist } from '@store/checklist';
@@ -23,6 +23,7 @@ class AuthStore {
   deviceLocked: boolean = false;
   fcmToken: string = '';
   lastActivetime: number = 0;
+  registerData: Partial<registerStoreType> = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -45,6 +46,7 @@ class AuthStore {
         'deviceLocked',
         'email',
         'fcmToken',
+        'registerData',
       ],
     });
   }
@@ -53,6 +55,10 @@ class AuthStore {
     this.auth = auth;
     this.isLoggedIn = true;
     this.email = auth.user.email;
+  }
+
+  setRegisterData(data: registerStoreType) {
+    this.registerData = data;
   }
 
   setFcmToken(val: string) {

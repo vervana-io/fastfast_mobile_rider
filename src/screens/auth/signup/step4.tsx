@@ -13,6 +13,7 @@ import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
 import React, {useEffect, useState} from 'react';
 
 import {Alert} from 'react-native';
+import {AuthLayout} from '@layouts/authLayout';
 import {BackButton} from '@components/ui';
 import {DefaultLayout} from '@layouts/default';
 import {Input} from '@components/inputs';
@@ -21,6 +22,7 @@ import {SheetManager} from 'react-native-actions-sheet';
 import {SignupTop} from './components/signupTop';
 import Toast from 'react-native-toast-message';
 import {apiType} from '@types/apiTypes';
+import { authStore } from '@store/auth';
 import {bankTypes} from '@types/bankTypes';
 import {functions} from '@helpers/functions';
 import {getApiLevel} from 'react-native-device-info';
@@ -96,6 +98,10 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
         if (val.status) {
           // Alert.alert('Registration Successful');
           navigate('Auth', {screen: 'Completion'});
+          authStore.setRegisterData({
+            registerData: {},
+            step: undefined,
+          });
         }
       },
       onError: (e: any) => {
@@ -164,7 +170,7 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
   };
 
   useEffect(() => {
-    GeoLocate();
+    // GeoLocate();
   }, []);
 
   const doValidateBank = (number: string) => {
@@ -207,7 +213,7 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
   };
 
   return (
-    <DefaultLayout checkPermissions={true} hasPermissionSet={getLocation}>
+    <AuthLayout>
       <Box flex={1} p={6}>
         <BackButton />
         <VStack my={8}>
@@ -280,6 +286,6 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
           Create Account
         </Button>
       </Box>
-    </DefaultLayout>
+    </AuthLayout>
   );
 };
