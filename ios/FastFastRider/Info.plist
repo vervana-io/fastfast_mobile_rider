@@ -38,17 +38,17 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>FastFast Rider would like access to your camera</string>
+	<string>FastFast Rider would like access to your camera for identity purposes</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>FastFast Rider would like to access your location</string>
+	<string>FastFast Rider would like to access your location to enable you receive orders around you</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>FastFast Rider would like to access your location</string>
+	<string>FastFast Rider would like to access your location to enable you receive orders around you</string>
 	<key>NSMotionUsageDescription</key>
-	<string>FastFast Rider would like to access your location</string>
+	<string>FastFast Rider would like to access your location to enable you receive orders around you</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>FastFast Rider would like to access your gallery</string>
+	<string>FastFast Rider would like to access your gallery to enable you choose a stored product image</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>FastFast Rider would like to access your gallery</string>
+	<string>FastFast Rider would like to access your gallery to enable you choose a stored product image</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Rany.otf</string>
