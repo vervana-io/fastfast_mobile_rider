@@ -203,18 +203,23 @@ export const Input = React.forwardRef<typeof NBInput, InputProps>(
       <Box width={boxWidth}>
         <FormControl isRequired={isRequired} isInvalid={hasError}>
           <Stack>
-            <HStack justifyContent="space-between" alignItems="center" w="full">
-              <FormControl.Label>
-                <Text
-                  style={labelStyle}
-                  fontSize="14px"
-                  color="themeLight.gray.2"
-                  fontWeight="medium">
-                  {label}
-                </Text>
-              </FormControl.Label>
-              {labelElementRight}
-            </HStack>
+            {label && (
+              <HStack
+                justifyContent="space-between"
+                alignItems="center"
+                w="full">
+                <FormControl.Label>
+                  <Text
+                    style={labelStyle}
+                    fontSize="14px"
+                    color="themeLight.gray.2"
+                    fontWeight="medium">
+                    {label}
+                  </Text>
+                </FormControl.Label>
+                {labelElementRight}
+              </HStack>
+            )}
             <Box style={customStyle}>
               <NBInput
                 ref={ref}

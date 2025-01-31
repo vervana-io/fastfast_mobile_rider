@@ -49,6 +49,7 @@ const themeOverrides = {
         4: '#7E8480',
       },
     },
+    textSecondary: '#6F7175',
   },
   // fontConfig: {
   //   Inter: {

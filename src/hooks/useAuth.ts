@@ -1,9 +1,12 @@
 import {AuthType, registerFieldType} from '@types/authType';
 import {useMutation, useQuery} from 'react-query';
 
+import { SignUpStep1 } from '@screens/auth';
+import Toast from 'react-native-toast-message';
 import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
 import {http} from '../config';
+import { navigate } from '@navigation/NavigationService';
 
 export const useAuth = () => {
   const login = useMutation(
@@ -127,6 +130,74 @@ export const useAuth = () => {
     },
   );
 
+  const loginWithSSO = useMutation(
+    async (data: {
+      provider: 'google' | 'facebook' | 'apple';
+      token: string;
+      device_token: string;
+    }) => {
+      try {
+        const req: any = await http.post('auth/oauth_login', data);
+        return req.data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    {
+      onSuccess: (val: apiType) => {
+        if (val.status) {
+          const data: any = val.data;
+          const payload: AuthType = {
+            user: data.user,
+            rider: data.rider,
+            setting: data.setting,
+            token: data.access_token.token,
+            wallet: data.wallet,
+          };
+          authStore.setAuth(payload);
+        }
+      },
+    },
+  );
+
+  const registerWithSSO = useMutation(
+    async (data: registerFieldType) => {
+      try {
+        const req: any = await http.post('auth/oauth_register', data);
+        return req.data;
+      } catch (error: any) {
+        if (error.status === 500) {
+          Toast.show({
+            text1: 'Internal Server Error',
+            text2: 'Please try again later.',
+            type: 'error',
+          });
+          authStore.setRegisterData({
+            registerData: {},
+            step: undefined,
+          });
+          navigate('Auth', {screen: 'SignUpStep1'});
+        }
+        throw error;
+      }
+    },
+    {
+      onSuccess: (val: apiType) => {
+        if (val.status) {
+          const data: any = val.data;
+          const payload: AuthType = {
+            user: data.user,
+            rider: data.rider,
+            setting: data.setting,
+            token: data.access_token.token,
+            wallet: data.wallet,
+          };
+          authStore.setAuth(payload);
+        }
+      },
+    },
+  );
+
   return {
     login,
     register,
@@ -137,5 +208,7 @@ export const useAuth = () => {
     sendEmailToken,
     validateEmailToken,
     checkIfPhoneExist,
+    loginWithSSO,
+    registerWithSSO,
   };
 };

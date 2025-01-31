@@ -60,6 +60,7 @@ apiInstance.interceptors.response.use(
         detail: error.response?.data.detail,
         errors: error.response?.data.error,
       },
+      response: error.response?.data,
       status: error.response?.status ?? 0,
       statusText: error.response?.statusText,
     };

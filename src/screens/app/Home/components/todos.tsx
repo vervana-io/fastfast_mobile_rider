@@ -117,7 +117,7 @@ export const Todos = observer(() => {
                   </Center>
                 )}
                 <VStack>
-                  <Text>{el.title}</Text>
+                  <Text fontSize="md">{el.title}</Text>
                   <Text fontSize="xs">
                     Completion time: {el.completionTime}
                   </Text>

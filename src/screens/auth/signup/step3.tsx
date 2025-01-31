@@ -1,71 +1,52 @@
+import {Alert, Platform} from 'react-native';
+import {Box, Button, Text, VStack} from 'native-base';
+import {Field, Formik} from 'formik';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-  Box,
-  Button,
-  Center,
-  HStack,
-  Image,
-  Pressable,
-  Text,
-  VStack,
-} from 'native-base';
-import React, {useEffect, useState} from 'react';
-import {object, string} from 'yup';
+  isValidEmail,
+  isValidPassword,
+  isValidPhoneNumber,
+  isValidUsername,
+} from '@helpers/regex';
+import {object, ref, string} from 'yup';
 
-import { AuthLayout } from '@layouts/authLayout';
+import {AuthLayout} from '@layouts/authLayout';
 import {BackButton} from '@components/ui';
-import {BikeIcon} from '@assets/svg/BikeIcon';
 import {DefaultLayout} from '@layouts/default';
-import {Formik} from 'formik';
-import {ImageFillIcon} from '@assets/svg/ImageFillIcon';
 import {Input} from '@components/inputs';
-import {Platform} from 'react-native';
 import {SignupTop} from './components/signupTop';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import {VehicleIcon} from '@assets/svg/VehicleIcon';
-import { authStore } from '@store/auth';
-import {launchImageLibrary} from 'react-native-image-picker';
+import Toast from 'react-native-toast-message';
+import {__passwords__} from '@helpers/regex/constants';
+import {apiType} from '@types/apiTypes';
+import {authStore} from '@store/auth';
 import {navigate} from '@navigation/NavigationService';
-import { registerStoreType } from '@types/authType';
+import {observer} from 'mobx-react-lite';
+import {registerStoreType} from '@types/authType';
+import {useAuth} from '@hooks/useAuth';
 
-interface SignUpStep3Type {
+interface SignUpStep2Type {
   route?: any;
 }
 
-export const SignUpStep3 = (props: SignUpStep3Type) => {
+export const SignUpStep3 = observer((props: SignUpStep2Type) => {
   const {route} = props;
-  const [selectedVehicleType, setSelectedVehicleType] = useState<
-    'bike' | 'car' | 'none'
-  >('bike');
 
-  const regData = route?.params.params;
+  const regData = route?.params.data;
 
-  const [license, setLicense] = useState('l');
+  const {checkIfPhoneExist} = useAuth();
 
-  const pickImage = async () => {
-    await launchImageLibrary(
-      {
-        mediaType: 'photo',
-        includeBase64: true,
-      },
-      (response: any) => {
-        if (response.assets) {
-          const res = response?.assets[0].base64;
-          setLicense(res);
-        }
-      },
-    );
-  };
+  const emref: any = useRef(null);
 
-  const step2Shema = object({
-    vehicle_plate_number: string().required('Valid vehicle plate number'),
-    vehicle_brand: string().required('Valid vehicle brand is required'),
+  const step3Shema = object({
+    first_name: string().required('First name is required'),
+    last_name: string().required('Last name is required'),
+    phone_number: string().required('Your phone number is required'),
   });
-
   useEffect(() => {
-    console.log('=================Params===================');
-    console.log(route.params.params);
+    console.log('================step 3====================');
+    console.log(regData);
     console.log('====================================');
-  }, [route.params]);
+  }, [regData, regData?.registerData?.email]);
 
   return (
     <AuthLayout>
@@ -73,27 +54,20 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
         <BackButton />
         <Formik
           initialValues={{
-            vehicle_plate_number: '',
-            vehicle_brand: '',
+            first_name: regData?.registerData?.first_name ?? '',
+            last_name: regData?.registerData?.last_name ?? '',
+            phone_number: '',
           }}
-          validationSchema={step2Shema}
+          validationSchema={step3Shema}
+          innerRef={emref}
           onSubmit={values => {
-            if (license === 'l') {
-              setLicense('');
-            } else {
-              const upd = {
-                ...regData,
-                ...values,
-                vehicle_type: selectedVehicleType === 'bike' ? 1 : 2,
-                drivers_license_base64: 'data:image/png;base64,' + license,
-              };
-              const det: registerStoreType = {
-                registerData: upd,
-                step: 4,
-              };
-              authStore.setRegisterData(det);
-              navigate('SignUpStep4', {data: upd});
-            }
+            const upd = {...regData.registerData, ...values};
+            const det: registerStoreType = {
+              registerData: upd,
+              step: 4,
+            };
+            authStore.setRegisterData(det);
+            navigate('SignUpStep4', {params: det});
           }}>
           {({
             handleChange,
@@ -105,113 +79,75 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
           }) => (
             <>
               <VStack my={8}>
-                <SignupTop title="Verification" percentage="75" />
-                <VStack space={1} mt={6}>
-                  <Box w="full" h="159px" borderWidth={1} borderStyle="dashed">
-                    <Pressable flex={1} onPress={() => pickImage()}>
-                      <Center flex={1}>
-                        {license !== 'l' && license !== '' ? (
-                          <Image
-                            w="100%"
-                            h="100%"
-                            source={{
-                              uri: 'data:image/png;base64,' + license,
-                            }}
-                            alt="Licence image"
-                            rounded="md"
-                          />
-                        ) : (
-                          <>
-                            <ImageFillIcon />
-                            <Text fontWeight="bold">
-                              Tap to upload driver’s license
-                            </Text>
-                            <Text>png or jpg format. 5MB max</Text>
-                          </>
-                        )}
-                      </Center>
-                    </Pressable>
+                <SignupTop title="Personal Details" percentage="50" />
+                <Text my={6}>Please fill in your personal details</Text>
+                <VStack space={1}>
+                  {/* <Box w="full" mt={3}>
+      <Input
+        label="User Name"
+        placeholder="Choose a username"
+        value={username}
+        py={Platform.OS === 'ios' ? 4 : 2}
+        onChangeText={e => setUsername(e)}
+      />
+    </Box> */}
+                  <Box w="full" mt={3}>
+                    <Input
+                      label="First Name"
+                      placeholder="Your legal first name"
+                      onChangeText={handleChange('first_name')}
+                      onBlur={handleBlur('first_name')}
+                      errorMessage={errors.first_name}
+                      autoComplete="name"
+                      hasError={
+                        errors.first_name && touched.first_name ? true : false
+                      }
+                      value={values.first_name}
+                      // py={Platform.OS === 'ios' ? 4 : 2}
+                    />
                   </Box>
-                  {license === '' && (
-                    <Text fontSize="xs" color="red.500">
-                      You must upload a drivers licence
-                    </Text>
-                  )}
-                  <Box my={5}>
-                    <Text color="themeLight.gray.2">Vehicle Type</Text>
-                    {selectedVehicleType === 'none' && (
-                      <Text fontSize="xs" color="red.500">
-                        You must choose a vehicle type
-                      </Text>
+                  <Box w="full" mt={3}>
+                    <Input
+                      label="Last Name"
+                      placeholder="Your legal last name"
+                      onChangeText={handleChange('last_name')}
+                      onBlur={handleBlur('last_name')}
+                      autoComplete="family-name"
+                      errorMessage={errors.last_name}
+                      hasError={
+                        errors.last_name && touched.last_name ? true : false
+                      }
+                      value={values.last_name}
+                      // py={Platform.OS === 'ios' ? 4 : 2}
+                    />
+                  </Box>
+                  <Box w="full" mt={3}>
+                    <Input
+                      label="Phone Number"
+                      placeholder=""
+                      onChangeText={handleChange('phone_number')}
+                      onBlur={handleBlur('phone_number')}
+                      autoComplete="tel"
+                      errorMessage={errors.phone_number}
+                      hasError={
+                        errors.phone_number && touched.phone_number
+                          ? true
+                          : false
+                      }
+                      value={values.phone_number}
+                      // onEndEditing={() => checkPhoneNumber(values.phone_number)}
+                      keyboardType="phone-pad"
+                    />
+                    {checkIfPhoneExist.isLoading && (
+                      <Box
+                        bg="themeLight.primary.light1"
+                        rounded="lg"
+                        px={2}
+                        position="absolute"
+                        right={0}>
+                        <Text>Validating...</Text>
+                      </Box>
                     )}
-                    <Center mt={4}>
-                      <HStack space={5}>
-                        <TouchableOpacity
-                          onPress={() => setSelectedVehicleType('bike')}>
-                          <Center
-                            w="100px"
-                            h="102px"
-                            borderWidth={1}
-                            borderColor={
-                              selectedVehicleType === 'bike'
-                                ? 'themeLight.accent'
-                                : 'themeLight.gray.3'
-                            }
-                            rounded="lg">
-                            <BikeIcon />
-                          </Center>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => setSelectedVehicleType('car')}>
-                          <Center
-                            w="100px"
-                            h="102px"
-                            borderWidth={1}
-                            borderColor={
-                              selectedVehicleType === 'car'
-                                ? 'themeLight.accent'
-                                : 'themeLight.gray.3'
-                            }
-                            rounded="lg">
-                            <VehicleIcon />
-                          </Center>
-                        </TouchableOpacity>
-                      </HStack>
-                    </Center>
-                  </Box>
-                  <Box w="full" mt={3}>
-                    <Input
-                      label="Vehicle Brand"
-                      placeholder="Brand of vehicle"
-                      onChangeText={handleChange('vehicle_brand')}
-                      onBlur={handleBlur('vehicle_brand')}
-                      errorMessage={errors.vehicle_brand}
-                      hasError={
-                        errors.vehicle_brand && touched.vehicle_brand
-                          ? true
-                          : false
-                      }
-                      value={values.vehicle_brand}
-                      py={Platform.OS === 'ios' ? 4 : 2}
-                    />
-                  </Box>
-                  <Box w="full" mt={3}>
-                    <Input
-                      label="Plate Number"
-                      placeholder="Vehicle plate number"
-                      onChangeText={handleChange('vehicle_plate_number')}
-                      caption="If your vehicle is a bicycle, then you can use bicycle has the text here, this would also be verified"
-                      onBlur={handleBlur('vehicle_plate_number')}
-                      errorMessage={errors.vehicle_plate_number}
-                      hasError={
-                        errors.vehicle_plate_number &&
-                        touched.vehicle_plate_number
-                          ? true
-                          : false
-                      }
-                      value={values.vehicle_plate_number}
-                      py={Platform.OS === 'ios' ? 4 : 2}
-                    />
                   </Box>
                 </VStack>
               </VStack>
@@ -235,4 +171,4 @@ export const SignUpStep3 = (props: SignUpStep3Type) => {
       </Box>
     </AuthLayout>
   );
-};
+});

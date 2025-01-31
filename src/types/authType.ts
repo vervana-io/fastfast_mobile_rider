@@ -70,13 +70,15 @@ export interface loginFieldType {
 }
 
 export interface registerFieldType {
+  provider?: string;
+  token?: string;
   phone_number?: string;
   email?: string;
   password?: string;
   first_name?: string;
   last_name?: string;
-  latitude?: string;
-  longitude?: string;
+  // latitude?: string;
+  // longitude?: string;
   contract_type?: number;
   shift_type?: number;
   shift_data?: number[];
@@ -113,4 +115,5 @@ export interface bioLoginFieldType {
 export interface registerStoreType {
   step: number | undefined;
   registerData: registerFieldType;
+  method?: 'provider' | 'route' | 'none';
 }

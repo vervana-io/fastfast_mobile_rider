@@ -10,18 +10,18 @@ export const AuthLayout = (props: layoutProps) => {
   return (
     <>
       {Platform.OS === 'android' && <Box safeAreaTop bg={statusBarColor} />}
-      <Box safeAreaTop flex={1} bg="white">
+      <Box safeAreaTop flex={1} bg="#009655">
         <StatusBar
           backgroundColor={statusBarColor}
-          barStyle={
-            statusBarColor === 'white' ? 'dark-content' : 'light-content'
-          }
+          barStyle={'light-content'}
         />
         <KeyboardAvoiding
           refreshable={false}
           shouldRefresh={false}
           paddingBottom={0}>
-          {children}
+          <Box bg="themeLight.primary.light2" flex={1}>
+            {children}
+          </Box>
         </KeyboardAvoiding>
       </Box>
     </>

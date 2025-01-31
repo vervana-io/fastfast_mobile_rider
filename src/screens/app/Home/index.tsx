@@ -170,13 +170,13 @@ export const Home = observer((props: HomeProps) => {
             text2: 'Location services timeout, retrying...',
           });
         } else if (error.code === 1) {
-          Toast.show({
-            type: 'error',
-            text1: 'Location',
-            text2:
-              'Location services are disabled, you need to permit this app to use location services',
-            autoHide: false,
-          });
+          // Toast.show({
+          //   type: 'error',
+          //   text1: 'Location',
+          //   text2:
+          //     'Location services are disabled, you need to permit this app to use location services',
+          //   autoHide: false,
+          // });
         } else if (error.code === 2) {
           Toast.show({
             type: 'error',
@@ -686,12 +686,12 @@ export const Home = observer((props: HomeProps) => {
     }
   }, [GeoLocate, isForeground]);
 
-  // useEffect(() => {
-  //   return Geolocation.setRNConfiguration({
-  //     enableBackgroundLocationUpdates: true,
-  //     skipPermissionRequests: false,
-  //   });
-  // }, []);
+  useEffect(() => {
+    // return Geolocation.setRNConfiguration({
+    //   enableBackgroundLocationUpdates: true,
+    //   skipPermissionRequests: false,
+    // });
+  }, []);
 
   return (
     <DefaultLayout

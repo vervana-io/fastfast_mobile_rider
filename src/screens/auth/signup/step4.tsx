@@ -3,212 +3,168 @@ import {
   Button,
   Center,
   HStack,
-  Link,
+  Image,
   Pressable,
-  SearchIcon,
   Text,
   VStack,
 } from 'native-base';
-import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
 import React, {useEffect, useState} from 'react';
+import {object, string} from 'yup';
 
-import {Alert} from 'react-native';
 import {AuthLayout} from '@layouts/authLayout';
 import {BackButton} from '@components/ui';
-import {DefaultLayout} from '@layouts/default';
+import {BikeIcon} from '@assets/svg/BikeIcon';
+import {Formik} from 'formik';
+import {ImageFillIcon} from '@assets/svg/ImageFillIcon';
 import {Input} from '@components/inputs';
-import PermissionManager from '@handlers/permissionHandler';
-import {SheetManager} from 'react-native-actions-sheet';
+import {Platform} from 'react-native';
 import {SignupTop} from './components/signupTop';
 import Toast from 'react-native-toast-message';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+import {VehicleIcon} from '@assets/svg/VehicleIcon';
 import {apiType} from '@types/apiTypes';
-import { authStore } from '@store/auth';
-import {bankTypes} from '@types/bankTypes';
-import {functions} from '@helpers/functions';
+import {authStore} from '@store/auth';
 import {getApiLevel} from 'react-native-device-info';
-import {navigate} from '@navigation/NavigationService';
-import {showMessage} from 'react-native-flash-message';
+import {launchImageLibrary} from 'react-native-image-picker';
+import messaging from '@react-native-firebase/messaging';
 import {useAuth} from '@hooks/useAuth';
-import {useBanks} from '@hooks/useBanks';
-import {useGeolocation} from '@hooks/useGeoLocation';
 
 interface SignUpStep4Type {
   route?: any;
+  navigation?: any;
 }
 
 export const SignUpStep4 = (props: SignUpStep4Type) => {
-  const {route} = props;
+  const {route, navigation} = props;
 
-  const regData = route?.params?.data;
+  const regData = route?.params.params;
 
-  const [bankName, setBankName] = useState<Partial<bankTypes>>({});
-  const [location, setLocation] = useState<GeoPosition | null>(null);
-  const [accountNumber, setAccountNumber] = useState('');
-  const [validatedName, setValidatedName] = useState<{
-    account_number: string;
-    account_name: string;
-  }>({});
+  const {register, registerWithSSO} = useAuth();
 
-  const {register} = useAuth();
-  const {validateBank} = useBanks();
-  const {geoCode} = useGeolocation();
+  const [selectedVehicleType, setSelectedVehicleType] = useState<
+    'bike' | 'car' | 'none'
+  >('bike');
 
-  const GeoLocate = () => {
-    Geolocation.getCurrentPosition(
-      position => {
-        setLocation(position);
-        console.log(position);
-      },
-      error => {
-        // Alert.alert(`Code ${error.code}`, error.message);
-        setLocation(null);
-        console.log(error);
-      },
+  const [license, setLicense] = useState('l');
+
+  const pickImage = async () => {
+    await launchImageLibrary(
       {
-        accuracy: {
-          android: 'high',
-          ios: 'best',
-        },
-        enableHighAccuracy: false,
-        timeout: 15000,
-        maximumAge: 10000,
-        distanceFilter: 0,
-        forceRequestLocation: true,
-        forceLocationManager: true,
-        showLocationDialog: true,
+        mediaType: 'photo',
+        includeBase64: true,
+      },
+      (response: any) => {
+        if (response.assets) {
+          const res = response?.assets[0].base64;
+          setLicense(res);
+        }
       },
     );
   };
 
-  const proceed = async () => {
-    const deviceId = await getApiLevel();
-    const payload = {
-      latitude: location?.coords.latitude ?? '0',
-      longitude: location?.coords.longitude ?? '0',
-      bank_name: bankName.name,
-      bank_code: bankName.code,
-      account_number: validatedName.account_number,
-      account_name: validatedName.account_name,
-      device_version: deviceId.toString(),
-    };
-    const upd = {...regData, ...payload};
-    // console.log(upd);
-    register.mutate(upd, {
-      onSuccess: (val: apiType) => {
-        if (val.status) {
-          // Alert.alert('Registration Successful');
-          navigate('Auth', {screen: 'Completion'});
-          authStore.setRegisterData({
-            registerData: {},
-            step: undefined,
-          });
-        }
-      },
-      onError: (e: any) => {
-        const errorS = e.data.errors;
-        console.log('error', errorS);
-        for (const key in errorS) {
-          if (Object.prototype.hasOwnProperty.call(errorS, key)) {
-            const el = errorS[key];
-            Toast.show({
-              type: 'error',
-              text1: 'Create Account',
-              text2: el,
-            });
-          }
-        }
-      },
-    });
-
-    // geoCode.mutate(
-    //   {
-    //     lat: location?.coords.latitude ?? 0,
-    //     lng: location?.coords.longitude ?? 0,
-    //   },
-    //   {
-    //     onSuccess: val => {
-    //       const res = val.results[0];
-    //       console.log('val', JSON.stringify(res));
-    //       const payload = {
-    //         city: functions.filterGeoData(
-    //           'administrative_area_level_2',
-    //           res?.address_components,
-    //         )?.long_name,
-    //         state: functions.filterGeoData(
-    //           'administrative_area_level_1',
-    //           res?.address_components,
-    //         )?.long_name,
-    //         house_number:
-    //           functions.filterGeoData('street_number', res?.address_components)
-    //             ?.long_name ?? '0',
-    //         street:
-    //           functions.filterGeoData('route', res?.address_components)
-    //             ?.long_name +
-    //           ' - ' +
-    //           functions.filterGeoData('neighborhood', res?.address_components)
-    //             ?.long_name,
-    //         nearest_bus_stop: functions.filterGeoData(
-    //           'neighborhood',
-    //           res?.address_components,
-    //         )?.long_name,
-    //         // latitude: val?.geometry.location.lat.toString() ?? '0',
-    //         // longitude: val?.geometry.location.lng.toString() ?? '0',
-    //         country: 'Nigeria',
-    //         is_primary: 1,
-    //       };
-    //       console.log('result', payload);
-    //     },
-    //   },
-    // );
-  };
-
-  const openBank = async () => {
-    const banks = await SheetManager.show('bankSheet');
-    if (banks) {
-      setBankName(banks);
-    }
-  };
+  const step2Shema = object({
+    vehicle_plate_number: string().required('Valid vehicle plate number'),
+    vehicle_brand: string().required('Valid vehicle brand is required'),
+  });
 
   useEffect(() => {
-    // GeoLocate();
-  }, []);
+    console.log('=================Params===================');
+    console.log(regData);
+    console.log('====================================');
+  }, [regData]);
 
-  const doValidateBank = (number: string) => {
-    validateBank.mutate(
-      {
-        account_number: number,
-        bank_code: bankName.code?.toString() ?? '',
-      },
-      {
+  const proceed = async (values: any) => {
+    const token = await messaging().getToken();
+    const dpd = {
+      ...regData.registerData,
+      ...values,
+      vehicle_type: selectedVehicleType === 'bike' ? 1 : 2,
+      drivers_license_base64: 'data:image/png;base64,' + license,
+      device_token: token,
+    };
+    const deviceId = await getApiLevel();
+    const payload = {
+      // latitude: '0',
+      // longitude: '0',
+      device_version: deviceId.toString(),
+    };
+    const upd = {...dpd, ...payload};
+    if (regData.registerData.provider) {
+      registerWithSSO.mutate(upd, {
         onSuccess: (val: apiType) => {
+          console.log('====================sso================');
+          console.log(val);
+          console.log('====================================');
           if (val.status) {
-            const data: any = val.data;
-            setValidatedName(data);
+            // Alert.alert('Registration Successful');
+            navigation.navigate('Auth', {screen: 'Completion'});
+            authStore.setRegisterData({
+              registerData: {},
+              step: undefined,
+            });
           } else {
-            showMessage({
-              type: 'warning',
-              message: 'We could not validate your account',
+            Toast.show({
+              type: 'error',
+              text1: 'Rider Registration',
+              text2: val.message,
             });
           }
         },
-      },
-    );
-  };
-
-  const getLocation = (res: boolean) => {
-    if (res) {
-      GeoLocate();
-    }
-  };
-
-  const callValidate = (val: string) => {
-    setAccountNumber(val);
-    console.log('length', val.length);
-    if (val !== '') {
-      if (val.length > 9) {
-        console.log('greater than 9');
-        doValidateBank(val);
-      }
+        onError: (e: any) => {
+          const errorS = e.status;
+          console.log('error', errorS);
+          if (errorS === 401) {
+            Toast.show({
+              type: 'error',
+              text1: 'Rider Registration',
+              text2: e.response.message,
+            });
+          }
+          for (const key in errorS) {
+            if (Object.prototype.hasOwnProperty.call(errorS, key)) {
+              const el = errorS[key];
+              Toast.show({
+                type: 'error',
+                text1: 'Create Account',
+                text2: el,
+              });
+            }
+          }
+        },
+      });
+    } else {
+      register.mutate(upd, {
+        onSuccess: (val: apiType) => {
+          if (val.status) {
+            // Alert.alert('Registration Successful');
+            navigation.navigate('Auth', {screen: 'Completion'});
+            authStore.setRegisterData({
+              registerData: {},
+              step: undefined,
+            });
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: 'Rider Registration',
+              text2: val.message,
+            });
+          }
+        },
+        onError: (e: any) => {
+          const errorS = e.status;
+          console.log('error status', errorS);
+          for (const key in errorS) {
+            if (Object.prototype.hasOwnProperty.call(errorS, key)) {
+              const el = errorS[key];
+              Toast.show({
+                type: 'error',
+                text1: 'Create Account',
+                text2: el,
+              });
+            }
+          }
+        },
+      });
     }
   };
 
@@ -216,75 +172,160 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
     <AuthLayout>
       <Box flex={1} p={6}>
         <BackButton />
-        <VStack my={8}>
-          <SignupTop title="Banking Details" percentage="100" />
-          <VStack space={1} my={6}>
-            <Box w="full" mt={3}>
-              <Pressable onPress={openBank}>
-                <Box
-                  borderWidth={1}
-                  rounded="lg"
-                  justifyContent="center"
-                  px={4}
-                  borderColor="themeLight.gray.3"
-                  h="52px">
-                  <HStack justifyContent="space-between">
-                    <Text>
-                      {bankName.id ? bankName.name : 'Choose your bank'}
+        <Formik
+          initialValues={{
+            latitude: '0',
+            longitude: '0',
+            vehicle_plate_number: '',
+            vehicle_brand: '',
+          }}
+          validationSchema={step2Shema}
+          onSubmit={values => {
+            if (license === 'l') {
+              setLicense('');
+            } else {
+              proceed(values);
+            }
+          }}>
+          {({
+            handleChange,
+            handleSubmit,
+            handleBlur,
+            touched,
+            errors,
+            values,
+          }) => (
+            <>
+              <VStack my={8}>
+                <SignupTop title="Verification" percentage="75" />
+                <VStack space={1} mt={6}>
+                  <Box w="full" h="159px" borderWidth={1} borderStyle="dashed">
+                    <Pressable flex={1} onPress={() => pickImage()}>
+                      <Center flex={1}>
+                        {license !== 'l' && license !== '' ? (
+                          <Image
+                            w="100%"
+                            h="100%"
+                            source={{
+                              uri: 'data:image/png;base64,' + license,
+                            }}
+                            alt="Licence image"
+                            rounded="md"
+                          />
+                        ) : (
+                          <>
+                            <ImageFillIcon />
+                            <Text fontWeight="bold">
+                              Tap to upload driver’s license
+                            </Text>
+                            <Text>png or jpg format. 5MB max</Text>
+                          </>
+                        )}
+                      </Center>
+                    </Pressable>
+                  </Box>
+                  {license === '' && (
+                    <Text fontSize="xs" color="red.500">
+                      You must upload a drivers licence
                     </Text>
-                    <SearchIcon color="themeLight.accent" size={5} />
-                  </HStack>
-                </Box>
-              </Pressable>
-            </Box>
-            <Box w="full" mt={3}>
-              <Input
-                label="Account Number"
-                placeholder=""
-                keyboardType="number-pad"
-                value={accountNumber}
+                  )}
+                  <Box my={5}>
+                    <Text color="themeLight.gray.2">Vehicle Type</Text>
+                    {selectedVehicleType === 'none' && (
+                      <Text fontSize="xs" color="red.500">
+                        You must choose a vehicle type
+                      </Text>
+                    )}
+                    <Center mt={4}>
+                      <HStack space={5}>
+                        <TouchableOpacity
+                          onPress={() => setSelectedVehicleType('bike')}>
+                          <Center
+                            w="100px"
+                            h="102px"
+                            borderWidth={1}
+                            borderColor={
+                              selectedVehicleType === 'bike'
+                                ? 'themeLight.accent'
+                                : 'themeLight.gray.3'
+                            }
+                            rounded="lg">
+                            <BikeIcon />
+                          </Center>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => setSelectedVehicleType('car')}>
+                          <Center
+                            w="100px"
+                            h="102px"
+                            borderWidth={1}
+                            borderColor={
+                              selectedVehicleType === 'car'
+                                ? 'themeLight.accent'
+                                : 'themeLight.gray.3'
+                            }
+                            rounded="lg">
+                            <VehicleIcon />
+                          </Center>
+                        </TouchableOpacity>
+                      </HStack>
+                    </Center>
+                  </Box>
+                  <Box w="full" mt={3}>
+                    <Input
+                      label="Vehicle Brand"
+                      placeholder="Brand of vehicle"
+                      onChangeText={handleChange('vehicle_brand')}
+                      onBlur={handleBlur('vehicle_brand')}
+                      errorMessage={errors.vehicle_brand}
+                      hasError={
+                        errors.vehicle_brand && touched.vehicle_brand
+                          ? true
+                          : false
+                      }
+                      value={values.vehicle_brand}
+                      py={Platform.OS === 'ios' ? 4 : 2}
+                    />
+                  </Box>
+                  <Box w="full" mt={3}>
+                    <Input
+                      label="Plate Number"
+                      placeholder="Vehicle plate number"
+                      onChangeText={handleChange('vehicle_plate_number')}
+                      caption="If your vehicle is a bicycle, then you can use bicycle has the text here, this would also be verified"
+                      onBlur={handleBlur('vehicle_plate_number')}
+                      errorMessage={errors.vehicle_plate_number}
+                      hasError={
+                        errors.vehicle_plate_number &&
+                        touched.vehicle_plate_number
+                          ? true
+                          : false
+                      }
+                      value={values.vehicle_plate_number}
+                      py={Platform.OS === 'ios' ? 4 : 2}
+                    />
+                  </Box>
+                </VStack>
+              </VStack>
+              <Button
+                w="full"
+                rounded="60px"
                 py={4}
-                onChangeText={e => callValidate(e)}
-                // onEndEditing={() => doValidateBank()}
-                caption={validatedName.account_name}
-              />
-              {validateBank.isLoading && (
-                <Box
-                  bg="themeLight.primary.light1"
-                  rounded="lg"
-                  px={2}
-                  position="absolute"
-                  right={0}>
-                  <Text>Validating...</Text>
-                </Box>
-              )}
-              {validateBank.isError && !validateBank.isLoading && (
-                <Link
-                  isUnderlined={false}
-                  bg="themeLight.primary.light1"
-                  rounded="lg"
-                  px={2}
-                  position="absolute"
-                  right={0}>
-                  Try again
-                </Link>
-              )}
-            </Box>
-          </VStack>
-        </VStack>
-        <Button
-          w="full"
-          rounded="60px"
-          py={4}
-          mb={3}
-          isDisabled={validatedName.account_name ? false : true}
-          onPress={proceed}
-          isLoading={register.isLoading}
-          isLoadingText="Processing..."
-          bg="themeLight.accent"
-          _text={{color: 'white', fontWeight: 'bold', fontFamily: 'body'}}>
-          Create Account
-        </Button>
+                mb={3}
+                onPress={() => handleSubmit()}
+                isLoading={register.isLoading || registerWithSSO.isLoading}
+                isLoadingText="Processing..."
+                bg="themeLight.accent"
+                _text={{
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontFamily: 'body',
+                }}>
+                Create Account
+              </Button>
+            </>
+          )}
+        </Formik>
       </Box>
     </AuthLayout>
   );

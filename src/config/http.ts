@@ -2,7 +2,7 @@ import {apiInstance} from './axios';
 // import {BASE_URL} from 'react-native-dotenv';
 import {authStore} from '@store/auth';
 
-const BASE_URL = __DEV__ ? process.env.BASE_URL_DEV : process.env.BASE_URL_PROD;
+const BASE_URL = __DEV__ ? process.env.BASE_URL_DEV : process.env.BASE_URL_DEV;
 
 class Http {
   async get(path: string, options: any = {}) {

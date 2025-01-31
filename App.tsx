@@ -34,6 +34,7 @@ export default function App() {
     'If you do not provide children',
     'VirtualizedLists should',
     '[Reanimated] Reading from `value`',
+    'This task',
   ]);
 
   crashlytics().log('App mounted.'); // firebase crashlytics

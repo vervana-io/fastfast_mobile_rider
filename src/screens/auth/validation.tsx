@@ -255,11 +255,11 @@ export const Validation = (props: ValidationType) => {
   const proceed = () => {
     if (redirectRule.status) {
       const det: registerStoreType = {
-        registerData: params.data,
-        step: 3,
+        registerData: params.data.registerData,
+        step: 2,
       };
       authStore.setRegisterData(det);
-      navigation.navigate(redirectRule.route, {params: params.data});
+      navigation.navigate(redirectRule.route, {params: det});
     } else {
       doRegister();
     }

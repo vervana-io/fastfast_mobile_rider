@@ -18,6 +18,7 @@ export interface ApiErrorType {
     detail: string;
     errors: {};
   };
+  response: object;
   status: number;
   statusText: string | undefined;
 }
