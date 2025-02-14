@@ -46,11 +46,12 @@ import {functions} from '@helpers/functions';
 import {markersType} from '@types/mapTypes';
 import {myLocationNotification} from '@handlers/localNotifications';
 import {observer} from 'mobx-react-lite';
-import { orderType } from '@types/index';
+import {orderType} from '@types/index';
 import {ordersStore} from '@store/orders';
 import {rootConfig} from '@store/root';
 import {useAppState} from '@hooks/useAppState';
 import {useDrawerStatus} from '@react-navigation/drawer';
+import {useIsFocused} from '@react-navigation/native';
 import {useOrders} from '@hooks/useOrders';
 import useSocket from '@hooks/useSocket';
 import {useUser} from '@hooks/useUser';
@@ -70,6 +71,8 @@ export const Home = observer((props: HomeProps) => {
     AppState.currentState,
   );
   const [shouldCheckPerms, setShouldCheckPerms] = useState(false);
+
+  const isFocussed = useIsFocused();
 
   const [ridersPosition, setRidersPosition] = useState({
     // title: 'You',
@@ -102,7 +105,10 @@ export const Home = observer((props: HomeProps) => {
   const selectedOrder = ordersStore.selectedOrder;
   const address = addressesStore.selectedAddress;
 
-  const {toggleOnlineStatus, userDetails} = useUser({enableFetchAddress: true});
+  const {toggleOnlineStatus, userDetails} = useUser({
+    enableFetchAddress: true,
+    enableFetchUser: true,
+  });
   const {fetchOngoingOrders} = useOrders();
   const ordersOngoingCount = ordersStore.ongoingOrderCount;
   const [subscriptionId, setSubscriptionId] = useState<number | null>(null);
@@ -687,11 +693,13 @@ export const Home = observer((props: HomeProps) => {
   }, [GeoLocate, isForeground]);
 
   useEffect(() => {
-    // return Geolocation.setRNConfiguration({
-    //   enableBackgroundLocationUpdates: true,
-    //   skipPermissionRequests: false,
-    // });
-  }, []);
+    if (isFocussed && isForeground) {
+      console.log('====================================');
+      console.log('a tive');
+      console.log('====================================');
+      userDetails.refetch();
+    }
+  }, [isFocussed, isForeground]);
 
   return (
     <DefaultLayout
