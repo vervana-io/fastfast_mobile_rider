@@ -82,7 +82,7 @@ export const checkApplicationNotificationPermission = async () => {
 //method was called to listener events from firebase for notification triger
 export function registerListenerWithFCM() {
   const unsubscribe = messaging().onMessage(async remoteMessage => {
-    console.log('onMessage Received : ', JSON.stringify(remoteMessage));
+    // console.log('onMessage Received : ', JSON.stringify(remoteMessage));
     if (
       remoteMessage?.notification?.title &&
       remoteMessage?.notification?.body
@@ -115,6 +115,7 @@ export function registerListenerWithFCM() {
 
   messaging().onNotificationOpenedApp(async remoteMessage => {
     ordersStore.setNotifiedOrder(remoteMessage.data);
+    playEffectForNotifications();
 
     console.log(
       'onNotificationOpenedApp Received',
@@ -130,6 +131,7 @@ export function registerListenerWithFCM() {
     .then(remoteMessage => {
       if (remoteMessage) {
         ordersStore.setNotifiedOrder(remoteMessage.data);
+        playEffectForNotifications();
 
         console.log(
           'Notification caused app to open from quit state:',
@@ -148,7 +150,8 @@ export function clearNotificationById(id: string) {
 
 //method was called to display notification
 async function onDisplayNotification(title, body, data) {
-  console.log('onDisplayNotification Adnan: ', JSON.stringify(data));
+  // console.log('onDisplayNotification Adnan: ', JSON.stringify(data));
+  playEffectForNotifications();
   // Request permissions (required for iOS)
   await notifee.requestPermission();
   // Create a channel (required for Android)

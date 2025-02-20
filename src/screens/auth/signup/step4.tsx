@@ -75,21 +75,19 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
 
   const proceed = async (values: any) => {
     const token = await messaging().getToken();
+    const deviceId = await getApiLevel();
+    const regD = regData.registerData ? regData.registerData : regData;
     const dpd = {
-      ...regData.registerData,
+      ...regD,
       ...values,
       vehicle_type: selectedVehicleType === 'bike' ? 1 : 2,
       drivers_license_base64: 'data:image/png;base64,' + license,
       device_token: token,
-    };
-    const deviceId = await getApiLevel();
-    const payload = {
-      // latitude: '0',
-      // longitude: '0',
       device_version: deviceId.toString(),
     };
-    const upd = {...dpd, ...payload};
-    if (regData.registerData.provider) {
+
+    const upd = dpd;
+    if (regData.registerData?.provider) {
       registerWithSSO.mutate(upd, {
         onSuccess: (val: apiType) => {
           console.log('====================sso================');

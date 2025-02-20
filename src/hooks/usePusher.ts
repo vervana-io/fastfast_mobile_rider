@@ -47,7 +47,7 @@ export const UsePusher = (): PusherHookReturn => {
             console.log(`Member removed: ${member}`);
           },
           onEvent: (event: PusherEvent) => {
-            console.log(`Event received: ${event}`);
+            // console.log(`Event received: ${event}`);
             callback(event);
           },
         });

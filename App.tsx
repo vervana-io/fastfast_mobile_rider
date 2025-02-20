@@ -16,6 +16,7 @@ import {ErrorFallback} from '@components/utils';
 import FlashMessage from 'react-native-flash-message';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {LogBox} from 'react-native';
+import { NeedsUpdateModal } from '@components/ui';
 import {QueryClientProvider} from 'react-query';
 import Toast from 'react-native-toast-message';
 import {authStore} from '@store/auth';
@@ -113,6 +114,7 @@ export default function App() {
             </ErrorBoundary>
             <Toast config={toastConfig} />
             <FlashMessage position="bottom" />
+            <NeedsUpdateModal />
           </GestureHandlerRootView>
         </NativeBaseProvider>
       </QueryClientProvider>

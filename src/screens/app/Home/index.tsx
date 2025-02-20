@@ -694,9 +694,6 @@ export const Home = observer((props: HomeProps) => {
 
   useEffect(() => {
     if (isFocussed && isForeground) {
-      console.log('====================================');
-      console.log('a tive');
-      console.log('====================================');
       userDetails.refetch();
     }
   }, [isFocussed, isForeground]);

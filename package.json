@@ -85,6 +85,7 @@
     "react-query": "^3.39.3",
     "rn-flipper-async-storage-advanced": "^1.0.5",
     "socket.io-client": "^4.8.0",
+    "sp-react-native-in-app-updates": "^1.4.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {
