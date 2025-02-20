@@ -55,10 +55,22 @@ export const useTransactions = () => {
     },
   );
 
+  const doWithdrawal = useMutation(
+    async (data: {bank_account_id: number; amount: number}) => {
+      try {
+        const req: any = await http.post('transactions/withdraw', data);
+        return req.data;
+      } catch (error) {
+        return error;
+      }
+    },
+  );
+
   return {
     fetchTransactions,
     transactionStates: {
       transactionsData,
     },
+    doWithdrawal,
   };
 };

@@ -1,21 +1,32 @@
 import {
+  clearPersistedStore,
   configurePersistable,
   getPersistedStore,
   makePersistable,
   stopPersisting,
 } from 'mobx-persist-store';
-import {orderType, orderTypes} from '@types/orderTypes';
+import {notificationsType, orderType} from '@types/orderTypes';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Notification} from '@notifee/react-native';
 import {makeAutoObservable} from 'mobx';
+import { playEffectForNotifications } from '@handlers/playEffect';
+
+interface hasArrivedType {
+  order_id: number;
+  has_arrived: boolean;
+}
 
 class OrdersStore {
-  notifiedOrder: Notification = {};
-  orders: orderTypes[] = [];
+  notifiedOrder: Partial<notificationsType> = {};
+  orders: orderType[] = [];
   ongoingOrderCount: number = 0;
   selectedOrderId: number = 0;
   selectedOrder: Partial<orderType> = {};
+  tempHasArrived: hasArrivedType = {
+    order_id: 0,
+    has_arrived: false,
+  };
 
   constructor() {
     makeAutoObservable(this);
@@ -31,15 +42,31 @@ class OrdersStore {
     );
     makePersistable(this, {
       name: 'ordersStore',
-      properties: ['orders', 'ongoingOrderCount'],
+      properties: ['orders', 'ongoingOrderCount', 'tempHasArrived'],
     });
   }
 
-  setNotifiedOrder(val: Notification) {
-    this.notifiedOrder = val;
+  setNotifiedOrder(val: notificationsType) {
+    console.log('=================order===================');
+    console.log(val.data);
+    console.log('====================================');
+    // check for duplicate request 
+    if (val.request_id && this.notifiedOrder.request_id) {
+      if (val.request_id === this.notifiedOrder.request_id) {
+        return;
+      }
+    }
+    if (this.ongoingOrderCount < 1) {
+      playEffectForNotifications();
+      this.notifiedOrder = val;
+    }
   }
 
-  setOrders(val: orderTypes[], count: number) {
+  setArrival(val: hasArrivedType) {
+    this.tempHasArrived = val;
+  }
+
+  setOrders(val: orderType[], count: number) {
     this.orders = val;
     this.ongoingOrderCount = count;
   }
@@ -58,6 +85,10 @@ class OrdersStore {
 
   async getStoredData() {
     return await getPersistedStore(this);
+  }
+
+  async clearPersisting() {
+    return await clearPersistedStore(this);
   }
 
   stopStore() {

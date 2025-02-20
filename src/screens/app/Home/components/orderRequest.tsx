@@ -4,15 +4,17 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {Box, Button, Center, HStack, Text, VStack} from 'native-base';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import React, {useCallback, useEffect, useState} from 'react';
+import {apiType, notificationsType} from '@types/index';
 
 import {LocationPin} from '@assets/svg/LocationPin';
 import {SheetManager} from 'react-native-actions-sheet';
 import {SmilleyTear} from '@assets/svg/SmilleyTear';
+import {StyleSheet} from 'react-native';
 import Toast from 'react-native-toast-message';
+import {UsePusher} from '@hooks/usePusher';
 import {WIN_HEIGHT} from '../../../../config';
-import {apiType} from '@types/index';
+import {bottomSheetStore} from '@store/bottom-sheet';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
@@ -20,25 +22,29 @@ import {useOrders} from '@hooks/useOrders';
 
 export const OrderRequest = observer(() => {
   const NotificationOrder: any = ordersStore.notifiedOrder;
-  const notification = NotificationOrder.data?.data;
-  const notificationData = notification ? JSON.parse(notification) : null;
+  // const notificationData = notification ? JSON.parse(notification) : null;
   const [showReassign, setShowReassign] = useState(false);
   const [showOrder, setShowOrder] = useState<boolean>(true);
+  const [mainNotificationOrder, setMainNotificationOrder] =
+    useState<Partial<notificationsType>>();
 
   const [boxChangeableHeight, setBoxChangeableHeight] = useState(0);
   const boxHeight = useSharedValue(WIN_HEIGHT * boxChangeableHeight);
 
   const {acceptOrder, reassignOrder} = useOrders();
 
-  const triggerReassign = () => {
+  const allOrders = ordersStore.orders;
+
+  const triggerReassign = useCallback(() => {
     setShowReassign(true);
     setShowOrder(false);
-  };
+    setMainNotificationOrder(mainNotificationOrder);
+  }, [mainNotificationOrder]);
 
-  const doReassign = () => {
-    if (notificationData.order_id) {
-      const order_id = notificationData.order_id;
-      const request_id = NotificationOrder.data.request_id;
+  const doReassign = useCallback(() => {
+    if (mainNotificationOrder?.order_id && mainNotificationOrder?.request_id) {
+      const order_id = mainNotificationOrder.order_id;
+      const request_id = mainNotificationOrder.request_id;
       if (order_id) {
         reassignOrder.mutate(
           {
@@ -52,26 +58,32 @@ export const OrderRequest = observer(() => {
                 setShowReassign(false);
                 setShowOrder(false);
                 ordersStore.clearNotifiedOrder();
+                setMainNotificationOrder({});
               } else {
+                console.log('====================================');
+                console.log(val);
+                console.log('====================================');
                 Toast.show({
                   type: 'warning',
                   text1: 'Order Request',
                   text2: val.message,
                 });
                 setShowOrder(false);
-                ordersStore.clearNotifiedOrder();
+                // ordersStore.clearNotifiedOrder();
               }
             },
           },
         );
       }
     }
-  };
+  }, [mainNotificationOrder]);
 
   const triggerAccept = useCallback(() => {
-    if (notificationData.order_id) {
-      const order_id = notificationData?.order_id;
-      const request_id = NotificationOrder?.data?.request_id;
+    if (mainNotificationOrder?.order_id) {
+      const order_id = mainNotificationOrder?.order_id;
+
+      const request_id = mainNotificationOrder?.request_id || '234';
+
       acceptOrder.mutate(
         {
           order_id,
@@ -83,10 +95,9 @@ export const OrderRequest = observer(() => {
               //clear notification and open order details sheet
               setShowOrder(false);
               ordersStore.clearNotifiedOrder();
+              setMainNotificationOrder({});
               ordersStore.setSelectedOrderId(order_id);
-              SheetManager.show('orderDetailsSheet', {
-                payload: {order_id, request_id},
-              });
+              bottomSheetStore.SetSheet('orderDetailsView', true);
             } else {
               Toast.show({
                 type: 'warning',
@@ -98,7 +109,11 @@ export const OrderRequest = observer(() => {
         },
       );
     }
-  }, [NotificationOrder?.data?.request_id, notificationData?.order_id]);
+  }, [
+    acceptOrder,
+    mainNotificationOrder?.order_id,
+    mainNotificationOrder?.request_id,
+  ]);
 
   const Request = useCallback(
     () => (
@@ -107,11 +122,11 @@ export const OrderRequest = observer(() => {
           <Text color="white" fontWeight="bold" fontSize="30px">
             ₦
             {formatter.formatCurrencySimple(
-              parseInt(notificationData?.delivery_fee, 10),
+              mainNotificationOrder?.data?.delivery_fee ?? 0,
             )}
           </Text>
-          <Text color="white">{notificationData?.title}</Text>
-          {/* <Text color="white">{notificationData.trading_name}</Text> */}
+          <Text color="white">{mainNotificationOrder?.title}</Text>
+          {/* <Text color="white">{mainNotificationOrder.trading_name}</Text> */}
         </Center>
         <VStack mt={4}>
           <VStack>
@@ -126,9 +141,9 @@ export const OrderRequest = observer(() => {
                 <Box />
               </Center>
               <Text color="white" flex={1}>
-                {notificationData?.address?.house_number}{' '}
-                {notificationData?.address?.street}{' '}
-                {notificationData?.address?.city}
+                {mainNotificationOrder?.data?.address.house_number}{' '}
+                {mainNotificationOrder?.data?.address?.street}{' '}
+                {mainNotificationOrder?.data?.address?.city}
               </Text>
             </HStack>
             <Box
@@ -145,9 +160,9 @@ export const OrderRequest = observer(() => {
             <HStack alignItems="center" space={2}>
               <LocationPin fill="white" />
               <Text color="white" flex={1}>
-                {notificationData?.customer_address?.house_number}{' '}
-                {notificationData?.customer_address?.street}{' '}
-                {notificationData?.customer_address?.city}
+                {mainNotificationOrder?.data?.customer_address?.house_number}{' '}
+                {mainNotificationOrder?.data?.customer_address?.street}{' '}
+                {mainNotificationOrder?.data?.customer_address?.city}
               </Text>
             </HStack>
           </VStack>
@@ -174,15 +189,16 @@ export const OrderRequest = observer(() => {
     ),
     [
       acceptOrder.isLoading,
-      notificationData?.address?.city,
-      notificationData?.address?.house_number,
-      notificationData?.address?.street,
-      notificationData?.customer_address?.city,
-      notificationData?.customer_address?.house_number,
-      notificationData?.customer_address?.street,
-      notificationData?.delivery_fee,
-      notificationData?.title,
+      mainNotificationOrder?.data?.address?.city,
+      mainNotificationOrder?.data?.address.house_number,
+      mainNotificationOrder?.data?.address?.street,
+      mainNotificationOrder?.data?.customer_address?.city,
+      mainNotificationOrder?.data?.customer_address?.house_number,
+      mainNotificationOrder?.data?.customer_address?.street,
+      mainNotificationOrder?.data?.delivery_fee,
+      mainNotificationOrder?.title,
       triggerAccept,
+      triggerReassign,
     ],
   );
 
@@ -209,7 +225,7 @@ export const OrderRequest = observer(() => {
         </Center>
       </Box>
     ),
-    [reassignOrder.isLoading],
+    [doReassign, reassignOrder.isLoading],
   );
 
   const toggleBoxHeight = useCallback(() => {
@@ -227,20 +243,57 @@ export const OrderRequest = observer(() => {
     };
   });
 
+  const checkForOrderById = useCallback(
+    (order_id: number) => {
+      console.log('checking order', order_id);
+      const order = allOrders.find(o => o.id === order_id);
+      console.log('order', order);
+      return order;
+    },
+    [allOrders],
+  );
+
   useEffect(() => {
-    console.log('noti', notificationData);
-    if (notificationData?.amount) {
-      // clearNotificationById(NotificationOrder.messageId);
-      setTimeout(() => {
-        toggleBoxHeight();
-      }, 500);
+    if (NotificationOrder.data) {
+      const data = NotificationOrder;
+      const notification_name = JSON.parse(data.data)?.notification_name;
+      // here we check if the notification is for an order request
+      // after which we then check if we already have the order accepted
+      if (notification_name === 'order_request') {
+        // first we check if the rider already has an ongoing order
+        if (ordersStore.ongoingOrderCount < 1) {
+          // here we check if an order is already being handled by the user
+          // with this, the rider can only have one order at a time
+          if (!checkForOrderById(data.order_id)) {
+            const payload: notificationsType = {
+              data: JSON.parse(data.data),
+              order_id: data.order_id ?? '',
+              request_id: data.request_id ?? '',
+              rider_id: data.rider_id ?? '',
+              title: data.title ?? '',
+              user_id: data.user_id ?? '',
+            };
+            setMainNotificationOrder(payload);
+            setTimeout(() => {
+              toggleBoxHeight();
+            }, 500);
+          }
+        } else {
+          ordersStore.clearNotifiedOrder();
+        }
+      } else {
+        console.log('no order request');
+      }
     }
-  }, [NotificationOrder, notificationData, toggleBoxHeight]);
+  }, [NotificationOrder, checkForOrderById, toggleBoxHeight]);
 
   return (
     <Animated.View style={[styles.box, animatedBoxStyle]}>
       <Box px={3}>
-        {notificationData?.amount && !showReassign && <Request />}
+        {/* {notificationData?.amount && !showReassign && <Request />}  */}
+        {mainNotificationOrder?.data?.amount && !showReassign ? (
+          <Request />
+        ) : null}
         {showReassign && <Reassign />}
       </Box>
     </Animated.View>

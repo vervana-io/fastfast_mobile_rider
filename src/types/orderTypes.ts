@@ -56,7 +56,7 @@ export interface orderType {
   updated_at: string;
   seller: sellerTypes;
   customer: customerTypes;
-  misc_rider_info: riderType[];
+  misc_rider_info: riderType;
   address: addressesTypes;
   order_products: order_products[];
   logs: orderLogs[];
@@ -87,4 +87,41 @@ export interface orderLogs {
   status: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface notificationsType {
+  data: orderNotifications;
+  order_id: string;
+  request_id: string;
+  rider_id: string;
+  title: string;
+  user_id: string;
+}
+
+export interface orderNotifications {
+  notification_name: string;
+  order_id: number;
+  amount: number;
+  delivery_pin: string;
+  id: number;
+  pick_up_pin: string;
+  reference: string;
+  rider_id: number;
+  sub_total: number;
+  delivery_fee: number;
+  title: string;
+  address: {
+    house_number: string;
+    street: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
+  customer_address: {
+    house_number: string;
+    street: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
 }

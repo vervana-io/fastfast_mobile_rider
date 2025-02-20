@@ -36,10 +36,13 @@ import {ordersStore} from '@store/orders';
 import {uploadedOrderType} from '@types/generalType';
 import {useIsFocused} from '@react-navigation/native';
 import {useOrders} from '@hooks/useOrders';
+import useSocket from '@hooks/useSocket';
 
 export const OrderDetailsSheet = observer((props: SheetProps) => {
   const orderDetailsSheetRef = useRef<ActionSheetRef>(null);
-  const [hasFullDetails, setFullDetails] = useState(false);
+  const [hasViewDetails, setViewDetails] = useState<'small' | 'mid' | 'full'>(
+    'mid',
+  );
   const [uploadedOrder, setUploadedOrder] = useState<uploadedOrderType[]>([]);
   const allowedUpload = 2;
   const [errorMessage, setErrorMessage] = useState('');
@@ -48,6 +51,12 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
   const [showFullPin, setShowFullPin] = useState(false);
 
   const isFocused = useIsFocused();
+
+  // we initialize the socket here
+  // const {isConnected, createRoom} = useSocket({
+  //   url: 'https://c371-105-113-112-189.ngrok-free.app',
+  //   isOnline: true,
+  // });
 
   const {fetchSingleOrder, pickUpOrder, arrivalOrder, deliveredOrder} =
     useOrders();
@@ -192,86 +201,173 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
     }
   }, [isFocused, order_id]);
 
-  const Content = useCallback(() => {
+  const SmallContent = useCallback(() => {
     return (
-      <Box py={6} px={4} bg="#1B1B1B" h="full" roundedTop="2xl">
-        <HStack justifyContent="space-between" space={2}>
-          <VStack flex={1} space={2}>
-            <Text fontWeight="bold" color="white" fontSize="lg">
-              {ordersData?.seller?.trading_name}
+      <Box bg="themeLight.primary.base" roundedTop="2xl">
+        <Pressable
+          onPress={() => orderDetailsSheetRef.current?.snapToOffset(100)}>
+          <Center py={1}>
+            <Text color="white" fontWeight="bold">
+              Swipe up to see more
             </Text>
-            <Text color="themeLight.gray.2" fontSize="xs">
-              {ordersData?.seller?.address}
-            </Text>
-          </VStack>
-          <HStack space={2}>
-            <Button
-              leftIcon={<QuestionIcon />}
-              w="44px"
-              h="44px"
-              rounded="2xl"
-              onPress={() => SheetManager.show('orderHelpSheet')}
-              bg="white"
-              _pressed={{bg: 'rgba(255,255,255, .4)'}}
-            />
-            <Button
-              leftIcon={<PhoneIcon />}
-              w="44px"
-              h="44px"
-              rounded="2xl"
-              onPress={callCustomer}
-              bg="white"
-              _pressed={{bg: 'rgba(255,255,255, .4)'}}
-            />
-          </HStack>
-        </HStack>
-        <Box mt={2}>
-          <Text color="white" fontWeight="bold">
-            Fee: ₦{ordersData?.sub_total}
-          </Text>
-          <Text color="white" fontWeight="bold">
-            Delivery Fee: ₦{ordersData?.delivery_fee}
-          </Text>
-          <VStack bg="white" rounded="lg" h="155px" my={4} p={4} space={2}>
-            {ordersData.order_products &&
-              ordersData.order_products?.map((el, i) => (
-                <Text key={i} color="black">
-                  {el.quantity}x {el.product?.title}
+          </Center>
+        </Pressable>
+        <Box bg="#1B1B1B" h="full" roundedTop="2xl">
+          <Center p={4}>
+            <Box bg="trueGray.400" w="12" h="1" rounded="full" />
+          </Center>
+          <Box py={6} px={4}>
+            <HStack justifyContent="space-between" space={2}>
+              <VStack flex={1} space={2}>
+                <Text fontWeight="bold" color="white" fontSize="lg">
+                  {ordersData?.seller?.trading_name}
                 </Text>
-              ))}
-          </VStack>
-          {ordersData.status === 3 &&
-          ordersData.is_rider_customer_arrived === 1 ? (
-            <Button
-              _text={{fontWeight: 'bold'}}
-              rounded="full"
-              py={4}
-              isLoading={deliveredOrder.isLoading}
-              onPress={doDelivered}>
-              I have delivered
-            </Button>
-          ) : ordersData.status === 3 &&
-            ordersData.is_rider_customer_arrived === 0 ? (
-            <Button
-              _text={{fontWeight: 'bold'}}
-              rounded="full"
-              py={4}
-              onPress={doArrival}>
-              I have arrived
-            </Button>
-          ) : (
-            <Button
-              _text={{fontWeight: 'bold'}}
-              rounded="full"
-              py={4}
-              onPress={() => orderDetailsSheetRef.current?.snapToOffset(100)}>
-              Proceed
-            </Button>
-          )}
+                <Text color="themeLight.gray.2" fontSize="xs">
+                  {ordersData?.seller?.address}
+                </Text>
+              </VStack>
+              <HStack space={2}>
+                <Button
+                  leftIcon={<QuestionIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={() => SheetManager.show('orderHelpSheet')}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+                <Button
+                  leftIcon={<PhoneIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={callCustomer}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+              </HStack>
+            </HStack>
+            <Box mt={2}>
+              <Text color="white" fontWeight="bold">
+                Fee: ₦{ordersData?.sub_total}
+              </Text>
+              <Text color="white" fontWeight="bold">
+                Delivery Fee: ₦{ordersData?.delivery_fee}
+              </Text>
+            </Box>
+          </Box>
         </Box>
       </Box>
     );
   }, [
+    callCustomer,
+    ordersData?.delivery_fee,
+    ordersData?.seller?.address,
+    ordersData?.seller?.trading_name,
+    ordersData?.sub_total,
+  ]);
+
+  const Content = useCallback(() => {
+    return (
+      <Box bg="themeLight.primary.base" roundedTop="2xl">
+        <Pressable
+          onPress={() => orderDetailsSheetRef.current?.snapToOffset(100)}>
+          <Center py={1}>
+            <Text color="white" fontWeight="bold">
+              Swipe up to see more
+            </Text>
+          </Center>
+        </Pressable>
+        <Box bg="#1B1B1B" h="full" roundedTop="2xl">
+          <Center p={4}>
+            <Box bg="trueGray.400" w="12" h="1" rounded="full" />
+          </Center>
+          <Box py={6} px={4}>
+            <HStack justifyContent="space-between" space={2}>
+              <VStack flex={1} space={2}>
+                <Text fontWeight="bold" color="white" fontSize="lg">
+                  {ordersData?.seller?.trading_name}
+                </Text>
+                <Text color="themeLight.gray.2" fontSize="xs">
+                  {ordersData?.seller?.address}
+                </Text>
+              </VStack>
+              <HStack space={2}>
+                <Button
+                  leftIcon={<QuestionIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={() => SheetManager.show('orderHelpSheet')}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+                <Button
+                  leftIcon={<PhoneIcon />}
+                  w="44px"
+                  h="44px"
+                  rounded="2xl"
+                  onPress={callCustomer}
+                  bg="white"
+                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                />
+              </HStack>
+            </HStack>
+            <Box mt={2}>
+              <Text color="white" fontWeight="bold">
+                Fee: ₦{ordersData?.sub_total}
+              </Text>
+              <Text color="white" fontWeight="bold">
+                Delivery Fee: ₦{ordersData?.delivery_fee}
+              </Text>
+              <VStack bg="white" rounded="lg" my={4} p={4} space={2}>
+                {ordersData.order_products &&
+                  ordersData.order_products?.map((el, i) => (
+                    <Text key={i} color="black">
+                      {el.quantity}x {el.product?.title}
+                    </Text>
+                  ))}
+              </VStack>
+              {ordersData.status === 3 &&
+              ordersData.is_rider_customer_arrived === 1 ? (
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  isLoading={deliveredOrder.isLoading}
+                  onPress={doDelivered}>
+                  I have delivered
+                </Button>
+              ) : ordersData.status === 3 &&
+                ordersData.is_rider_customer_arrived === 0 ? (
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  isLoading={arrivalOrder.isLoading}
+                  isLoadingText="Setting arrival"
+                  isDisabled={arrivalOrder.isLoading}
+                  onPress={doArrival}>
+                  I have arrived
+                </Button>
+              ) : (
+                <Button
+                  _text={{fontWeight: 'bold'}}
+                  rounded="full"
+                  py={4}
+                  onPress={() =>
+                    orderDetailsSheetRef.current?.snapToOffset(100)
+                  }>
+                  Proceed
+                </Button>
+              )}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }, [
+    arrivalOrder.isLoading,
     callCustomer,
     deliveredOrder.isLoading,
     doArrival,
@@ -289,7 +385,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
     () => (
       <Box py={6} px={4} bg="white" h="full" roundedTop="2xl">
         <Pressable
-          onPress={() => orderDetailsSheetRef.current?.snapToOffset(60)}>
+          onPress={() => orderDetailsSheetRef.current?.snapToOffset(50)}>
           <Box
             w={45}
             h={45}
@@ -298,7 +394,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
             rounded="lg"
           />
           <Pressable
-            onPress={() => orderDetailsSheetRef.current?.snapToOffset(60)}
+            onPress={() => orderDetailsSheetRef.current?.snapToOffset(50)}
             position="absolute"
             zIndex={4}
             top={3}
@@ -436,7 +532,7 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
                     fetchSingleOrder.isLoading ? 'Updating records' : ''
                   }
                   onPress={doPickUp}>
-                  Proceed
+                  Pick up order
                 </Button>
               </>
             ) : ordersData.status === 3 &&
@@ -458,6 +554,8 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
                 py={4}
                 mt={3}
                 isLoading={deliveredOrder.isLoading}
+                isLoadingText="Setting delivery"
+                isDisabled={deliveredOrder.isLoading}
                 onPress={doDelivered}>
                 I have delivered
               </Button>
@@ -571,17 +669,24 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         // Get the offset from bottom
         const offsetFromBottom = height - position;
         // console.log('reached top', offsetFromBottom);
-        setTimeout(() => {
-          if (offsetFromBottom > 600) {
-            setFullDetails(true);
-          } else {
-            setFullDetails(false);
-          }
-        }, 500);
+        // setTimeout(() => {
+
+        // }, 50);
+        if (offsetFromBottom > 600) {
+          setViewDetails('full');
+        } else if (offsetFromBottom < 271) {
+          setViewDetails('small');
+        } else {
+          setViewDetails('mid');
+        }
       }}
+      disableDragBeyondMinimumSnapPoint={true}
       backgroundInteractionEnabled={true}
-      snapPoints={[60, 100]}
-      initialSnapIndex={0}
+      isModal={false}
+      closable={false}
+      // snapPoints={[(WIN_HEIGHT / 100) * 2.5, (WIN_HEIGHT / 100) * 5.5, 100]}
+      snapPoints={[30, 60, 100]}
+      initialSnapIndex={1}
       gestureEnabled={true}
       containerStyle={{
         height: WIN_HEIGHT,
@@ -594,10 +699,12 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         <FullPin />
       ) : orderCompleted ? (
         <OrderComplete />
-      ) : hasFullDetails ? (
+      ) : hasViewDetails === 'full' ? (
         ContentFull()
-      ) : (
+      ) : hasViewDetails === 'mid' ? (
         Content()
+      ) : (
+        SmallContent()
       )}
     </ActionSheet>
   );

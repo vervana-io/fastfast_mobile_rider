@@ -18,7 +18,7 @@ export const CheckMarkSolid = (props: SvgProps) => (
         y={0}
         width={24}
         height={24}>
-        <Rect id="Bounding box" width={24} height={24} fill="#D9D9D9" />
+        <Rect id="Bounding box" width={24} height={24} fill="#009655" />
       </Mask>
       <G mask="url(#mask0_1958_6954)">
         <Path

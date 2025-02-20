@@ -1,3 +1,4 @@
+import {AuthType, registerStoreType} from '@types/authType';
 import {
   clearPersistedStore,
   configurePersistable,
@@ -7,10 +8,12 @@ import {
 } from 'mobx-persist-store';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {AuthType} from '@types/authType';
 import NavigationService from '@navigation/NavigationService';
+import { addressesStore } from '@store/addresses';
+import { checklist } from '@store/checklist';
 import {makeAutoObservable} from 'mobx';
-import {rootConfig} from '../root';
+import { ordersStore } from '@store/orders';
+import { transactionsStore } from '@store/transactions';
 
 class AuthStore {
   auth: Partial<AuthType> = {};
@@ -20,6 +23,7 @@ class AuthStore {
   deviceLocked: boolean = false;
   fcmToken: string = '';
   lastActivetime: number = 0;
+  registerData: Partial<registerStoreType> = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -42,6 +46,7 @@ class AuthStore {
         'deviceLocked',
         'email',
         'fcmToken',
+        'registerData',
       ],
     });
   }
@@ -50,6 +55,10 @@ class AuthStore {
     this.auth = auth;
     this.isLoggedIn = true;
     this.email = auth.user.email;
+  }
+
+  setRegisterData(data: registerStoreType) {
+    this.registerData = data;
   }
 
   setFcmToken(val: string) {
@@ -75,6 +84,10 @@ class AuthStore {
     this.isLoggedIn = false;
     this.lockPassCode = '';
     this.deviceLocked = false;
+    addressesStore.clearPersisting();
+    ordersStore.clearPersisting();
+    checklist.clearStoredData();
+    transactionsStore.clearPersisting();
     return new Promise<any>((resolve: any) => {
       NavigationService.navigate('Splashscreen');
       resolve(true);

@@ -13,3 +13,13 @@ export interface bankTypes {
   type: string;
   is_deleted: boolean;
 }
+
+export interface bankAccountType {
+  id: number;
+  account_name: string;
+  account_number: string;
+  bank_name: string;
+  bank_code: string;
+  is_main: number;
+  status: number;
+}

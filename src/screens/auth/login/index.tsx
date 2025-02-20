@@ -7,6 +7,7 @@ import {
   Heading,
   Image,
   Link,
+  Spinner,
   Text,
   VStack,
 } from 'native-base';
@@ -14,20 +15,20 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import {InlineError, apiType} from '@types/index';
 import React, {useCallback, useState} from 'react';
-import {getInlineError, setInlineError} from '@helpers/componentErrorHandler';
 import {object, ref, string} from 'yup';
 
+import { AuthLayout } from '@layouts/authLayout';
 import {DefaultLayout} from '@layouts/default';
-import {FBIcon} from '@assets/svg/FBIcon';
 import {Formik} from 'formik';
 import {GoogleIcon} from '@assets/svg/GoogleIcon';
 import {Input} from '@components/inputs';
-import {LogoTextPrimary} from '@assets/svg/LogoTextPrimary';
 import {Pattern} from '@assets/svg/Pattern';
+import {RiderLogo} from '@assets/svg/RiderLogo';
+import {SSOButtons} from '@components/ui/ssobuttons';
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT} from '../../../config';
+import {apiType} from '@types/index';
 import {authStore} from '@store/auth';
 import messaging from '@react-native-firebase/messaging';
 import {navigate} from '@navigation/NavigationService';
@@ -44,8 +45,7 @@ interface LoginProp {
 
 export const Login = (props: LoginProp) => {
   const {navigation} = props;
-  const [field, setField] = useState('');
-  const [password, setPassword] = useState('');
+  const [showLoading, setShowLoading] = useState(false);
 
   const {login} = useAuth();
 
@@ -56,73 +56,29 @@ export const Login = (props: LoginProp) => {
 
   const ButtonWithSSO = useCallback(
     () => (
-      <>
-        <Text>Or Continue With</Text>
-        <HStack space={6} my={4}>
-          {/* <Button
-            leftIcon={<FBIcon />}
-            bg="white"
-            borderWidth={1}
-            borderColor="#F4F4F4"
-            px={3}
-            _text={{fontWeight: 'light', color: 'black', ml: 2}}
-            rounded="lg">
-            Facebook
-          </Button> */}
-          {/* <Button
-            leftIcon={<GoogleIcon />}
-            bg="white"
-            borderWidth={1}
-            borderColor="#F4F4F4"
-            px={3}
-            onPress={doGoogleSignIn}
-            _pressed={{bg: 'themeLight.accent', _text: {color: 'white'}}}
-            _text={{fontWeight: 'light', color: 'black', ml: 2}}
-            rounded="lg">
-            Google
-          </Button> */}
-        </HStack>
-        <HStack space={2}>
-          <Text>Don’t have an account?</Text>
-          <Link
-            isUnderlined={false}
-            onPress={() => navigate('Auth', {screen: 'SignUpStep1'})}
-            _text={{
-              fontWeight: 'bold',
-              fontFamily: 'body',
-              color: 'themeLight.accent',
-            }}>
-            Sign Up
-          </Link>
-        </HStack>
-      </>
+      <Box mt={4} w={'full'}>
+        <SSOButtons
+          navigation={navigation}
+          showLoading={(e: boolean) => setShowLoading(e)}
+          type="login"
+        />
+        <VStack my={3}>
+          <Box w={'full'} borderWidth={1} borderColor={'#F4F4F4'} />
+          <Center top={-13.8} position={'absolute'} w={'full'}>
+            <Box bg="themeLight.primary.light2" px={2} py={1}>
+              <Text>Or</Text>
+            </Box>
+          </Center>
+        </VStack>
+      </Box>
     ),
-    [],
+    [navigation],
   );
 
-  const doGoogleSignIn = async () => {
-    try {
-      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
-      const userInfo = await GoogleSignin.signIn();
-      console.log('signin', userInfo);
-    } catch (error: any) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        // operation (e.g. sign in) is in progress already
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-      } else {
-        // some other error happened
-      }
-      console.log('error', error);
-    }
-  };
-
   const doLogin = async (values: any) => {
-    // const token = await messaging().getToken();
+    const token = await messaging().getToken();
     const payload = {
-      device_token: '',
+      device_token: token,
       field: values.email,
       password: values.password,
     };
@@ -150,7 +106,7 @@ export const Login = (props: LoginProp) => {
           });
         } else if (e.status === 422) {
           const errorS = e.data.errors;
-          console.log('error', errorS)
+          console.log('error', errorS);
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
               const el = errorS[key];
@@ -167,23 +123,16 @@ export const Login = (props: LoginProp) => {
   };
 
   return (
-    <DefaultLayout checkPermissions={true}>
-      <Box position="absolute" top={0} w="full" left={0} zIndex={1}>
-        <Pattern />
-      </Box>
-      <Box alignItems="center" flex={1} pt={0.2 * WIN_HEIGHT}>
-        <Box w={110} h={110}>
-          <Image
-            w="full"
-            h="full"
-            alt="rider logo"
-            source={require('@assets/img/riderlogo.png')}
-          />
+    <AuthLayout>
+      <Box flex={1} pt={16} bg="themeLight.primary.light2">
+        <Box px={8}>
+          <RiderLogo />
         </Box>
-        <Center mt={8} w="full" px={8}>
-          <Heading size="md" fontWeight="bold">
-            Login To Your Account
+        <Box mt={8} w="full" px={8}>
+          <Heading size="xl" fontWeight="semibold">
+            Sign in to your {'\n'}Account
           </Heading>
+          <ButtonWithSSO />
           <Formik
             initialValues={{
               email: authStore.email ?? '',
@@ -201,10 +150,13 @@ export const Login = (props: LoginProp) => {
               errors,
               values,
             }) => (
-              <VStack w="full" space={2}>
+              <VStack w="full" space={2} mt={4}>
+                <Text color="textSecondary">
+                  Enter your email and password to log in
+                </Text>
                 <Box w="full" mt={3}>
                   <Input
-                    label="Email"
+                    label=""
                     placeholder=""
                     py={Platform.OS === 'ios' ? 4 : 2}
                     autoCapitalize="none"
@@ -213,16 +165,18 @@ export const Login = (props: LoginProp) => {
                     errorMessage={errors.email}
                     hasError={errors.email && touched.email ? true : false}
                     value={values.email}
+                    autoComplete="email"
                   />
                 </Box>
                 <Box w="full" mt={3}>
                   <Input
-                    label="Password"
+                    label=""
                     placeholder=""
                     isSecure
                     hasIcon
                     iconPosition="right"
                     onChangeText={handleChange('password')}
+                    autoComplete="current-password"
                     onBlur={handleBlur('password')}
                     errorMessage={errors.password}
                     hasError={
@@ -235,6 +189,7 @@ export const Login = (props: LoginProp) => {
                 </Box>
                 <Link
                   _text={{fontSize: 14, fontWeight: 'medium'}}
+                  onPress={() => navigation.navigate('ForgotStep1')}
                   isUnderlined={false}>
                   Forgot Your Password?
                 </Link>
@@ -255,13 +210,42 @@ export const Login = (props: LoginProp) => {
                     }}>
                     Login
                   </Button>
-                  <ButtonWithSSO />
+                  <Center>
+                    <HStack space={2}>
+                      <Text>Don’t have an account?</Text>
+                      <Link
+                        onPress={() =>
+                          navigate('Auth', {screen: 'SignUpStep1'})
+                        }
+                        _text={{
+                          fontWeight: 'bold',
+                          fontFamily: 'body',
+                          color: 'black',
+                        }}>
+                        Sign Up
+                      </Link>
+                    </HStack>
+                  </Center>
                 </Center>
               </VStack>
             )}
           </Formik>
-        </Center>
+        </Box>
       </Box>
-    </DefaultLayout>
+      {showLoading && (
+        <Center
+          position="absolute"
+          top={0}
+          left={0}
+          bottom={0}
+          w="full"
+          h="full"
+          bg="rgba(0,0,0,.4)">
+          <Center bg="white" w="80px" h="80px" rounded="lg">
+            <Spinner />
+          </Center>
+        </Center>
+      )}
+    </AuthLayout>
   );
 };

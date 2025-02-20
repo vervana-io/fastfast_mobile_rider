@@ -3,7 +3,7 @@
     "project_number": "862410060924",
     "firebase_url": "https://fastfast-ab3b0-default-rtdb.firebaseio.com",
     "project_id": "fastfast-ab3b0",
-    "storage_bucket": "fastfast-ab3b0.appspot.com"
+    "storage_bucket": "fastfast-ab3b0.firebasestorage.app"
   },
   "client": [
     {
@@ -14,6 +14,22 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "862410060924-ccs6s3dgnh46rn0hp1qpdlf9r86eujv1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fastfast",
+            "certificate_hash": "eae55cf84b5c8d5aac320ae9d94ffae9e700a8a5"
+          }
+        },
+        {
+          "client_id": "862410060924-f95r5jiv1p38fo45uj2o74fe3blnkme0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fastfast",
+            "certificate_hash": "ef12262a4c8fb223ddb817b4eb3b985063339faf"
+          }
+        },
         {
           "client_id": "862410060924-u1uc7e8ikd16gm1ccv7n2aa38mk46co4.apps.googleusercontent.com",
           "client_type": 1,
@@ -40,10 +56,10 @@
               "client_type": 3
             },
             {
-              "client_id": "862410060924-l33n11vvdtjkpftalnr4gsjeph7k7n2p.apps.googleusercontent.com",
+              "client_id": "862410060924-024hj36sa2s3ltbsr4kf57j6dra0sd6k.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "org.fastfast"
+                "bundle_id": "com.fastfastvendor"
               }
             }
           ]
@@ -84,10 +100,46 @@
               "client_type": 3
             },
             {
-              "client_id": "862410060924-l33n11vvdtjkpftalnr4gsjeph7k7n2p.apps.googleusercontent.com",
+              "client_id": "862410060924-024hj36sa2s3ltbsr4kf57j6dra0sd6k.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "org.fastfast"
+                "bundle_id": "com.fastfastvendor"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:862410060924:android:d4203e812c5509945cc5f9",
+        "android_client_info": {
+          "package_name": "com.fastfastvendor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "862410060924-hqcggk82mce69aiunfufj9dmd1luk36b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoEU-1M-3FfST8eVhJNTEVTFHLocEczsA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "862410060924-d96200hnseihf9051lb0h70fi0eb6cco.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "862410060924-024hj36sa2s3ltbsr4kf57j6dra0sd6k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.fastfastvendor"
               }
             }
           ]

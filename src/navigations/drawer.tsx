@@ -7,9 +7,6 @@ import {
   Box,
   ChevronRightIcon,
   HStack,
-  Heading,
-  Icon,
-  IconButton,
   Image,
   Pressable,
   ScrollView,
@@ -17,6 +14,7 @@ import {
   Text,
   VStack,
 } from 'native-base';
+import {getBuildNumber, getVersion} from 'react-native-device-info';
 
 import {Dollar} from '@assets/svg/Dollar';
 import {Home} from '@screens/app';
@@ -26,10 +24,12 @@ import {SheetManager} from 'react-native-actions-sheet';
 import {WIN_WIDTH} from '../config';
 import {addressesStore} from '@store/addresses';
 import {authStore} from '@store/auth';
+import { bottomSheetStore } from '@store/bottom-sheet';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import {createStackNavigator} from '@react-navigation/stack';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
+import { rootConfig } from '@store/root';
 import {useAuth} from '@hooks/useAuth';
 
 const navOptions = {
@@ -60,6 +60,9 @@ const DrawerContent = observer(({navigation, state}: any) => {
   const userD = authStore.auth;
   const {city, house_number, street} = addressesStore.selectedAddress;
 
+  let version = getVersion();
+  let buildNumber = getBuildNumber();
+
   const selectedAddress = street
     ? `${house_number ?? ''} ${street ?? ''}, ${city ?? ''}, ${
         addressesStore.selectedAddress.state ?? ''
@@ -72,6 +75,8 @@ const DrawerContent = observer(({navigation, state}: any) => {
       {
         onSuccess: () => {
           navigation.closeDrawer();
+          rootConfig.setIsOnline(false);
+          bottomSheetStore.SetSheet('orderDetailsView', false);
           authStore.logout();
         },
       },
@@ -85,6 +90,7 @@ const DrawerContent = observer(({navigation, state}: any) => {
 
   const navigateToScreen = (screen: string) => {
     navigation.navigate(screen);
+    bottomSheetStore.SetSheet('orderDetailsView', false);
   };
 
   const openExtLink = (link: string) => {
@@ -135,8 +141,8 @@ const DrawerContent = observer(({navigation, state}: any) => {
           </Box>
 
           <VStack mt={8} space={3}>
-            <Pressable py={2} onPress={() => openSheet('addressSheetNewIOS')}>
-              <HStack alignItems="center" space={2}>
+            {/* <Pressable py={2} onPress={() => openSheet('addressSheetNewIOS')}>
+              <HStack alignItems="center" space={2} justifyContent="flex-start">
                 <LocationPin />
                 <VStack flex={1}>
                   <Text>Change Area</Text>
@@ -145,7 +151,7 @@ const DrawerContent = observer(({navigation, state}: any) => {
                   </Text>
                 </VStack>
               </HStack>
-            </Pressable>
+            </Pressable> */}
             <Pressable py={2} onPress={() => openSheet('EarningsSheet')}>
               <HStack alignItems="center" space={2}>
                 <Dollar />
@@ -214,6 +220,12 @@ const DrawerContent = observer(({navigation, state}: any) => {
               </HStack>
             </Pressable>
           </VStack>
+
+          <Box mt={8}>
+            <Text fontSize="sm" fontWeight="bold" color="trueGray.500">
+              v{version}.({buildNumber})
+            </Text>
+          </Box>
         </VStack>
       </ScrollView>
     </Box>

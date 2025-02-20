@@ -3,7 +3,7 @@ import notifee, {EventType} from '@notifee/react-native';
 
 import messaging from '@react-native-firebase/messaging';
 import {ordersStore} from '@store/orders';
-import { playEffectForNotifications } from './playEffect';
+import {playEffectForNotifications} from './playEffect';
 
 //method was called to get FCM tiken for notification
 export const getFcmToken = async () => {
@@ -82,13 +82,12 @@ export const checkApplicationNotificationPermission = async () => {
 //method was called to listener events from firebase for notification triger
 export function registerListenerWithFCM() {
   const unsubscribe = messaging().onMessage(async remoteMessage => {
-    console.log('onMessage Received : ', JSON.stringify(remoteMessage));
+    // console.log('onMessage Received : ', JSON.stringify(remoteMessage));
     if (
       remoteMessage?.notification?.title &&
       remoteMessage?.notification?.body
     ) {
-      ordersStore.setNotifiedOrder(remoteMessage);
-      playEffectForNotifications();
+      ordersStore.setNotifiedOrder(remoteMessage?.data);
       onDisplayNotification(
         remoteMessage.notification?.title,
         remoteMessage.notification?.body,
@@ -103,8 +102,8 @@ export function registerListenerWithFCM() {
         break;
       case EventType.PRESS:
         console.log('User pressed notification', detail.notification);
-        ordersStore.setNotifiedOrder(detail.notification);
-        playEffectForNotifications();
+        ordersStore.setNotifiedOrder(detail.notification?.data);
+
         // if (detail?.notification?.data?.clickAction) {
         //   onNotificationClickActionHandling(
         //     detail.notification.data.clickAction
@@ -115,8 +114,9 @@ export function registerListenerWithFCM() {
   });
 
   messaging().onNotificationOpenedApp(async remoteMessage => {
-    ordersStore.setNotifiedOrder(remoteMessage);
+    ordersStore.setNotifiedOrder(remoteMessage.data);
     playEffectForNotifications();
+
     console.log(
       'onNotificationOpenedApp Received',
       JSON.stringify(remoteMessage),
@@ -130,8 +130,9 @@ export function registerListenerWithFCM() {
     .getInitialNotification()
     .then(remoteMessage => {
       if (remoteMessage) {
-        ordersStore.setNotifiedOrder(remoteMessage);
+        ordersStore.setNotifiedOrder(remoteMessage.data);
         playEffectForNotifications();
+
         console.log(
           'Notification caused app to open from quit state:',
           remoteMessage.notification,
@@ -149,7 +150,8 @@ export function clearNotificationById(id: string) {
 
 //method was called to display notification
 async function onDisplayNotification(title, body, data) {
-  console.log('onDisplayNotification Adnan: ', JSON.stringify(data));
+  // console.log('onDisplayNotification Adnan: ', JSON.stringify(data));
+  playEffectForNotifications();
   // Request permissions (required for iOS)
   await notifee.requestPermission();
   // Create a channel (required for Android)

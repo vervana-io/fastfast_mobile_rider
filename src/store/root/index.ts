@@ -21,6 +21,7 @@ class Store {
   biometrics: boolean = false;
   shouldLogin: boolean = false;
   requestLoading: boolean = false;
+  isOnline: boolean = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -36,7 +37,13 @@ class Store {
     );
     makePersistable(this, {
       name: 'config',
-      properties: ['newUser', 'lastActiveTime', 'biometrics', 'shouldLogin'],
+      properties: [
+        'newUser',
+        'lastActiveTime',
+        'biometrics',
+        'shouldLogin',
+        'isOnline',
+      ],
     });
   }
 
@@ -54,6 +61,11 @@ class Store {
 
   setNewUser(val: boolean) {
     this.newUser = val;
+  }
+
+  setIsOnline(val: boolean) {
+    this.isOnline = val;
+    console.log('online state', val);
   }
 
   setShouldLogin(val: boolean) {

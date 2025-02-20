@@ -16,6 +16,7 @@ buildscript {
 
         // NOTE: using any of them will work
         googlePlayServicesVersion = "21.0.1"
+        googlePlayServicesIidVersion = "17.0.0"
     }
     repositories {
         google()

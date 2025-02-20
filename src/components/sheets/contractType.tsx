@@ -118,7 +118,11 @@ export const ContractTypeSheet = observer((props: SheetProps) => {
   const Content = useCallback(() => {
     return (
       <Box py={6} px={4} bg="#ffffff" h="full" roundedTop="2xl">
-        <SheetHeader sheetToClose="contractType" title="Contract type" />
+        <SheetHeader
+          sheetToClose="contractType"
+          title="Contract type"
+          sheetType="1"
+        />
         {errors?.message && (
           <Alerts
             status={errors.type}
@@ -173,7 +177,7 @@ export const ContractTypeSheet = observer((props: SheetProps) => {
             isLoadingText="Contract updating..."
             mt={8}
             _text={{fontWeight: 'bold'}}>
-            Finish
+            Update
           </Button>
         </VStack>
       </Box>

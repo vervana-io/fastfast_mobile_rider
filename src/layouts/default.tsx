@@ -1,21 +1,24 @@
 import {Alert, Modal, Platform} from 'react-native';
 import {Box, Button, Center, StatusBar, Text, VStack} from 'native-base';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   isLocationEnabled,
   promptForEnableLocationIfNeeded,
 } from 'react-native-android-location-enabler';
 
+import { AllBottomSheets } from '@components/gorhom';
+import BottomSheet from '@gorhom/bottom-sheet';
 import {KeyboardAvoiding} from '@components/utils';
 import {LocationPin} from '@assets/svg/LocationPin';
 import PermissionManager from '@handlers/permissionHandler';
+import { checklist } from '@store/checklist';
 import {layoutProps} from '@types/layoutsTypes';
 
 export const DefaultLayout = (props: layoutProps) => {
   const {
     children,
     statusBarColor = 'white',
-    checkPermissions = true,
+    checkPermissions = false,
     hasPermissionSet,
     refreshable = false,
     shouldRefresh,
@@ -24,7 +27,7 @@ export const DefaultLayout = (props: layoutProps) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    const checkPermission = async () => {
+    const _checkPermission = async () => {
       const checkPrems = await PermissionManager.checkPerms();
       if (Platform.OS === 'ios') {
         if (checkPrems !== 'granted') {
@@ -39,7 +42,7 @@ export const DefaultLayout = (props: layoutProps) => {
     };
 
     if (checkPermissions) {
-      checkPermission();
+      _checkPermission();
     }
   }, [checkPermissions]);
 
@@ -161,7 +164,7 @@ export const DefaultLayout = (props: layoutProps) => {
                   bg="themeLight.accent">
                   Set automatically
                 </Button>
-                <Button
+                {/* <Button
                   py={4}
                   _text={{fontWeight: 'bold', color: 'themeLight.accent'}}
                   w="full"
@@ -169,11 +172,12 @@ export const DefaultLayout = (props: layoutProps) => {
                   rounded="full"
                   variant="ghost">
                   Set Later
-                </Button>
+                </Button> */}
               </VStack>
             </Center>
           </Box>
         </Modal>
+        <AllBottomSheets />
       </Box>
     </>
   );

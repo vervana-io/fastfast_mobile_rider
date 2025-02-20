@@ -2,22 +2,28 @@ import {ArrowBackIcon, Box, Center, Pressable, Text} from 'native-base';
 
 import React from 'react';
 import {SheetManager} from 'react-native-actions-sheet';
+import { bottomSheetStore } from '@store/bottom-sheet';
 
 interface SheetHeaderProps {
   navigation?: any;
-  sheetToClose?: string;
+  sheetToClose?: any;
   title?: string;
+  sheetType?: '1' | '2'; // 1 is for normal actions-sheet, 2 is for ghrhon bottom sheet
 }
 
 export const SheetHeader = (props: SheetHeaderProps) => {
-  const {navigation, sheetToClose, title} = props;
+  const {navigation, sheetToClose, title, sheetType} = props;
 
   const close = () => {
     if (sheetToClose) {
       if (navigation) {
         navigation();
       } else {
-        SheetManager.hide(sheetToClose);
+        if (sheetType === '1') {
+          SheetManager.hide(sheetToClose);
+        } else {
+          bottomSheetStore.SetSheet(sheetToClose, false);
+        }
       }
     }
   };

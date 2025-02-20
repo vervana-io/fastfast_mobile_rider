@@ -4,14 +4,21 @@ import ActionSheet, {
   SheetManager,
   SheetProps,
 } from 'react-native-actions-sheet';
-import {Alerts, AlertsProps, SheetHeader} from '@components/ui';
+import {
+  Alerts,
+  AlertsProps,
+  CancelOrderModal,
+  SheetHeader,
+} from '@components/ui';
 import {Box, Button, Text, TextArea, VStack} from 'native-base';
 import React, {useCallback, useRef, useState} from 'react';
 
 import {ListType} from './orderHelp';
+import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT} from '../../config';
 import {apiType} from '@types/index';
 import {observer} from 'mobx-react-lite';
+import {ordersStore} from '@store/orders';
 import {useOrders} from '@hooks/useOrders';
 
 export const ComplaintSheet = observer((props: SheetProps) => {
@@ -21,6 +28,7 @@ export const ComplaintSheet = observer((props: SheetProps) => {
     type: AlertsProps['status'];
     message: any;
   }>();
+  const [showCancelOrder, setShowCancelOrder] = useState(false);
 
   const {complaints} = useOrders();
 
@@ -35,17 +43,21 @@ export const ComplaintSheet = observer((props: SheetProps) => {
       {
         onSuccess: (val: apiType) => {
           if (val.status) {
-            setErrors({
+            Toast.show({
               type: 'success',
-              message: 'Your complaint has been logged',
+              text1: 'Complaint',
+              text2:
+                'Your complaint has been logged successfully and an admin would reach you',
             });
             setTimeout(() => {
               SheetManager.hide('ComplaintSheet');
+              setShowCancelOrder(true);
             }, 1000);
           } else {
-            setErrors({
-              type: 'warning',
-              message: val.message,
+            Toast.show({
+              type: 'error',
+              text1: 'Complaint',
+              text2: 'We could not log your complaint',
             });
           }
         },
@@ -108,6 +120,11 @@ export const ComplaintSheet = observer((props: SheetProps) => {
         // backgroundColor: colorMode === 'dark' ? '#111827' : '#fff',
       }}>
       {Content()}
+      <Toast />
+      <CancelOrderModal
+        show={showCancelOrder}
+        order_id={ordersStore.selectedOrder?.id ?? 0}
+      />
     </ActionSheet>
   );
 });

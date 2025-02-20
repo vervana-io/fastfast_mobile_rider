@@ -19,15 +19,17 @@ import {BackButton} from '@components/ui';
 import {BikeIcon} from '@assets/svg/BikeIcon';
 import {DefaultLayout} from '@layouts/default';
 import {LocationPin} from '@assets/svg/LocationPin';
-import {LocationPin2} from '@assets/svg/LocationPin2';
 import {PhoneIcon} from '@assets/svg/PhoneIcon';
 import {SheetManager} from 'react-native-actions-sheet';
 import {TimeIcon} from '@assets/svg/TimeIcon';
+import Toast from 'react-native-toast-message';
+import {bottomSheetStore} from '@store/bottom-sheet';
 import dayjs from 'dayjs';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
-import {orderTypes} from '@types/orderTypes';
+import {orderType} from '@types/index';
 import {ordersStore} from '@store/orders';
+import {rootConfig} from '@store/root';
 import {useOrders} from '@hooks/useOrders';
 
 interface OrdersScreenProps {
@@ -38,10 +40,12 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
   const {navigation} = props;
   const layout = useWindowDimensions();
 
+  const userIsOnline = rootConfig.isOnline;
+
   const {fetchOngoingOrders, orderStates} = useOrders();
   const {ordersData} = orderStates;
 
-  const orders: orderTypes[] = ordersStore.orders;
+  const orders: orderType[] = ordersStore.orders;
 
   const [active, setIsActive] = useState([-1]);
 
@@ -70,11 +74,21 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
   );
 
   const openOrder = useCallback(
-    (order_id: number, item: orderTypes) => {
+    (order_id: number, item: orderType) => {
       navigation.navigate('Home');
-      ordersStore.setSelectedOrderId(order_id);
-      ordersStore.setSelectedOrder(item);
-      SheetManager.show('orderDetailsSheet', {payload: {order_id}});
+      if (userIsOnline) {
+        ordersStore.setSelectedOrderId(order_id);
+        ordersStore.setSelectedOrder(item);
+        bottomSheetStore.SetSheet('orderDetailsView', true, {
+          payload: {order_id: order_id},
+        });
+      } else {
+        Toast.show({
+          type: 'warning',
+          text1: 'Online status',
+          text2: 'You need to go online before proceeding to an order',
+        });
+      }
     },
     [navigation],
   );
@@ -160,8 +174,8 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                     <HStack alignItems="center" space={2}>
                       <LocationPin />
                       <Text flex={1}>
-                        {item?.address.house_number} {item?.address.street}{' '}
-                        {item?.address.city} {item?.address.state}
+                        {item?.address?.house_number} {item?.address?.street}{' '}
+                        {item?.address?.city.name} {item?.address?.state.name}
                       </Text>
                     </HStack>
                   </VStack>
@@ -175,15 +189,13 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                       <Text fontWeight="bold">
                         Delivery Fee: ₦{item.delivery_fee}
                       </Text>
-                      <Text fontWeight="bold">
+                      {/* <Text fontWeight="bold">
                         Order Fee: ₦{item.sub_total}
-                      </Text>
+                      </Text> */}
                     </VStack>
                     <Text fontWeight="bold">
                       Code: #
-                      {item.status === '3'
-                        ? item.delivery_pin
-                        : item.pick_up_pin}
+                      {item.status === 3 ? item.delivery_pin : item.pick_up_pin}
                     </Text>
                   </HStack>
                   <Button
@@ -196,7 +208,7 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                 </Box>
               </Box>
             )}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item: orderType) => item.id.toString()}
           />
         ) : (
           <Center py={8}>
@@ -226,7 +238,7 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                         {item.seller.trading_name}
                       </Text>
                       <Text color="themeLight.gray.2" fontSize="xs">
-                        {item?.seller.address}
+                        {item?.seller?.address}
                       </Text>
                     </VStack>
                     <HStack space={2}>
@@ -252,7 +264,7 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                   </HStack>
                   <Box mt={2}>
                     <Text fontWeight="bold">
-                      Fee: ₦{formatter.formatCurrencySimple(item.total_amount)}
+                      Fee: ₦{formatter.formatCurrencySimple(item.delivery_fee)}
                     </Text>
                     <VStack
                       bg="themeLight.gray.4"
@@ -274,12 +286,12 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
                 </Box>
               </VStack>
             )}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item: orderType) => item.id.toString()}
           />
         ) : (
           <Center py={8}>
             <BikeIcon />
-            <Text my={4}>You have not completted any orders yet</Text>
+            <Text my={4}>You have not completed any orders yet</Text>
           </Center>
         )}
       </VStack>
@@ -344,10 +356,6 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
       });
     }
   };
-
-  useEffect(() => {
-    refreshData();
-  }, [index]);
 
   return (
     <DefaultLayout refreshable={true} shouldRefresh={refreshData}>

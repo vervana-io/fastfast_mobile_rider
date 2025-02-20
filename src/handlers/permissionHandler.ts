@@ -1,6 +1,5 @@
+import {Alert, PermissionsAndroid, Platform} from 'react-native';
 import {PERMISSIONS, RESULTS, check, request} from 'react-native-permissions';
-
-import {Platform} from 'react-native';
 
 class PermissionManager {
   static PERMISSIONS = {
@@ -55,6 +54,46 @@ class PermissionManager {
 
     const result = await check(permission);
     return result;
+  }
+
+  static async askForPostNotificationsPermission(): Promise<boolean> {
+    if (Platform.OS !== 'android') {
+      return false;
+    }
+    if (Platform.Version < 33) {
+      return false;
+    } // Only request for Android versions 13 and above
+
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        {
+          title: 'Notification Permission',
+          message: 'We need your permission to show you notifications',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      this.checkPerms();
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Permission Granted. You can now receive notifications.');
+        return true;
+      } else if (granted === PermissionsAndroid.RESULTS.DENIED) {
+        console.log('Permission Denied. Notification permission is required.');
+      } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+        console.log(
+          'Permission Blocked. Notification permission has been blocked.',
+        );
+        Alert.alert(
+          'Notification has not been granted!',
+          'Please long press on app icon, select App Info, select Notifications and enable all notifications.',
+        );
+      }
+    } catch (e) {
+      console.warn('requestPostNotificationsPermission error', e);
+    }
+    return false;
   }
 }
 

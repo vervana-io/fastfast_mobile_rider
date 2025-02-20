@@ -1,7 +1,13 @@
-import {AuthType, addressesTypes, apiPaginatedType, apiType, profileUpdateType} from '@types/index';
+import {
+  AuthType,
+  addressesTypes,
+  apiPaginatedType,
+  apiType,
+  profileUpdateType,
+} from '@types/index';
 import {useMutation, useQuery} from 'react-query';
 
-import { addressesStore } from '@store/index';
+import {addressesStore} from '@store/index';
 import {authStore} from '@store/auth';
 import {http} from '../config';
 
@@ -33,7 +39,7 @@ export const useUser = (config?: userConfig) => {
     {
       enabled: Boolean(config?.enableFetchUser) && authStore.isLoggedIn,
       onSuccess: (val: apiType) => {
-        console.log('val', val);
+        // console.log('val', val);
         if (val.status) {
           const data: any = val.data;
           const payload: AuthType = {
@@ -106,6 +112,24 @@ export const useUser = (config?: userConfig) => {
     }
   });
 
+  const updatePasswordWithEmail = useMutation(
+    async (data: {
+      email: string;
+      password: string;
+      password_confirmation: string;
+    }) => {
+      try {
+        const req: any = await http.post(
+          'profile/update_password_with_email',
+          data,
+        );
+        return req.data;
+      } catch (error) {
+        return error;
+      }
+    },
+  );
+
   return {
     toggleOnlineStatus,
     userDetails,
@@ -114,5 +138,6 @@ export const useUser = (config?: userConfig) => {
     fetchAddress,
     profileUpdate,
     deleteAddress,
+    updatePasswordWithEmail,
   };
 };

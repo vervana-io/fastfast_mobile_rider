@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>862410060924-bc8k563n8om1im0dnou26qvspp81fbdi.apps.googleusercontent.com</string>
+	<string>862410060924-350bglh4dbr76otd3sr07id5frrmgl08.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.862410060924-bc8k563n8om1im0dnou26qvspp81fbdi</string>
+	<string>com.googleusercontent.apps.862410060924-350bglh4dbr76otd3sr07id5frrmgl08</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>862410060924-nci0ltqgi37n498t81l0mip0979rcf2b.apps.googleusercontent.com</string>
+	<string>862410060924-ccs6s3dgnh46rn0hp1qpdlf9r86eujv1.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCPgBe8jj2_2cKxjrEHzJ91D3uS2X3bh9U</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,11 +15,11 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>org.fast.rider</string>
+	<string>org.fastfastrider</string>
 	<key>PROJECT_ID</key>
 	<string>fastfast-ab3b0</string>
 	<key>STORAGE_BUCKET</key>
-	<string>fastfast-ab3b0.appspot.com</string>
+	<string>fastfast-ab3b0.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:862410060924:ios:befd5580f463aae05cc5f9</string>
+	<string>1:862410060924:ios:e0dd2249f72ddebc5cc5f9</string>
 	<key>DATABASE_URL</key>
 	<string>https://fastfast-ab3b0-default-rtdb.firebaseio.com</string>
 </dict>

@@ -1,5 +1,6 @@
-import { authStore } from '@store/auth';
 import {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios';
+
+import {authStore} from '@store/auth';
 
 export const todo = () => {
   if (__DEV__) {

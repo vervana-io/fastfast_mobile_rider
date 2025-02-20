@@ -131,6 +131,7 @@ export const ProfileSheets = observer((props: SheetProps) => {
                 Delivering since {dayjs(userD.user?.created_at).format('YYYY')}
               </Text>
               <Link
+                onPress={() => SheetManager.show('VehicleDetailsSheet')}
                 _text={{fontSize: 'sm', color: 'themeLight.accent'}}
                 isUnderlined={false}>
                 See vehicle details
@@ -151,7 +152,8 @@ export const ProfileSheets = observer((props: SheetProps) => {
                     <ChevronRightIcon />
                   </HStack>
                 </Pressable>
-                <Pressable>
+                <Pressable
+                  onPress={() => SheetManager.show('GuarantorFormSheet')}>
                   <HStack
                     space={2}
                     alignItems="center"
@@ -163,7 +165,7 @@ export const ProfileSheets = observer((props: SheetProps) => {
                     <ChevronRightIcon />
                   </HStack>
                 </Pressable>
-                <Link
+                {/* <Link
                   _text={{
                     fontSize: 'sm',
                     color: 'themeLight.accent',
@@ -171,7 +173,7 @@ export const ProfileSheets = observer((props: SheetProps) => {
                   }}
                   isUnderlined={false}>
                   View customer compliments
-                </Link>
+                </Link> */}
               </VStack>
               <HStack justifyContent="space-between" w="full" mt={8}>
                 <VStack alignItems="center">

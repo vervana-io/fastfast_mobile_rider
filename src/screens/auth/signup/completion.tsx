@@ -1,7 +1,7 @@
 import {Box, Button, Center, CheckIcon, Heading, Text} from 'native-base';
+import React, { useEffect } from 'react';
 
 import {Pattern} from '@assets/svg/Pattern';
-import React from 'react';
 
 interface Step3Props {
   navigation?: any;
@@ -10,12 +10,16 @@ interface Step3Props {
 export const Completion = (props: Step3Props) => {
   const {navigation} = props;
 
+  useEffect(() => {
+    setTimeout(() => {
+      navigation.navigate('App');
+    }, 3000); // Redirect to Main screen after 3 seconds
+  }, [navigation]);
+
   return (
     <Box flex={1} p={6}>
-      <Box position="absolute" top={0} w="full" left={0} zIndex={1}>
-        <Pattern />
-      </Box>
       <Center my={48}>
+        <Heading mb={4}>Registration Successful</Heading>
         <Center
           w="104px"
           h="104px"
@@ -25,19 +29,14 @@ export const Completion = (props: Step3Props) => {
           borderColor="themeLight.primary.base">
           <CheckIcon size="10" color="themeLight.primary.base" />
         </Center>
-        <Heading mb={4}>Success</Heading>
-        <Text mt={2}>Your account has been created successfully</Text>
+        <Text fontWeight="semibold" mb={4} fontSize="lg">
+          Redirecting...
+        </Text>
+        <Text mt={2} textAlign="center">
+          Please hold on while we redirect you to your Fast Fast Rider Home
+          screen
+        </Text>
       </Center>
-      <Button
-        bg="themeLight.accent"
-        _text={{fontWeight: 'bold'}}
-        w="full"
-        py={4}
-        my={8}
-        onPress={() => navigation.replace('Auth', {screen: 'Login'})}
-        rounded="full">
-        Proceed
-      </Button>
     </Box>
   );
 };

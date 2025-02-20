@@ -67,3 +67,9 @@ yarn-error.log
 
 # testing
 /coverage
+
+*.env
+/android/app/release
+.yarn
+
+android/app/release/

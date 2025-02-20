@@ -45,7 +45,7 @@ export const Earnings = observer((props: SheetProps) => {
 
   const doFetchTransaction = useCallback(() => {
     fetchTransactions.mutate({
-      per_page: 20,
+      per_page: 30,
     });
   }, []);
 
@@ -71,11 +71,19 @@ export const Earnings = observer((props: SheetProps) => {
   });
 
   const fetchDataByRange = (start: Dayjs, end: Dayjs) => {
-    console.log('start', start);
-    console.log('end', end);
+    fetchTransactions.mutate(
+      {
+        from_date: formatter.formatDate(start, 'YYYY-MM-DD'),
+        to_date: formatter.formatDate(end, 'YYYY-MM-DD'),
+        per_page: 30,
+      },
+      {},
+    );
+    console.log('start', formatter.formatDate(start, 'YYYY-MM-DD'));
+    console.log('end', formatter.formatDate(end, 'YYYY-MM-DD'));
   };
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     const newStartDate = dateRange.startDate.subtract(7, 'day');
     const newEndDate = dateRange.endDate.subtract(7, 'day');
     if (newStartDate.isBefore(minDate)) {
@@ -85,9 +93,9 @@ export const Earnings = observer((props: SheetProps) => {
       setDateRange({startDate: newStartDate, endDate: newEndDate});
       fetchDataByRange(newStartDate, newEndDate);
     }
-  };
+  }, [dateRange.endDate, dateRange.startDate, minDate]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     const newStartDate = dateRange.startDate.add(7, 'day');
     const newEndDate = dateRange.endDate.add(7, 'day');
     if (newEndDate.isAfter(maxDate)) {
@@ -107,7 +115,7 @@ export const Earnings = observer((props: SheetProps) => {
       setDateRange({startDate: newStartDate, endDate: newEndDate});
       fetchDataByRange(newStartDate, newEndDate);
     }
-  };
+  }, [dateRange.endDate, dateRange.startDate, maxDate, minDate]);
 
   const Header = useCallback(
     () => (
@@ -146,7 +154,13 @@ export const Earnings = observer((props: SheetProps) => {
         </VStack>
       </Center>
     ),
-    [auth.wallet?.balance, dateRange.endDate, dateRange.startDate],
+    [
+      auth.wallet?.balance,
+      dateRange.endDate,
+      dateRange.startDate,
+      handleNext,
+      handlePrev,
+    ],
   );
 
   const DataInfo = useCallback(
@@ -156,22 +170,23 @@ export const Earnings = observer((props: SheetProps) => {
         <Text fontSize="2xl" fontWeight="bold" mb={2} color="black">
           ₦{formatter.formatCurrencySimple(auth.wallet?.balance ?? 0)}
         </Text>
-        {/* <HStack space={2} mt={2}>
+        <HStack space={2} mt={2}>
           <Button
             variant="outline"
             borderColor="themeLight.accent"
             rounded="full"
+            onPress={() => SheetManager.show('WithdrawSheet')}
             px={5}>
             Withdraw
           </Button>
-          <Button
+          {/* <Button
             variant="ghost"
             rounded="full"
             px={5}
             endIcon={<ChevronRightIcon />}>
             Payment history
-          </Button>
-        </HStack> */}
+          </Button> */}
+        </HStack>
       </VStack>
     ),
     [auth.wallet?.balance],
@@ -261,7 +276,11 @@ export const Earnings = observer((props: SheetProps) => {
   const Content = useCallback(() => {
     return (
       <Box py={6} px={4} bg="#fff" h="full" roundedTop="2xl">
-        <SheetHeader sheetToClose="EarningsSheet" title="Earnings" />
+        <SheetHeader
+          sheetToClose="EarningsSheet"
+          sheetType="1"
+          title="Earnings"
+        />
         <ScrollView>
           <VStack mt={4}>
             <Header />

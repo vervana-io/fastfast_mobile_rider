@@ -17,18 +17,24 @@ import {
 import React, {useCallback, useRef} from 'react';
 
 import {ContractIcon} from '@assets/svg/ContractIcon';
+import {InAppBrowser} from 'react-native-inappbrowser-reborn';
+import {Linking} from 'react-native';
 import {MapIcon} from '@assets/svg/MapIcon';
 import {SheetHeader} from '@components/ui';
 import {TrashIcon} from '@assets/svg/TrashIcon';
 import {WIN_HEIGHT} from '../../config';
 import {authStore} from '@store/auth';
+import { bottomSheetStore } from '@store/bottom-sheet';
 import {observer} from 'mobx-react-lite';
+import { rootConfig } from '@store/root';
 import {useAuth} from '@hooks/useAuth';
 
 interface settingsListType {
+  route?: any;
   title: string;
   icon: any;
-  sheet: string;
+  sheet?: string;
+  link?: string;
 }
 
 const list: settingsListType[] = [
@@ -50,7 +56,7 @@ const list: settingsListType[] = [
   {
     title: 'Delete Account',
     icon: <TrashIcon fill="#757575" />,
-    sheet: '',
+    link: 'https://fastfastapp.com/delete-account',
   },
 ];
 
@@ -66,12 +72,64 @@ export const SettingsSheet = observer((props: SheetProps) => {
     // }, 500);
   };
 
+  const sleep = async (timeout: any) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+  };
+
+  const openLink = async (link: string) => {
+    try {
+      const url = link;
+      if (await InAppBrowser.isAvailable()) {
+        await InAppBrowser.open(url, {
+          // iOS Properties
+          dismissButtonStyle: 'cancel',
+          preferredBarTintColor: '#499D6A',
+          preferredControlTintColor: 'white',
+          readerMode: false,
+          animated: true,
+          modalPresentationStyle: 'fullScreen',
+          modalTransitionStyle: 'coverVertical',
+          modalEnabled: true,
+          enableBarCollapsing: false,
+          // Android Properties
+          showTitle: true,
+          toolbarColor: '#2EAB6F',
+          secondaryToolbarColor: 'white',
+          navigationBarColor: 'white',
+          navigationBarDividerColor: 'white',
+          enableUrlBarHiding: true,
+          enableDefaultShare: true,
+          forceCloseOnRedirection: false,
+          // Specify full animation resource identifier(package:anim/name)
+          // or only resource name(in case of animation bundled with app).
+          animations: {
+            startEnter: 'slide_in_right',
+            startExit: 'slide_out_left',
+            endEnter: 'slide_in_left',
+            endExit: 'slide_out_right',
+          },
+          headers: {
+            'my-custom-header': 'my custom header value',
+          },
+        });
+        await sleep(800);
+        // Alert.alert(JSON.stringify(result));
+      } else {
+        Linking.openURL(url);
+      }
+    } catch (error: any) {
+      // Alert.alert(error.message);
+    }
+  };
+
   const doLogout = () => {
     logout.mutate(
       {},
       {
         onSuccess: () => {
           SheetManager.hide('settingsSheet');
+          rootConfig.setIsOnline(false);
+          bottomSheetStore.SetSheet('orderDetailsView', false);
           authStore.logout();
         },
       },
@@ -81,10 +139,18 @@ export const SettingsSheet = observer((props: SheetProps) => {
   const Content = useCallback(() => {
     return (
       <Box py={6} px={4} bg="#ffffff" h="full" roundedTop="2xl">
-        <SheetHeader sheetToClose="settingsSheet" title="Settings" />
+        <SheetHeader
+          sheetToClose="settingsSheet"
+          title="Settings"
+          sheetType="1"
+        />
         <VStack mt={4}>
           {list.map((el, i) => (
-            <Pressable key={i} onPress={() => openSheet(el.sheet)}>
+            <Pressable
+              key={i}
+              onPress={() =>
+                el.link ? openLink(el?.link ?? '') : openSheet(el.sheet ?? '')
+              }>
               <HStack
                 w="full"
                 justifyContent="space-between"
@@ -115,11 +181,10 @@ export const SettingsSheet = observer((props: SheetProps) => {
               Log Out
             </Link>
           </HStack>
-          <Text color="themeLight.gray.2">Version 2.3</Text>
         </VStack>
       </Box>
     );
-  }, [logout.isLoading]);
+  }, [doLogout, logout.isLoading]);
 
   return (
     <ActionSheet

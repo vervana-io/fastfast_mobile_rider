@@ -14,6 +14,8 @@ export interface User {
   current_longitude: string;
   created_at: string;
   updated_at: string;
+  complaince_status: number;
+  rejection_note: string;
 }
 
 export interface Rider {
@@ -68,41 +70,50 @@ export interface loginFieldType {
 }
 
 export interface registerFieldType {
-  phone_number: string;
-  email: string;
-  password: string;
-  first_name: string;
-  last_name: string;
-  latitude: string;
-  longitude: string;
-  contract_type: number;
+  provider?: string;
+  token?: string;
+  phone_number?: string;
+  email?: string;
+  password?: string;
+  first_name?: string;
+  last_name?: string;
+  // latitude?: string;
+  // longitude?: string;
+  contract_type?: number;
   shift_type?: number;
-  shift_data: number[];
+  shift_data?: number[];
   next_of_kin?: string;
   next_of_kin_phone_number?: string;
   drivers_license?: File;
   drivers_license_base64?: string;
-  vehicle_type: number;
-  vehicle_brand: string;
-  vehicle_plate_number: string;
+  vehicle_type?: number;
+  vehicle_brand?: string;
+  vehicle_plate_number?: string;
   vehicle_picture?: File;
-  vehicle_picture_base64: string;
+  vehicle_picture_base64?: string;
   first_guarantor_name?: string;
   first_guarantor_phone_number?: string;
   second_guarantor_name?: string;
   second_guarantor_phone_number?: string;
   previous_place_of_work?: string;
   previous_place_of_work_duration?: string;
-  bank_name: string;
-  bank_code: string;
-  account_number: string;
-  account_name: string;
+  bank_name?: string;
+  bank_code?: string;
+  account_number?: string;
+  account_name?: string;
   avatar?: File;
   avatar_base64?: string;
-  device_token: string;
+  device_token?: string;
+  device_version?: string;
 }
 
 export interface bioLoginFieldType {
   signature: string;
   fbt: string;
+}
+
+export interface registerStoreType {
+  step: number | undefined;
+  registerData: registerFieldType;
+  method?: 'provider' | 'route' | 'none';
 }

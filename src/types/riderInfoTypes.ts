@@ -1,7 +1,8 @@
 import {Media} from '.';
 
 export interface riderType {
-  user_id: number;
+  id: number;
+  rider_id: number;
   contract_type: number;
   first_name: string;
   other_name: string;

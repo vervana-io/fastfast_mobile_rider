@@ -36,15 +36,19 @@ export const useOrders = () => {
       }
     },
     {
-      onSuccess: (val: apiPaginatedType) => {
-        const data: any = val.data;
+      onSuccess(data, variables) {
+        const val: apiPaginatedType = data;
+        const _data: any = val.data;
         const payload: paginationType = {
+          ...val,
           current_page: val.current_page,
           total: val.total,
           from: val.from,
+          links: [],
         };
         const ongoingCount = val.total;
-        ordersStore.setOrders(data, ongoingCount);
+        const dCount = variables.status === '1' ? ongoingCount : 0;
+        ordersStore.setOrders(_data, dCount);
         setOrders(payload);
       },
     },
@@ -77,6 +81,15 @@ export const useOrders = () => {
           current_page: val.current_page,
           total: val.total,
           from: val.from,
+          links: [],
+          first_page_url: '',
+          last_page: '',
+          last_page_url: '',
+          next_page_url: '',
+          path: '',
+          per_page: '',
+          prev_page_url: '',
+          to: 0,
         };
         setPastOrders(payload);
       },
@@ -104,7 +117,7 @@ export const useOrders = () => {
   );
 
   const acceptOrder = useMutation(
-    async (data: {order_id: number; request_id: number}) => {
+    async (data: {order_id: string | number; request_id: number}) => {
       try {
         const req: any = await http.post('orders/accept', data);
         return req.data;
@@ -115,7 +128,7 @@ export const useOrders = () => {
   );
 
   const reassignOrder = useMutation(
-    async (data: {order_id: number; request_id: number}) => {
+    async (data: {order_id: string | number; request_id: number}) => {
       try {
         const req: any = await http.post('orders/reject', data);
         return req.data;
@@ -152,7 +165,11 @@ export const useOrders = () => {
   );
 
   const deliveredOrder = useMutation(
-    async (data: {order_id: number; request_id: number}) => {
+    async (data: {
+      order_id: number;
+      request_id: number;
+      media_base64: string[];
+    }) => {
       try {
         const req: any = await http.post('orders/delivered', data);
         return req.data;
