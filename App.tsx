@@ -1,31 +1,31 @@
 import './src/components/sheets/sheets';
 
 /* eslint-disable react-native/no-inline-styles */
-import {ColorMode, NativeBaseProvider, StorageManager} from 'native-base';
-import React, {useEffect} from 'react';
 import {
   checkApplicationNotificationPermission,
   registerAppWithFCM,
   registerListenerWithFCM,
 } from '@handlers/fcmHandler';
+import {ColorMode, NativeBaseProvider, StorageManager} from 'native-base';
+import React, {useEffect} from 'react';
 
+import {NeedsUpdateModal} from '@components/ui';
+import {ErrorFallback} from '@components/utils';
+import {toastConfig} from '@helpers/toastConfig';
 import {AppNavigator} from '@navigation/index';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ErrorBoundary from 'react-native-error-boundary';
-import {ErrorFallback} from '@components/utils';
-import FlashMessage from 'react-native-flash-message';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {LogBox} from 'react-native';
-import { NeedsUpdateModal } from '@components/ui';
-import {QueryClientProvider} from 'react-query';
-import Toast from 'react-native-toast-message';
-import {authStore} from '@store/auth';
 import crashlytics from '@react-native-firebase/crashlytics';
 import messaging from '@react-native-firebase/messaging';
-import {rootClientQuery} from './src/config';
+import {authStore} from '@store/auth';
 import {rootConfig} from '@store/root';
+import {LogBox} from 'react-native';
+import ErrorBoundary from 'react-native-error-boundary';
+import FlashMessage from 'react-native-flash-message';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
+import {QueryClientProvider} from 'react-query';
+import {rootClientQuery} from './src/config';
 import {theme} from './theme';
-import {toastConfig} from '@helpers/toastConfig';
 
 export default function App() {
   LogBox.ignoreLogs([

@@ -65,6 +65,9 @@ target 'FastFastRider' do
   pod 'react-native-google-maps', :path => rn_maps_path
 
   config = use_native_modules!
+  flags = get_default_flags()
+
+  flags[:hermes_enabled] = true
 
   use_frameworks! :linkage => :static
 
