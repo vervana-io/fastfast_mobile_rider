@@ -4,8 +4,9 @@ buildscript {
         minSdkVersion = 21
         compileSdkVersion = 34
         targetSdkVersion = 34
-        kotlinVersion = "1.8.0"
-
+        kotlinVersion = "1.8.10"
+        // Add this line for react-native-inappbrowser-reborn
+        androidXBrowser = "1.5.0"
         if (System.properties['os.arch'] == "aarch64") {
             // For M1 Users we need to use the NDK 24 which added support for aarch64
             ndkVersion = "25.1.8937393"
@@ -22,11 +23,12 @@ buildscript {
         google()
         mavenCentral()
         jcenter()
+        gradlePluginPortal()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle")
+        classpath("com.android.tools.build:gradle:8.1.0")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath 'com.google.gms:google-services:4.4.1'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
     }
@@ -53,5 +55,15 @@ allprojects {
         }
         google()
         maven { url 'https://www.jitpack.io' }
+    }
+     configurations.all {
+         resolutionStrategy {
+            force 'androidx.browser:browser:1.5.0'
+            force "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
+            force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
+            force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${kotlinVersion}"
+            force 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+            force 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+        }
     }
 }
