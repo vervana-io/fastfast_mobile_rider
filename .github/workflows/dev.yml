@@ -28,7 +28,7 @@ jobs:
             echo "TIER=staging" >> $GITHUB_ENV
           fi
 
-      - name: Trigger Bitrise Android Build
+      - name: Trigger Bitrise Build
         env:
           BITRISE_APP_SLUG: ${{ secrets.BITRISE_APP_SLUG }}
           BITRISE_ACCESS_TOKEN: ${{ secrets.BITRISE_ACCESS_TOKEN }}
