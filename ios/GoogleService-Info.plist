@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>862410060924-350bglh4dbr76otd3sr07id5frrmgl08.apps.googleusercontent.com</string>
+	<string>862410060924-2g3cot503tnr3fsfu5oop7s1s1tf43kd.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.862410060924-350bglh4dbr76otd3sr07id5frrmgl08</string>
+	<string>com.googleusercontent.apps.862410060924-2g3cot503tnr3fsfu5oop7s1s1tf43kd</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>862410060924-ccs6s3dgnh46rn0hp1qpdlf9r86eujv1.apps.googleusercontent.com</string>
+	<string>862410060924-0d2gsemmfum8ddco4efm0ipr6aufg7p0.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCPgBe8jj2_2cKxjrEHzJ91D3uS2X3bh9U</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>org.fastfastrider</string>
+	<string>org.fastfastrider.develop</string>
 	<key>PROJECT_ID</key>
 	<string>fastfast-ab3b0</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:862410060924:ios:e0dd2249f72ddebc5cc5f9</string>
+	<string>1:862410060924:ios:fe20a66e4e1916945cc5f9</string>
 	<key>DATABASE_URL</key>
 	<string>https://fastfast-ab3b0-default-rtdb.firebaseio.com</string>
 </dict>
