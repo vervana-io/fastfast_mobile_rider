@@ -58,7 +58,7 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = FastFastRider/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = FastFastRider/main.m; sourceTree = "<group>"; };
 		282BF30A4C4273C960EF9809 /* Pods_FastFastRider.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FastFastRider.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		40917F012DE6772F006F7F34 /* Pods-FastFastRider.staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Pods-FastFastRider.staging.xcconfig"; sourceTree = "<group>"; };
+		40917F012DE6772F006F7F34 /* Pods-FastFastRider.staging.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Target Support Files/Pods-FastFastRider/Pods-FastFastRider.staging.xcconfig"; sourceTree = "<group>"; };
 		523E824FA7AA4E23B81C3BCC /* RanyMedium Italic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "RanyMedium Italic.otf"; path = "../src/assets/fonts/rany/RanyMedium Italic.otf"; sourceTree = "<group>"; };
 		5A8D9E78B1AB469AB19C2CD1 /* RanyBold Italic.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "RanyBold Italic.otf"; path = "../src/assets/fonts/rany/RanyBold Italic.otf"; sourceTree = "<group>"; };
 		5C2822A4E67D4D4299B60C54 /* RanyLight.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = RanyLight.otf; path = ../src/assets/fonts/rany/RanyLight.otf; sourceTree = "<group>"; };
@@ -565,10 +565,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconDevelop;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = FastFastRider/FastFastRider.entitlements;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = H6SW6D3PZ9;
+				DEVELOPMENT_TEAM = H6SW6D3PZ9;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = FastFastRider/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "FastFast Rider";
@@ -585,7 +585,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.fastfastrider.develop;
 				PRODUCT_NAME = FastFastRider;
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development org.fastfastrider.develop";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -697,7 +696,10 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -707,6 +709,7 @@
 		};
 		40917EFE2DE673BD006F7F34 /* Staging */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40917F012DE6772F006F7F34 /* Pods-FastFastRider.staging.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconDevelop;
 				CLANG_ENABLE_MODULES = YES;
@@ -841,7 +844,10 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -920,7 +926,10 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

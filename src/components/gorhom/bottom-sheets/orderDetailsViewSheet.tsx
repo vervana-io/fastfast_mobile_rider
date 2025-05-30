@@ -368,7 +368,7 @@ export const OrderDetailsViewSheet = observer(() => {
                 <VStack bg="white" rounded="lg" my={4} p={4} space={2}>
                   {ordersData.order_products &&
                     ordersData.order_products?.map((el, i) => (
-                      <Text key={i} color="black">
+                      <Text key={el.id || el.product?.id} color="black">
                         {el.quantity}x {el.product?.title}
                       </Text>
                     ))}
@@ -441,6 +441,8 @@ export const OrderDetailsViewSheet = observer(() => {
             rounded="lg"
           />
           <Pressable
+            accessibilityLabel="Close sheet"
+            accessibilityRole="button"
             onPress={() => handleSnapPress(1)}
             position="absolute"
             zIndex={4}
@@ -693,7 +695,7 @@ export const OrderDetailsViewSheet = observer(() => {
     ],
   );
 
-  const OrderComplete = useCallback(
+  const OrderComplete = useMemo(
     () => (
       <Box py={6} px={4} bg="#fff" h="full" roundedTop="2xl">
         <Center my={8}>
@@ -763,8 +765,17 @@ export const OrderDetailsViewSheet = observer(() => {
     [ordersData?.delivery_pin, ordersData?.pick_up_pin, ordersData?.status],
   );
 
-  const handleClosePress = () => sheetRef.current.close();
-  const handleExpand = () => sheetRef.current.expand();
+  const handleClosePress = () => {
+    if (sheetRef.current) {
+      sheetRef.current.close();
+    }
+  };
+
+  const handleExpand = () => {
+    if (sheetRef.current) {
+      sheetRef.current.expand();
+    }
+  };
 
   useEffect(() => {
     if (sheetOpen && order_id) {
@@ -774,11 +785,20 @@ export const OrderDetailsViewSheet = observer(() => {
     }
   }, [order_id, sheetOpen]);
 
+  // useEffect(() => {
+  //   if (sheetOpen) {
+  //     handleExpand;
+  //   } else {
+  //     handleClosePress;
+  //     bottomSheetStore.SetSheet('orderDetailsView', false);
+  //   }
+  // }, [sheetOpen]);
+
   useEffect(() => {
     if (sheetOpen) {
-      handleExpand;
+      handleExpand();
     } else {
-      handleClosePress;
+      handleClosePress();
       bottomSheetStore.SetSheet('orderDetailsView', false);
     }
   }, [sheetOpen]);
@@ -790,32 +810,32 @@ export const OrderDetailsViewSheet = observer(() => {
     }
   }, [isForeground, sheetOpen]);
 
-  return (
-    sheetOpen && (
-      <BottomSheet
-        ref={sheetRef}
-        index={1}
-        snapPoints={snapPoints}
-        backdropComponent={renderBackdrop}
-        backgroundStyle={{backgroundColor: 'transparent'}}
-        enableDynamicSizing={false}
-        handleComponent={null}
-        // enablePanDownToClose
-        onChange={handleSheetChanges}>
-        <BottomSheetView>
-          {showFullPin ? (
-            <FullPin />
-          ) : orderCompleted ? (
-            <OrderComplete />
-          ) : hasViewDetails === 'full' ? (
-            ContentFull()
-          ) : (
-            Content()
-          )}
-          <Toast config={toastConfig} />
-        </BottomSheetView>
-      </BottomSheet>
-    )
+  return sheetOpen && sheetRef.current ? (
+    <BottomSheet
+      ref={sheetRef}
+      index={1}
+      snapPoints={snapPoints}
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{backgroundColor: 'transparent'}}
+      enableDynamicSizing={false}
+      handleComponent={null}
+      // enablePanDownToClose
+      onChange={handleSheetChanges}>
+      <BottomSheetView>
+        {showFullPin ? (
+          <FullPin />
+        ) : orderCompleted ? (
+          <OrderComplete />
+        ) : hasViewDetails === 'full' ? (
+          ContentFull()
+        ) : (
+          Content()
+        )}
+        <Toast config={toastConfig} />
+      </BottomSheetView>
+    </BottomSheet>
+  ) : (
+    <></>
   );
 });
 

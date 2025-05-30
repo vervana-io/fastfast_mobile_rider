@@ -73,21 +73,49 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
     </VStack>
   );
 
+  // const openOrder = useCallback(
+  //   (order_id: number, item: orderType) => {
+  //     navigation.navigate('Home');
+  //     if (userIsOnline) {
+  //       console.log('something else.');
+  //       ordersStore.setSelectedOrderId(order_id);
+  //       // ordersStore.setSelectedOrder(item);
+  //       // bottomSheetStore.SetSheet('orderDetailsView', true, {
+  //       //   payload: {order_id: order_id},
+  //       // });
+  //     } else {
+  //       Toast.show({
+  //         type: 'warning',
+  //         text1: 'Online status',
+  //         text2: 'You need to go online before proceeding to an order',
+  //       });
+  //     }
+  //   },
+  //   [navigation],
+  // );
+
   const openOrder = useCallback(
     (order_id: number, item: orderType) => {
-      navigation.navigate('Home');
-      if (userIsOnline) {
-        ordersStore.setSelectedOrderId(order_id);
-        ordersStore.setSelectedOrder(item);
-        bottomSheetStore.SetSheet('orderDetailsView', true, {
-          payload: {order_id: order_id},
-        });
-      } else {
-        Toast.show({
-          type: 'warning',
-          text1: 'Online status',
-          text2: 'You need to go online before proceeding to an order',
-        });
+      try {
+        console.log('[openOrder] id:', order_id);
+        console.log('[openOrder] item:', JSON.stringify(item, null, 2));
+        navigation.navigate('Home');
+        if (userIsOnline) {
+          ordersStore.setSelectedOrderId(order_id);
+          ordersStore.setSelectedOrder(item);
+          console.log('[openOrder] opening sheet...');
+          bottomSheetStore.SetSheet('orderDetailsView', true, {
+            payload: {order_id: order_id},
+          });
+        } else {
+          Toast.show({
+            type: 'warning',
+            text1: 'Online status',
+            text2: 'You need to go online before proceeding to an order',
+          });
+        }
+      } catch (err) {
+        console.error('[openOrder] Crash:', err);
       }
     },
     [navigation],
