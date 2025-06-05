@@ -29,7 +29,9 @@ export const useOrders = () => {
           );
           endpoint += `?${queryParams.toString()}`;
         }
+        //https://testriderapi.fastfastapp.com/api/orders?page=1&per_page=6&status=1
         const req: any = await http.get(endpoint);
+        console.log(JSON.stringify(req, null, 2), 'FULL REQUEST.');
         return req.data;
       } catch (error) {
         return error;

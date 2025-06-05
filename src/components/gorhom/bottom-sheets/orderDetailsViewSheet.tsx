@@ -1,4 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet';
 import {
   AddIcon,
   Box,
@@ -6,37 +11,31 @@ import {
   Center,
   CloseIcon,
   DeleteIcon,
-  Divider,
   HStack,
   Image,
   Pressable,
   Text,
   VStack,
 } from 'native-base';
-import {Alert, Linking, StyleSheet} from 'react-native';
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetScrollView,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Alert, Linking, StyleSheet} from 'react-native';
 import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
 
 import {ExpandIcon} from '@assets/svg/Expand';
 import {LocationPin2} from '@assets/svg/LocationPin2';
 import {PhoneIcon} from '@assets/svg/PhoneIcon';
 import {QuestionIcon} from '@assets/svg/QuestionIcon';
-import {SheetManager} from 'react-native-actions-sheet';
-import Toast from 'react-native-toast-message';
-import {apiType} from '@types/apiTypes';
-import {bottomSheetStore} from '@store/bottom-sheet';
-import {launchImageLibrary} from 'react-native-image-picker';
-import {observer} from 'mobx-react-lite';
-import {ordersStore} from '@store/orders';
 import {toastConfig} from '@helpers/toastConfig';
-import {uploadedOrderType} from '@types/generalType';
 import {useAppState} from '@hooks/useAppState';
 import {useOrders} from '@hooks/useOrders';
+import {bottomSheetStore} from '@store/bottom-sheet';
+import {ordersStore} from '@store/orders';
+import {apiType} from '@types/apiTypes';
+import {uploadedOrderType} from '@types/generalType';
+import {observer} from 'mobx-react-lite';
+import {SheetManager} from 'react-native-actions-sheet';
+import {launchImageLibrary} from 'react-native-image-picker';
+import Toast from 'react-native-toast-message';
 
 export const OrderDetailsViewSheet = observer(() => {
   const sheetRef: any = useRef<BottomSheet>(null);
