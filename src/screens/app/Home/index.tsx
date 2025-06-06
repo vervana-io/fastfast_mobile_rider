@@ -64,7 +64,7 @@ export const Home = observer((props: HomeProps) => {
   const [appState, setAppState] = useState<AppStateStatus>(
     AppState.currentState,
   );
-  const [shouldCheckPerms, setShouldCheckPerms] = useState(false);
+  // const [shouldCheckPerms, setShouldCheckPerms] = useState(false);
 
   const isFocussed = useIsFocused();
 
