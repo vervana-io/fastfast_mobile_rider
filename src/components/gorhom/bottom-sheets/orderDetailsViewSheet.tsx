@@ -41,8 +41,6 @@ export const OrderDetailsViewSheet = observer(() => {
   const sheetRef: any = useRef<BottomSheet>(null);
   const sheetOpen = bottomSheetStore.sheets.orderDetailsView;
 
-  console.log('IS sheet open? ', sheetOpen);
-
   const [uploadedOrder, setUploadedOrder] = useState<uploadedOrderType[]>([]);
   const allowedUpload = 2;
   const [errorMessage, setErrorMessage] = useState('');
@@ -385,9 +383,14 @@ export const OrderDetailsViewSheet = observer(() => {
                 </Text>
                 <VStack bg="white" rounded="lg" my={4} p={4} space={2}>
                   {ordersData.order_products &&
-                    ordersData.order_products?.map((el, i) => (
-                      <Text key={el.id || el.product?.id} color="black">
-                        {el.quantity}x {el.product?.title}
+                    ordersData.order_products?.map((product_in_order, i) => (
+                      <Text
+                        key={
+                          product_in_order.id || product_in_order.product?.id
+                        }
+                        color="black">
+                        {product_in_order.quantity}x{' '}
+                        {product_in_order.product?.title}
                       </Text>
                     ))}
                 </VStack>
