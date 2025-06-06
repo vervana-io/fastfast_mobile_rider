@@ -455,47 +455,47 @@ export const Home = observer((props: HomeProps) => {
   }, [selectedOrder]);
 
   // pusher event setup
+
+  useEffect(() => {
+    subscribe('private-users.compliance.userId', (data: PusherEvent) => {
+      // another channel private room should be created to handle compliance message,
+      // it should strictly private and not public
+      // also we can't hold subscription forever it's expensive and not scalable,
+      //put a mechanism to check when compliance is completed and done, then unsuscribe from the channel after compliance is done
+      if (data.eventName === 'user_compliance_approve') {
+        userDetails.refetch();
+        Toast.show({
+          type: 'success',
+          text1: 'Compliance Approval',
+          text2:
+            'Your compliance has been approved you can now go online to receive orders.',
+          swipeable: true,
+          visibilityTime: 6000,
+        });
+      }
+      if (data.eventName === 'user_compliance_reject') {
+        userDetails.refetch();
+        Toast.show({
+          type: 'error',
+          text1: 'Compliance Approval',
+          text2: 'Your compliance has been rejected',
+          swipeable: true,
+          visibilityTime: 6000,
+        });
+      }
+  }, [subscribe, userDetails]);
   useEffect(() => {
     subscribe(
-      `private-orders.approved.${userD?.user?.id}`,
+      `private-orders.approved.userId`,
       (data: PusherEvent) => {
-        if (data.eventName === 'user_compliance_approve') {
-          userDetails.refetch();
-          Toast.show({
-            type: 'success',
-            text1: 'Compliance Approval',
-            text2:
-              'Your compliance has been approved you can now go online to receive orders.',
-            swipeable: true,
-            visibilityTime: 6000,
-          });
-        }
-        if (data.eventName === 'user_compliance_reject') {
-          userDetails.refetch();
-          Toast.show({
-            type: 'error',
-            text1: 'Compliance Approval',
-            text2: 'Your compliance has been rejected',
-            swipeable: true,
-            visibilityTime: 6000,
-          });
-        }
         if (data.eventName === 'rider_new_order') {
           console.log('NEW ORDER CAME IN!', JSON.stringify(data, null, 2));
           const dData = data.data;
           const parsed = JSON.parse(dData);
           ordersStore.setNotifiedOrder(parsed);
         }
+        //move this to private-ready channel
         if (data.eventName === 'rider_cancel_order') {
-        }
-        if (data.eventName === 'rider_order_pickup') {
-          Toast.show({
-            type: 'success',
-            text1: 'Order Ready for Pickup',
-            text2: 'Your order is ready for pickup',
-            swipeable: true,
-            visibilityTime: 6000,
-          });
         }
       },
     );

@@ -36,6 +36,7 @@ import {observer} from 'mobx-react-lite';
 import {SheetManager} from 'react-native-actions-sheet';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
+import {UsePusher} from '@hooks/usePusher.ts';
 
 export const OrderDetailsViewSheet = observer(() => {
   const sheetRef: any = useRef<BottomSheet>(null);
@@ -65,6 +66,8 @@ export const OrderDetailsViewSheet = observer(() => {
   const request_id = payload?.request_id ?? ordersData?.misc_rider_info?.id;
 
   const {isBackground, isForeground, currentAppState} = useAppState();
+
+  const {unsuscribe, subscribe} = UsePusher();
 
   // variables
   const snapPoints = useMemo(() => ['30%', '60%', '85%'], []);
@@ -150,6 +153,7 @@ export const OrderDetailsViewSheet = observer(() => {
               per_page: 6,
               status: '1',
             });
+            unsuscribe(`private.orders.ready.${order_id}`);
             setUploadedOrder([]);
             const pay: any = {
               customer_id: ordersData.customer_id,
