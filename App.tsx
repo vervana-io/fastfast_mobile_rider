@@ -26,6 +26,7 @@ import Toast from 'react-native-toast-message';
 import {QueryClientProvider} from 'react-query';
 import {rootClientQuery} from './src/config';
 import {theme} from './theme';
+import {Host} from 'react-native-portalize';
 
 export default function App() {
   LogBox.ignoreLogs([
@@ -110,7 +111,9 @@ export default function App() {
             <ErrorBoundary
               onError={errorHandler}
               FallbackComponent={ErrorFallback}>
-              <AppNavigator />
+              <Host>
+                <AppNavigator />
+              </Host>
             </ErrorBoundary>
             <Toast config={toastConfig} />
             <FlashMessage position="bottom" />

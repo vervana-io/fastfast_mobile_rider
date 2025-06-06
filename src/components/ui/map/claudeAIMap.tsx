@@ -1,13 +1,11 @@
-import {Animated, View} from 'react-native';
 import {Box, Center, Image, Spinner, Text} from 'native-base';
-import MapView, {Marker, PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
+import {Animated, View} from 'react-native';
+import MapView, {Marker} from 'react-native-maps';
 /* eslint-disable react-native/no-inline-styles */
 import React, {useEffect, useRef} from 'react';
-
-import {GeoPosition} from 'react-native-geolocation-service';
-import MapViewDirections from 'react-native-maps-directions';
-import {markersType} from '@types/mapTypes';
 import {ordersStore} from '@store/orders';
+import {markersType} from '@types/mapTypes';
+import MapViewDirections from 'react-native-maps-directions';
 
 interface RiderMapProps {
   destinationCoords?: markersType;
@@ -182,7 +180,7 @@ const RiderMap: React.FC<RiderMapProps> = ({
         <MapViewDirections
           origin={currentLocation}
           destination={destinationCoords}
-          apikey={process.env.GOOGLE_API_KEY ?? ''}
+          apikey={'AIzaSyB7-DZbnJ_GP62ef8sifDLj1C_x43VMwi0'}
           strokeWidth={3} // Customize the line width
           // lineDashPattern={[5, 5]}
           strokeColor="#1B7A41" // Customize the line color

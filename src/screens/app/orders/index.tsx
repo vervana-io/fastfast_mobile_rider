@@ -11,26 +11,26 @@ import {
   Text,
   VStack,
 } from 'native-base';
+import React, {useCallback, useState} from 'react';
 import {Linking, useWindowDimensions} from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
 import {SceneMap, TabBar, TabView} from 'react-native-tab-view';
 
-import {BackButton} from '@components/ui';
 import {BikeIcon} from '@assets/svg/BikeIcon';
-import {DefaultLayout} from '@layouts/default';
 import {LocationPin} from '@assets/svg/LocationPin';
 import {PhoneIcon} from '@assets/svg/PhoneIcon';
-import {SheetManager} from 'react-native-actions-sheet';
 import {TimeIcon} from '@assets/svg/TimeIcon';
-import Toast from 'react-native-toast-message';
-import {bottomSheetStore} from '@store/bottom-sheet';
-import dayjs from 'dayjs';
+import {BackButton} from '@components/ui';
 import {formatter} from '@helpers/formatter';
-import {observer} from 'mobx-react-lite';
-import {orderType} from '@types/index';
+import {useOrders} from '@hooks/useOrders';
+import {DefaultLayout} from '@layouts/default';
+import {bottomSheetStore} from '@store/bottom-sheet';
 import {ordersStore} from '@store/orders';
 import {rootConfig} from '@store/root';
-import {useOrders} from '@hooks/useOrders';
+import {orderType} from '@types/index';
+import dayjs from 'dayjs';
+import {observer} from 'mobx-react-lite';
+import {SheetManager} from 'react-native-actions-sheet';
+import Toast from 'react-native-toast-message';
 
 interface OrdersScreenProps {
   navigation?: any;
@@ -73,21 +73,49 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
     </VStack>
   );
 
+  // const openOrder = useCallback(
+  //   (order_id: number, item: orderType) => {
+  //     navigation.navigate('Home');
+  //     if (userIsOnline) {
+  //       console.log('something else.');
+  //       ordersStore.setSelectedOrderId(order_id);
+  //       // ordersStore.setSelectedOrder(item);
+  //       // bottomSheetStore.SetSheet('orderDetailsView', true, {
+  //       //   payload: {order_id: order_id},
+  //       // });
+  //     } else {
+  //       Toast.show({
+  //         type: 'warning',
+  //         text1: 'Online status',
+  //         text2: 'You need to go online before proceeding to an order',
+  //       });
+  //     }
+  //   },
+  //   [navigation],
+  // );
+
   const openOrder = useCallback(
     (order_id: number, item: orderType) => {
-      navigation.navigate('Home');
-      if (userIsOnline) {
-        ordersStore.setSelectedOrderId(order_id);
-        ordersStore.setSelectedOrder(item);
-        bottomSheetStore.SetSheet('orderDetailsView', true, {
-          payload: {order_id: order_id},
-        });
-      } else {
-        Toast.show({
-          type: 'warning',
-          text1: 'Online status',
-          text2: 'You need to go online before proceeding to an order',
-        });
+      try {
+        console.log('[openOrder] id:', order_id);
+        console.log('[openOrder] item:', JSON.stringify(item, null, 2));
+        if (userIsOnline) {
+          ordersStore.setSelectedOrderId(order_id);
+          ordersStore.setSelectedOrder(item);
+          console.log('[openOrder] opening sheet...');
+          bottomSheetStore.SetSheet('orderDetailsView', true, {
+            payload: {order_id: order_id},
+          });
+        } else {
+          Toast.show({
+            type: 'warning',
+            text1: 'Online status',
+            text2: 'You need to go online before proceeding to an order',
+          });
+        }
+        navigation.navigate('Home');
+      } catch (err) {
+        console.error('[openOrder] Crash:', err);
       }
     },
     [navigation],
