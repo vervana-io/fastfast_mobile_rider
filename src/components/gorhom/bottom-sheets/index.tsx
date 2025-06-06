@@ -7,9 +7,9 @@ import {ProfileViewSheet} from './profileViewSheet';
 export const AllBottomSheets = observer(() => {
   return (
     <>
-      <ProfileViewSheet />
+      {/* <ProfileViewSheet /> */}
       <OrderDetailsViewSheet />
-      <GuarantorFormSheet />
+      {/* <GuarantorFormSheet /> */}
     </>
   );
 });

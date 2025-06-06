@@ -10,6 +10,7 @@ import {LocationPin} from '@assets/svg/LocationPin';
 import {KeyboardAvoiding} from '@components/utils';
 import PermissionManager from '@handlers/permissionHandler';
 import {layoutProps} from '@types/layoutsTypes';
+import {AllBottomSheets} from '@components/gorhom';
 
 export const DefaultLayout = (props: layoutProps) => {
   const {
@@ -174,7 +175,7 @@ export const DefaultLayout = (props: layoutProps) => {
             </Center>
           </Box>
         </Modal>
-        {/* <AllBottomSheets /> */}
+        <AllBottomSheets />
       </Box>
     </>
   );

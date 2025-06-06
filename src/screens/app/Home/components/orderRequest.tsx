@@ -94,7 +94,7 @@ export const OrderRequest = observer(() => {
               setShowOrder(false);
               ordersStore.clearNotifiedOrder();
               setMainNotificationOrder({});
-              ordersStore.setSelectedOrderId(order_id);
+              ordersStore.setSelectedOrderId(Number(order_id));
               bottomSheetStore.SetSheet('orderDetailsView', true);
             } else {
               Toast.show({
@@ -144,8 +144,8 @@ export const OrderRequest = observer(() => {
                 <Box />
               </Center>
               <Text color="white" flex={1}>
-                {mainNotificationOrder?.data?.address.house_number}{' '}
-                {mainNotificationOrder?.data?.address?.street}{' '}
+                {mainNotificationOrder?.data?.address.house_number}
+                {mainNotificationOrder?.data?.address?.street}
                 {mainNotificationOrder?.data?.address?.city}
               </Text>
             </HStack>
@@ -163,8 +163,8 @@ export const OrderRequest = observer(() => {
             <HStack alignItems="center" space={2}>
               <LocationPin fill="white" />
               <Text color="white" flex={1}>
-                {mainNotificationOrder?.data?.customer_address?.house_number}{' '}
-                {mainNotificationOrder?.data?.customer_address?.street}{' '}
+                {mainNotificationOrder?.data?.customer_address?.house_number}
+                {mainNotificationOrder?.data?.customer_address?.street}
                 {mainNotificationOrder?.data?.customer_address?.city}
               </Text>
             </HStack>
@@ -176,7 +176,11 @@ export const OrderRequest = observer(() => {
             rounded="full"
             isLoading={acceptOrder.isLoading}
             _text={{fontWeight: 'bold'}}
-            onPress={triggerAccept}>
+            onPress={triggerAccept}
+            // onPress={() => {
+            //   bottomSheetStore.SetSheet('orderDetailsView', true);
+            // }}>
+          >
             Accept
           </Button>
           <Button
@@ -278,7 +282,7 @@ export const OrderRequest = observer(() => {
         if (ordersStore.ongoingOrderCount < 20) {
           // here we check if an order is already being handled by the user
           // with this, the rider can only have one order at a time
-          if (/**!checkForOrderById(data.order_id)*/ true) {
+          if (!checkForOrderById(data.order_id)) {
             console.log("I'M INNNN");
             const payload: notificationsType = {
               data: JSON.parse(

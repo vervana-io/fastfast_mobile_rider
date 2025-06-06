@@ -41,6 +41,8 @@ export const OrderDetailsViewSheet = observer(() => {
   const sheetRef: any = useRef<BottomSheet>(null);
   const sheetOpen = bottomSheetStore.sheets.orderDetailsView;
 
+  console.log('IS sheet open? ', sheetOpen);
+
   const [uploadedOrder, setUploadedOrder] = useState<uploadedOrderType[]>([]);
   const allowedUpload = 2;
   const [errorMessage, setErrorMessage] = useState('');
@@ -231,6 +233,17 @@ export const OrderDetailsViewSheet = observer(() => {
   }, [ordersData.customer?.phone_number_one]);
 
   // callbacks
+  // const handleSheetChanges = useCallback((index: number) => {
+  //   console.log('handleSheetChanges', index);
+  //   if (index === 2) {
+  //     setViewDetails('full');
+  //   } else if (index === 1) {
+  //     setViewDetails('mid');
+  //   } else {
+  //     setViewDetails('small');
+  //   }
+  // }, []);
+
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index);
     if (index === 2) {
@@ -239,6 +252,12 @@ export const OrderDetailsViewSheet = observer(() => {
       setViewDetails('mid');
     } else {
       setViewDetails('small');
+    }
+
+    // Sync MobX store: if sheet is closed, set to false
+    // For gorhom, index === -1 means fully closed; sometimes 0 is also used for closed
+    if (index === -1 || index === 0) {
+      bottomSheetStore.SetSheet('orderDetailsView', false);
     }
   }, []);
 
@@ -809,7 +828,9 @@ export const OrderDetailsViewSheet = observer(() => {
     }
   }, [isForeground, sheetOpen]);
 
-  return sheetOpen && sheetRef.current ? (
+  console.log(sheetRef.current, 'sheetRef.current ');
+
+  return sheetOpen ? (
     <BottomSheet
       ref={sheetRef}
       index={1}
