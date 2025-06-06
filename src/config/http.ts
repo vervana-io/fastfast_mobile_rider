@@ -2,8 +2,8 @@ import {apiInstance} from './axios';
 // import {BASE_URL} from 'react-native-dotenv';
 import {authStore} from '@store/auth';
 
-// const BASE_URL = 'https://9ff5-102-219-152-26.ngrok-free.app/api/';
-const BASE_URL = 'https://testriderapi.fastfastapp.com/api/';
+const BASE_URL = 'https://9ff5-102-219-152-26.ngrok-free.app/api/';
+// const BASE_URL = 'https://testriderapi.fastfastapp.com/api/';
 
 class Http {
   async get(path: string, options: any = {}) {
