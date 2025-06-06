@@ -2568,11 +2568,33 @@ PODS:
     - React-Core
   - RNPermissions (4.1.5):
     - React-Core
-  - RNReanimated (3.7.0):
+  - RNReanimated (2.17.0):
+    - DoubleConversion
+    - FBLazyVector
+    - FBReactNativeSpec
     - glog
-    - RCT-Folly (= 2022.05.16.00)
+    - RCT-Folly
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
     - React-Core
+    - React-Core/DevSupport
+    - React-Core/RCTWebSocket
+    - React-CoreModules
+    - React-cxxreact
+    - React-jsi
+    - React-jsiexecutor
+    - React-jsinspector
+    - React-RCTActionSheet
+    - React-RCTAnimation
+    - React-RCTBlob
+    - React-RCTImage
+    - React-RCTLinking
+    - React-RCTNetwork
+    - React-RCTSettings
+    - React-RCTText
     - ReactCommon/turbomodule/core
+    - Yoga
   - RNScreens (3.29.0):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -2982,7 +3004,7 @@ SPEC CHECKSUMS:
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNNotifee: 935f3ea8c134c88cbf8b13ea0c97c72c09ad2116
   RNPermissions: 291897442ea8c0cc518e28f34e218685a279b094
-  RNReanimated: 8de2a7af1d91c71ccecbc94c71bc52eff8dfa4b0
+  RNReanimated: 783a7482f872cff13bed7993a8f9b2dad4432dde
   RNScreens: a4d9ce8f68f833f4e42410140eafd88e38bba163
   RNSound: 6c156f925295bdc83e8e422e7d8b38d33bc71852
   RNSVG: d3dcdd1472cc7e82b0654c48bf6abf893485b074
