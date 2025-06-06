@@ -2350,7 +2350,7 @@ PODS:
     - React-Core
   - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-pager-view (6.8.1):
+  - react-native-pager-view (6.7.1):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -2556,7 +2556,7 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNGoogleSignin (13.3.1):
+  - RNGoogleSignin (13.2.0):
     - GoogleSignIn (~> 7.1)
     - React-Core
   - RNInAppBrowser (3.7.0):
@@ -2604,7 +2604,7 @@ PODS:
     - RNSound/Core (= 0.11.2)
   - RNSound/Core (0.11.2):
     - React-Core
-  - RNSVG (15.12.0):
+  - RNSVG (15.11.2):
     - React-Core
   - SocketRocket (0.6.1)
   - TweetNacl (1.0.2)
@@ -2967,7 +2967,7 @@ SPEC CHECKSUMS:
   react-native-image-picker: b049e0ea9d6b1b58c06262e19f8b66c87ac7b760
   react-native-maps: 72a8a903f8a1b53e2c777ba79102078ab502e0bf
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
-  react-native-pager-view: de8a6c678af4bf8a8a90d84a795ca083d001cc18
+  react-native-pager-view: eadf3561ada6525601d3e41101eacc53fd01c8b6
   react-native-safe-area-context: 141eca0fd4e4191288dfc8b96a7c7e1c2983447a
   React-nativeconfig: 6178939b2ac9010dd2f9f994aab3ab11fa68fbf3
   React-NativeModulesApple: 802f2357d0af3e0eaf57db321987f6a425fd3c6d
@@ -3000,14 +3000,14 @@ SPEC CHECKSUMS:
   RNFBMessaging: 099972ab397d61815f32610514b0573d1db2b1e1
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: e1f2aea0c2ba66aeb1ec5af824a94c6e92d202cc
-  RNGoogleSignin: c26dada63b1a357af4f6a87f93ee70268d420c0f
+  RNGoogleSignin: ee2938633d996756819e3212c8e0f7f696b380d0
   RNInAppBrowser: e36d6935517101ccba0e875bac8ad7b0cb655364
   RNNotifee: 935f3ea8c134c88cbf8b13ea0c97c72c09ad2116
   RNPermissions: 291897442ea8c0cc518e28f34e218685a279b094
   RNReanimated: 783a7482f872cff13bed7993a8f9b2dad4432dde
   RNScreens: a4d9ce8f68f833f4e42410140eafd88e38bba163
   RNSound: 6c156f925295bdc83e8e422e7d8b38d33bc71852
-  RNSVG: 9325fbf920447630ab816ace9a4dfd9e4fe8c1b9
+  RNSVG: d3dcdd1472cc7e82b0654c48bf6abf893485b074
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   TweetNacl: 3abf4d1d2082b0114e7a67410e300892448951e6
   VisionCamera: 36c460338692788a0d377dce7d32f8ba049fb4f2
