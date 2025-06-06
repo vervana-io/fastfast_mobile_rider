@@ -1,13 +1,4 @@
 import {
-  Alert,
-  AppState,
-  AppStateStatus,
-  Linking,
-  Platform,
-  StyleSheet,
-} from 'react-native';
-import {AnimatedRegion, enableLatestRenderer} from 'react-native-maps';
-import {
   Box,
   Button,
   Center,
@@ -16,45 +7,48 @@ import {
   Pressable,
   Spinner,
   Text,
-  VStack,
 } from 'native-base';
+import React, {useCallback, useEffect, useState} from 'react';
+import {
+  Alert,
+  AppState,
+  AppStateStatus,
+  Linking,
+  Platform,
+  StyleSheet,
+} from 'react-native';
 import Geoloc, {GeoPosition} from 'react-native-geolocation-service';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {enableLatestRenderer} from 'react-native-maps';
 
-import BackgroundJob from 'react-native-background-actions';
-import {BicycleIcon} from '@assets/svg/BicycleIcon';
 import {BottomActions} from '@components/utils';
-import {CancelOrderModal} from '@components/ui';
 import {DefaultLayout} from '@layouts/default';
+import BackgroundJob from 'react-native-background-actions';
 // import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
-import Geolocation from '@react-native-community/geolocation';
-import MapView from '@components/ui/map/mapView';
-import {OrderRequest} from './components/orderRequest';
 import PermissionManager from '@handlers/permissionHandler';
-import {PusherEvent} from '@pusher/pusher-websocket-react-native';
-import RiderMap from '@components/ui/map/claudeAIMap';
-import {SheetManager} from 'react-native-actions-sheet';
-import Toast from 'react-native-toast-message';
-import {Todos} from './components/todos';
+import {functions} from '@helpers/functions';
 import {UsePusher} from '@hooks/usePusher';
+import {PusherEvent} from '@pusher/pusher-websocket-react-native';
+import Geolocation from '@react-native-community/geolocation';
 import {addressesStore} from '@store/addresses';
-import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
 import {bottomSheetStore} from '@store/bottom-sheet';
-import {functions} from '@helpers/functions';
+import {apiType} from '@types/apiTypes';
+import {SheetManager} from 'react-native-actions-sheet';
+import Toast from 'react-native-toast-message';
+import {OrderRequest} from './components/orderRequest';
+import {Todos} from './components/todos';
 // import io from 'socket.io-client';
-import {markersType} from '@types/mapTypes';
-import {myLocationNotification} from '@handlers/localNotifications';
-import {observer} from 'mobx-react-lite';
-import {orderType} from '@types/index';
-import {ordersStore} from '@store/orders';
-import {rootConfig} from '@store/root';
+import RiderMap from '@components/ui/map/claudeAIMap';
 import {useAppState} from '@hooks/useAppState';
-import {useDrawerStatus} from '@react-navigation/drawer';
-import {useIsFocused} from '@react-navigation/native';
 import {useOrders} from '@hooks/useOrders';
 import useSocket from '@hooks/useSocket';
 import {useUser} from '@hooks/useUser';
+import {useDrawerStatus} from '@react-navigation/drawer';
+import {useIsFocused} from '@react-navigation/native';
+import {ordersStore} from '@store/orders';
+import {rootConfig} from '@store/root';
+import {markersType} from '@types/mapTypes';
+import {observer} from 'mobx-react-lite';
 
 enableLatestRenderer();
 
@@ -462,45 +456,49 @@ export const Home = observer((props: HomeProps) => {
 
   // pusher event setup
   useEffect(() => {
-    subscribe('FastFast', (data: PusherEvent) => {
-      if (data.eventName === 'user_compliance_approve') {
-        userDetails.refetch();
-        Toast.show({
-          type: 'success',
-          text1: 'Compliance Approval',
-          text2:
-            'Your compliance has been approved you can now go online to receive orders.',
-          swipeable: true,
-          visibilityTime: 6000,
-        });
-      }
-      if (data.eventName === 'user_compliance_reject') {
-        userDetails.refetch();
-        Toast.show({
-          type: 'error',
-          text1: 'Compliance Approval',
-          text2: 'Your compliance has been rejected',
-          swipeable: true,
-          visibilityTime: 6000,
-        });
-      }
-      if (data.eventName === 'rider_new_order') {
-        const dData = data.data;
-        const parsed = JSON.parse(dData);
-        ordersStore.setNotifiedOrder(parsed);
-      }
-      if (data.eventName === 'rider_cancel_order') {
-      }
-      if (data.eventName === 'rider_order_pickup') {
-        Toast.show({
-          type: 'success',
-          text1: 'Order Ready for Pickup',
-          text2: 'Your order is ready for pickup',
-          swipeable: true,
-          visibilityTime: 6000,
-        });
-      }
-    });
+    subscribe(
+      `private-orders.approved.${userD?.user?.id}`,
+      (data: PusherEvent) => {
+        if (data.eventName === 'user_compliance_approve') {
+          userDetails.refetch();
+          Toast.show({
+            type: 'success',
+            text1: 'Compliance Approval',
+            text2:
+              'Your compliance has been approved you can now go online to receive orders.',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+        if (data.eventName === 'user_compliance_reject') {
+          userDetails.refetch();
+          Toast.show({
+            type: 'error',
+            text1: 'Compliance Approval',
+            text2: 'Your compliance has been rejected',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+        if (data.eventName === 'rider_new_order') {
+          console.log('NEW ORDER CAME IN!', JSON.stringify(data, null, 2));
+          const dData = data.data;
+          const parsed = JSON.parse(dData);
+          ordersStore.setNotifiedOrder(parsed);
+        }
+        if (data.eventName === 'rider_cancel_order') {
+        }
+        if (data.eventName === 'rider_order_pickup') {
+          Toast.show({
+            type: 'success',
+            text1: 'Order Ready for Pickup',
+            text2: 'Your order is ready for pickup',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+      },
+    );
   }, [subscribe, userDetails]);
 
   // open the order details sheet if we have a selected order
@@ -789,6 +787,7 @@ export const Home = observer((props: HomeProps) => {
             location={ridersPosition}
             onLocationUpdate={loc => console.log(loc)}
           />
+          {/* <AppMapView /> */}
         </Box>
         <OnlineSection />
         <BottomActions show={showRerender} navigation={navigation} />
