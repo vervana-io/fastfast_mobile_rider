@@ -1,16 +1,18 @@
+import {Alert, Modal, Platform} from 'react-native';
 import {Box, Button, Center, StatusBar, Text, VStack} from 'native-base';
 import React, {useEffect, useState} from 'react';
-import {Alert, Modal, Platform} from 'react-native';
 import {
   isLocationEnabled,
   promptForEnableLocationIfNeeded,
 } from 'react-native-android-location-enabler';
 
-import {LocationPin} from '@assets/svg/LocationPin';
+import { AllBottomSheets } from '@components/gorhom';
+import BottomSheet from '@gorhom/bottom-sheet';
 import {KeyboardAvoiding} from '@components/utils';
+import {LocationPin} from '@assets/svg/LocationPin';
 import PermissionManager from '@handlers/permissionHandler';
+import { checklist } from '@store/checklist';
 import {layoutProps} from '@types/layoutsTypes';
-import {AllBottomSheets} from '@components/gorhom';
 
 export const DefaultLayout = (props: layoutProps) => {
   const {

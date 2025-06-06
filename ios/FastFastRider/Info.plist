@@ -52,10 +52,6 @@
 	<string>FastFast Rider would like access to your camera for identity purposes</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>FastFast Rider would like to access your location to enable you receive orders around you</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>comgooglemaps</string>
-	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>FastFast Rider would like to access your location to enable you receive orders around you</string>
 	<key>NSMotionUsageDescription</key>

@@ -1,31 +1,35 @@
 import BottomSheet, {
+  BottomSheetFlatList,
   BottomSheetScrollView,
   BottomSheetView,
+  useBottomSheet,
 } from '@gorhom/bottom-sheet';
 import {
   Box,
+  Button,
   Center,
   ChevronRightIcon,
   HStack,
   Image,
   Link,
   Pressable,
+  ScrollView,
   Text,
   VStack,
 } from 'native-base';
 import React, {useCallback, useEffect, useRef} from 'react';
 
 import {IDCard} from '@assets/svg/idCard';
+import {Platform} from 'react-native';
+import {SheetHeader} from '@components/ui';
+import {SheetManager} from 'react-native-actions-sheet';
 import {StarIcon} from '@assets/svg/StarIcon';
 import {UserIcon} from '@assets/svg/UserIcon';
-import {SheetHeader} from '@components/ui';
+import {WIN_HEIGHT} from '../../../config';
 import {authStore} from '@store/auth';
 import {bottomSheetStore} from '@store/bottom-sheet';
 import dayjs from 'dayjs';
 import {observer} from 'mobx-react-lite';
-import {Platform} from 'react-native';
-import {SheetManager} from 'react-native-actions-sheet';
-import {WIN_HEIGHT} from '../../../config';
 
 const complimentsList = [
   {

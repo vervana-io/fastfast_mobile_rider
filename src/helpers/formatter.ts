@@ -98,10 +98,8 @@ export const formatter = {
       return '';
     }
   },
-  formatCurrencySimple(input: number | string) {
-    const num = Number(input);
-    if (isNaN(num)) return '0.00';
-    return num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+  formatCurrencySimple(number: number) {
+    return number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
   },
   timeAgo(time: any) {
     let date: any = new Date(

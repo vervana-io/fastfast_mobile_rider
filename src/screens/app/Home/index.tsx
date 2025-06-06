@@ -24,6 +24,7 @@ import {BottomActions} from '@components/utils';
 import {DefaultLayout} from '@layouts/default';
 import BackgroundJob from 'react-native-background-actions';
 // import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
+import RiderMap from '@components/ui/map/claudeAIMap';
 import PermissionManager from '@handlers/permissionHandler';
 import {functions} from '@helpers/functions';
 import {UsePusher} from '@hooks/usePusher';
@@ -38,7 +39,6 @@ import Toast from 'react-native-toast-message';
 import {OrderRequest} from './components/orderRequest';
 import {Todos} from './components/todos';
 // import io from 'socket.io-client';
-import RiderMap from '@components/ui/map/claudeAIMap';
 import {useAppState} from '@hooks/useAppState';
 import {useOrders} from '@hooks/useOrders';
 import useSocket from '@hooks/useSocket';
@@ -456,64 +456,45 @@ export const Home = observer((props: HomeProps) => {
 
   // pusher event setup
   useEffect(() => {
-    subscribe(
-      `private-orders.approved.${userD?.user?.id}`,
-      (data: PusherEvent) => {
-        const event = JSON.parse(data.data); // First parse
-        const order = event.order;
-        const orderData = JSON.parse(order.data);
-
-        /*
-        
-          pusher event {
-  "channelName": "private-orders.approved.327",
-  "eventName": "App\\Events\\OrderApproved",
-  "data": "{\"order\":{\"user_id\":327,\"order_id\":409,\"rider_id\":35,\"request_id\":672,\"title\":\"New Order\",\"body\":\"New Order #ORDER_1749054228915799 for Food Hub at RXHG+RHQ, Ada-George Road, Rumuafrikom, Port Harcourt 500102, Rivers, Nigeria\",\"data\":\"{\\\"notification_name\\\":\\\"order_request\\\",\\\"status\\\":1,\\\"address\\\":{\\\"house_number\\\":null,\\\"latitude\\\":\\\"4.8295796\\\",\\\"longitude\\\":\\\"6.9764937\\\",\\\"street\\\":\\\"Ada-George Road, Port Harcourt, Nigeria\\\",\\\"nearest_bus_stop\\\":null},\\\"customer_address\\\":{\\\"latitude\\\":4.8562203,\\\"longitude\\\":6.9711322,\\\"street\\\":\\\"NTA Road, Port Harcourt, Nigeria\\\",\\\"city\\\":null,\\\"house_number\\\":null},\\\"amount\\\":\\\"13711.0000\\\",\\\"sub_total\\\":\\\"11400.0000\\\",\\\"delivery_fee\\\":\\\"1000.0000\\\",\\\"order_id\\\":409,\\\"orders\\\":[{\\\"Quantity\\\":3,\\\"name\\\":\\\"Palmwine\\\"}],\\\"time\\\":\\\"10 minutes\\\",\\\"title\\\":\\\"Food Hub has an order\\\",\\\"trading_name\\\":\\\"Food Hub\\\"}\"}}",
-  "userId": null
-}
-        
-        */
-
-        if (data.eventName === 'user_compliance_approve') {
-          userDetails.refetch();
-          Toast.show({
-            type: 'success',
-            text1: 'Compliance Approval',
-            text2:
-              'Your compliance has been approved you can now go online to receive orders.',
-            swipeable: true,
-            visibilityTime: 6000,
-          });
-        }
-        if (data.eventName === 'user_compliance_reject') {
-          userDetails.refetch();
-          Toast.show({
-            type: 'error',
-            text1: 'Compliance Approval',
-            text2: 'Your compliance has been rejected',
-            swipeable: true,
-            visibilityTime: 6000,
-          });
-        }
-        if (data.eventName === 'rider_new_order') {
-          console.log('NEW ORDER CAME IN!', JSON.stringify(data, null, 2));
-          const dData = data.data;
-          const parsed = JSON.parse(dData);
-          ordersStore.setNotifiedOrder(parsed);
-        }
-        if (data.eventName === 'rider_cancel_order') {
-        }
-        if (data.eventName === 'rider_order_pickup') {
-          Toast.show({
-            type: 'success',
-            text1: 'Order Ready for Pickup',
-            text2: 'Your order is ready for pickup',
-            swipeable: true,
-            visibilityTime: 6000,
-          });
-        }
-      },
-    );
+    subscribe('FastFast', (data: PusherEvent) => {
+      if (data.eventName === 'user_compliance_approve') {
+        userDetails.refetch();
+        Toast.show({
+          type: 'success',
+          text1: 'Compliance Approval',
+          text2:
+            'Your compliance has been approved you can now go online to receive orders.',
+          swipeable: true,
+          visibilityTime: 6000,
+        });
+      }
+      if (data.eventName === 'user_compliance_reject') {
+        userDetails.refetch();
+        Toast.show({
+          type: 'error',
+          text1: 'Compliance Approval',
+          text2: 'Your compliance has been rejected',
+          swipeable: true,
+          visibilityTime: 6000,
+        });
+      }
+      if (data.eventName === 'rider_new_order') {
+        const dData = data.data;
+        const parsed = JSON.parse(dData);
+        ordersStore.setNotifiedOrder(parsed);
+      }
+      if (data.eventName === 'rider_cancel_order') {
+      }
+      if (data.eventName === 'rider_order_pickup') {
+        Toast.show({
+          type: 'success',
+          text1: 'Order Ready for Pickup',
+          text2: 'Your order is ready for pickup',
+          swipeable: true,
+          visibilityTime: 6000,
+        });
+      }
+    });
   }, [subscribe, userDetails]);
 
   // open the order details sheet if we have a selected order
@@ -802,7 +783,6 @@ export const Home = observer((props: HomeProps) => {
             location={ridersPosition}
             onLocationUpdate={loc => console.log(loc)}
           />
-          {/* <AppMapView /> */}
         </Box>
         <OnlineSection />
         <BottomActions show={showRerender} navigation={navigation} />

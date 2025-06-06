@@ -1,31 +1,38 @@
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {Alert, Platform} from 'react-native';
 import {
   Box,
   Button,
   Center,
   HStack,
   Heading,
+  Image,
   Link,
   Spinner,
   Text,
   VStack,
 } from 'native-base';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import React, {useCallback, useState} from 'react';
-import {Platform} from 'react-native';
-import {object, string} from 'yup';
+import {object, ref, string} from 'yup';
 
-import {RiderLogo} from '@assets/svg/RiderLogo';
-import {Input} from '@components/inputs';
-import {SSOButtons} from '@components/ui/ssobuttons';
-import {useAuth} from '@hooks/useAuth';
-import {AuthLayout} from '@layouts/authLayout';
-import {navigate} from '@navigation/NavigationService';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import messaging from '@react-native-firebase/messaging';
-import {apiType} from '@types/index';
+import { AuthLayout } from '@layouts/authLayout';
+import {DefaultLayout} from '@layouts/default';
 import {Formik} from 'formik';
+import {GoogleIcon} from '@assets/svg/GoogleIcon';
+import {Input} from '@components/inputs';
+import {Pattern} from '@assets/svg/Pattern';
+import {RiderLogo} from '@assets/svg/RiderLogo';
+import {SSOButtons} from '@components/ui/ssobuttons';
 import Toast from 'react-native-toast-message';
-import {STORAGE_KEY} from '../../../constant';
+import {WIN_HEIGHT} from '../../../config';
+import {apiType} from '@types/index';
+import {authStore} from '@store/auth';
+import messaging from '@react-native-firebase/messaging';
+import {navigate} from '@navigation/NavigationService';
+import {useAuth} from '@hooks/useAuth';
 
 GoogleSignin.configure({
   webClientId:
@@ -78,16 +85,6 @@ export const Login = (props: LoginProp) => {
     login.mutate(payload, {
       onSuccess: (val: apiType) => {
         if (val.status) {
-          console.log(
-            'Successful login',
-            JSON.stringify(val, null, 2),
-            val?.data?.access_token?.token,
-          );
-          //store the token in the async storage, let's write the aync func from scratch
-          AsyncStorage.setItem(
-            STORAGE_KEY.ACCESS_TOKEN,
-            val?.data?.access_token?.token,
-          );
           navigation.replace('App');
         } else {
           // Alert.alert(val.message);
@@ -138,8 +135,8 @@ export const Login = (props: LoginProp) => {
           <ButtonWithSSO />
           <Formik
             initialValues={{
-              email: 'chukwusoyidaniel1@gmail.com',
-              password: '1234User',
+              email: authStore.email ?? '',
+              password: '',
             }}
             validationSchema={loginSchema}
             onSubmit={values => {
