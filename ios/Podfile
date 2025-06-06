@@ -110,24 +110,7 @@ target 'FastFastRider' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
-    
     installer.pods_project.targets.each do |target|
-      # Fix for React Native Reanimated with static frameworks
-      if target.name == 'RNReanimated'
-        target.build_configurations.each do |config|
-          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
-          config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
-          config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
-        end
-      end
-      
-      # Ensure all targets have proper C++ settings
-      target.build_configurations.each do |config|
-        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
-        config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
-      end
-      
-      # Your existing BoringSSL fix
       if target.name == 'BoringSSL-GRPC'
         target.source_build_phase.files.each do |file|
           if file.settings && file.settings['COMPILER_FLAGS']
