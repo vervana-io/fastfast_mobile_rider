@@ -474,7 +474,6 @@ export const Home = observer((props: HomeProps) => {
         
         */
 
-        console.log('pusher event', orderData);
         if (data.eventName === 'user_compliance_approve') {
           userDetails.refetch();
           Toast.show({
