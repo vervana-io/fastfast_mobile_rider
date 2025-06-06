@@ -33,31 +33,31 @@ export const UsePusher = (): PusherHookReturn => {
         authorizerTimeoutInSeconds: 30, //30sec
         apiKey: PusherInstance.appKey ?? '',
         cluster: PusherInstance.cluster ?? '',
-        onAuthorizer: async (channelName: string, socketId: string) => {
-          console.log('calling authorizer', {channelName, socketId});
-          try {
-            const token = await AsyncStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
-            const response = await fetch(
-              'https://9ff5-102-219-152-26.ngrok-free.app/api/broadcasting/auth',
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: 'Bearer ' + token,
-                },
-                body: JSON.stringify({
-                  socket_id: socketId,
-                  channel_name: channelName,
-                }),
-              },
-            );
-            const body = (await response.json()) as PusherAuthorizerResult;
-            console.log(JSON.stringify(body, null, 2), ' NEW PUSHER');
-            return body;
-          } catch (error) {
-            console.log(error);
-          }
-        },
+        // onAuthorizer: async (channelName: string, socketId: string) => {
+        //   console.log('calling authorizer', {channelName, socketId});
+        //   try {
+        //     const token = await AsyncStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
+        //     const response = await fetch(
+        //       'https://9ff5-102-219-152-26.ngrok-free.app/api/broadcasting/auth',
+        //       {
+        //         method: 'POST',
+        //         headers: {
+        //           'Content-Type': 'application/json',
+        //           Authorization: 'Bearer ' + token,
+        //         },
+        //         body: JSON.stringify({
+        //           socket_id: socketId,
+        //           channel_name: channelName,
+        //         }),
+        //       },
+        //     );
+        //     const body = (await response.json()) as PusherAuthorizerResult;
+        //     console.log(JSON.stringify(body, null, 2), ' NEW PUSHER');
+        //     return body;
+        //   } catch (error) {
+        //     console.log(error);
+        //   }
+        // },
       });
       await pusher.connect();
     };
