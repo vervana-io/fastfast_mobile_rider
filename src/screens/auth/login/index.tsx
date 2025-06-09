@@ -133,8 +133,8 @@ export const Login = (props: LoginProp) => {
           <ButtonWithSSO />
           <Formik
             initialValues={{
-              email: 'chukwusoyidaniel1@gmail.com',
-              password: '1234User',
+              email: '',
+              password: '',
             }}
             validationSchema={loginSchema}
             onSubmit={values => {
