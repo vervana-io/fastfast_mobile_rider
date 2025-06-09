@@ -13,6 +13,7 @@ export interface sellerTypes {
   phone_number_two: string;
   business_email: string;
   license_number: string;
+
   address: string;
   city: string;
   state: string;

@@ -54,6 +54,7 @@ export interface orderType {
   status: number;
   created_at: string;
   updated_at: string;
+  delivery_address: string;
   seller: sellerTypes;
   customer: customerTypes;
   misc_rider_info: riderType;

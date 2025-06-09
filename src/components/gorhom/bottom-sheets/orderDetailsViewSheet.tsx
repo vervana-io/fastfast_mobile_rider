@@ -1,9 +1,21 @@
 /* eslint-disable react-native/no-inline-styles */
+import {ExpandIcon} from '@assets/svg/Expand';
+import {PhoneIcon} from '@assets/svg/PhoneIcon';
+import {QuestionIcon} from '@assets/svg/QuestionIcon';
+import TablerIcon from '@assets/svg/Tabler';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
+import {toastConfig} from '@helpers/toastConfig';
+import {useAppState} from '@hooks/useAppState';
+import {useOrders} from '@hooks/useOrders';
+import {bottomSheetStore} from '@store/bottom-sheet';
+import {ordersStore} from '@store/orders';
+import {apiType} from '@types/apiTypes';
+import {uploadedOrderType} from '@types/generalType';
+import {observer} from 'mobx-react-lite';
 import {
   AddIcon,
   Box,
@@ -19,23 +31,10 @@ import {
 } from 'native-base';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Alert, Linking, StyleSheet} from 'react-native';
-import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
-
-import {ExpandIcon} from '@assets/svg/Expand';
-import {LocationPin2} from '@assets/svg/LocationPin2';
-import {PhoneIcon} from '@assets/svg/PhoneIcon';
-import {QuestionIcon} from '@assets/svg/QuestionIcon';
-import {toastConfig} from '@helpers/toastConfig';
-import {useAppState} from '@hooks/useAppState';
-import {useOrders} from '@hooks/useOrders';
-import {bottomSheetStore} from '@store/bottom-sheet';
-import {ordersStore} from '@store/orders';
-import {apiType} from '@types/apiTypes';
-import {uploadedOrderType} from '@types/generalType';
-import {observer} from 'mobx-react-lite';
 import {SheetManager} from 'react-native-actions-sheet';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
+import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
 
 export const OrderDetailsViewSheet = observer(() => {
   const sheetRef: any = useRef<BottomSheet>(null);
@@ -320,7 +319,7 @@ export const OrderDetailsViewSheet = observer(() => {
               rounded="full"
               w="36px"
               h="36px">
-              <LocationPin2 />
+              <TablerIcon />
             </Center>
           </Pressable>
         </HStack>
@@ -350,7 +349,8 @@ export const OrderDetailsViewSheet = observer(() => {
                     {ordersData?.seller?.trading_name}
                   </Text>
                   <Text color="themeLight.gray.2" fontSize="xs">
-                    {ordersData?.seller?.address}
+                    {ordersData?.seller?.address ??
+                      'Seller Address not Available'}
                   </Text>
                 </VStack>
                 <HStack space={2}>
@@ -380,6 +380,13 @@ export const OrderDetailsViewSheet = observer(() => {
                 </Text> */}
                 <Text color="white" fontWeight="bold">
                   Delivery Fee: ₦{ordersData?.delivery_fee}
+                </Text>
+                <Text color="white" fontWeight="bold">
+                  Customer Address: {ordersData?.delivery_address}
+                </Text>
+                <Text color="white" fontWeight="bold">
+                  Customer Name: {ordersData?.customer?.first_name}{' '}
+                  {ordersData?.customer?.last_name}
                 </Text>
                 <VStack bg="white" rounded="lg" my={4} p={4} space={2}>
                   {ordersData.order_products &&
@@ -483,7 +490,23 @@ export const OrderDetailsViewSheet = observer(() => {
                 {ordersData?.seller?.trading_name}
               </Text>
               <Text color="themeLight.gray.2" fontSize="xs">
-                {ordersData?.seller?.address}
+                {ordersData?.seller?.address ?? 'Seller Address not Available'}
+              </Text>
+            </VStack>
+            <VStack space={1} mt={5}>
+              <Text fontWeight="bold" color="black" fontSize="xs">
+                {'Customer Address'}
+              </Text>
+              <Text color="themeLight.gray.2" fontSize="lg">
+                {ordersData?.delivery_address}
+              </Text>
+            </VStack>
+            <VStack space={1} mt={5}>
+              <Text fontWeight="bold" color="black" fontSize="xs">
+                {'Customer Name'}
+              </Text>
+              <Text color="themeLight.gray.2" fontSize="lg">
+                {`${ordersData?.customer?.first_name} ${ordersData?.customer?.last_name}`}
               </Text>
             </VStack>
             <HStack justifyContent="space-between" alignItems="center" mt={2}>

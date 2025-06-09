@@ -176,11 +176,7 @@ export const OrderRequest = observer(() => {
             rounded="full"
             isLoading={acceptOrder.isLoading}
             _text={{fontWeight: 'bold'}}
-            onPress={triggerAccept}
-            // onPress={() => {
-            //   bottomSheetStore.SetSheet('orderDetailsView', true);
-            // }}>
-          >
+            onPress={triggerAccept}>
             Accept
           </Button>
           <Button
