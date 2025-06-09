@@ -140,7 +140,6 @@ export const Home = observer((props: HomeProps) => {
   const GeoLocate = useCallback(() => {
     Geoloc.getCurrentPosition(
       position => {
-        console.log('position', position);
         setRidersPosition({
           // title: 'You',
           latitude: position?.coords?.latitude,
@@ -148,19 +147,11 @@ export const Home = observer((props: HomeProps) => {
         });
       },
       error => {
-        console.log(error.code);
-        console.log('====================================');
         if (error.code === 3) {
           // GeoLocate();
-          console.log('====================================');
-          console.log('Retry: ' + retryCount);
-          console.log('====================================');
           if (retryCount < 2) {
             setRetryCount(retryCount + 1);
           } else if (retryCount >= 3) {
-            console.log('====================================');
-            console.log('Got here: ' + retryCount);
-            console.log('====================================');
             setShowRerender(true);
           }
           Toast.show({
@@ -240,18 +231,14 @@ export const Home = observer((props: HomeProps) => {
           lon2,
         );
         if (comparePositions) {
-          console.log('got to compare right');
           updateOnlineStatus(1);
         } else {
           const hasAddress = await SheetManager.show('addressSheetNewIOS');
-          console.log('got to compare wrong');
-          console.log('hasAddress', hasAddress);
           if (hasAddress) {
             updateOnlineStatus(1);
           }
         }
       } else {
-        console.log('got to no address set');
         Toast.show({
           type: 'warning',
           text1: 'Going Online?',
@@ -263,7 +250,6 @@ export const Home = observer((props: HomeProps) => {
         }
       }
     } else {
-      console.log('going offline');
       updateOnlineStatus(0);
     }
   }, [
@@ -458,22 +444,6 @@ export const Home = observer((props: HomeProps) => {
     subscribe(
       `private-orders.approved.${userD?.user?.id}`,
       (data: PusherEvent) => {
-        const event = JSON.parse(data.data); // First parse
-        const order = event.order;
-        const orderData = JSON.parse(order.data);
-
-        /*
-        
-          pusher event {
-  "channelName": "private-orders.approved.327",
-  "eventName": "App\\Events\\OrderApproved",
-  "data": "{\"order\":{\"user_id\":327,\"order_id\":409,\"rider_id\":35,\"request_id\":672,\"title\":\"New Order\",\"body\":\"New Order #ORDER_1749054228915799 for Food Hub at RXHG+RHQ, Ada-George Road, Rumuafrikom, Port Harcourt 500102, Rivers, Nigeria\",\"data\":\"{\\\"notification_name\\\":\\\"order_request\\\",\\\"status\\\":1,\\\"address\\\":{\\\"house_number\\\":null,\\\"latitude\\\":\\\"4.8295796\\\",\\\"longitude\\\":\\\"6.9764937\\\",\\\"street\\\":\\\"Ada-George Road, Port Harcourt, Nigeria\\\",\\\"nearest_bus_stop\\\":null},\\\"customer_address\\\":{\\\"latitude\\\":4.8562203,\\\"longitude\\\":6.9711322,\\\"street\\\":\\\"NTA Road, Port Harcourt, Nigeria\\\",\\\"city\\\":null,\\\"house_number\\\":null},\\\"amount\\\":\\\"13711.0000\\\",\\\"sub_total\\\":\\\"11400.0000\\\",\\\"delivery_fee\\\":\\\"1000.0000\\\",\\\"order_id\\\":409,\\\"orders\\\":[{\\\"Quantity\\\":3,\\\"name\\\":\\\"Palmwine\\\"}],\\\"time\\\":\\\"10 minutes\\\",\\\"title\\\":\\\"Food Hub has an order\\\",\\\"trading_name\\\":\\\"Food Hub\\\"}\"}}",
-  "userId": null
-}
-        
-        */
-
-        console.log('pusher event', orderData);
         if (data.eventName === 'user_compliance_approve') {
           userDetails.refetch();
           Toast.show({
@@ -496,7 +466,6 @@ export const Home = observer((props: HomeProps) => {
           });
         }
         if (data.eventName === 'rider_new_order') {
-          console.log('NEW ORDER CAME IN!', JSON.stringify(data, null, 2));
           const dData = data.data;
           const parsed = JSON.parse(dData);
           ordersStore.setNotifiedOrder(parsed);
@@ -534,7 +503,6 @@ export const Home = observer((props: HomeProps) => {
     try {
       const watchID = Geolocation.watchPosition(
         position => {
-          console.log('watchPosition', JSON.stringify(position));
           updateRiderLocation(userD.user?.id.toString() ?? '', position.coords);
           // here we check if the user has selected an order and the order is picked up already
           if (selectedOrder?.id) {
@@ -555,20 +523,11 @@ export const Home = observer((props: HomeProps) => {
           }
         },
         error => {
-          console.log('====================================');
-          console.log(error.code);
-          console.log('====================================');
           if (error.code === 3) {
             // GeoLocate();
-            console.log('====================================');
-            console.log('Retry: ' + retryCount);
-            console.log('====================================');
             if (retryCount < 2) {
               setRetryCount(retryCount + 1);
             } else if (retryCount >= 3) {
-              console.log('====================================');
-              console.log('Got here: ' + retryCount);
-              console.log('====================================');
               setShowRerender(true);
             }
             Toast.show({
@@ -624,7 +583,7 @@ export const Home = observer((props: HomeProps) => {
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
 
   BackgroundJob.on('expiration', () => {
-    console.log('iOS: I am being closed!');
+    // console.log('iOS: I am being closed!');
   });
 
   const taskRandom = async (taskData: any) => {
@@ -638,7 +597,6 @@ export const Home = observer((props: HomeProps) => {
     await new Promise(async resolve => {
       // For loop with a delay
       const {delay} = taskData;
-      console.log(BackgroundJob.isRunning(), delay);
       watchBackgroundUpdates();
       for (let i = 0; BackgroundJob.isRunning(); i++) {
         // console.log('Runned -> ', i);

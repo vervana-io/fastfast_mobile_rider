@@ -97,12 +97,9 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
   const openOrder = useCallback(
     (order_id: number, item: orderType) => {
       try {
-        console.log('[openOrder] id:', order_id);
-        console.log('[openOrder] item:', JSON.stringify(item, null, 2));
         if (userIsOnline) {
           ordersStore.setSelectedOrderId(order_id);
           ordersStore.setSelectedOrder(item);
-          console.log('[openOrder] opening sheet...');
           bottomSheetStore.SetSheet('orderDetailsView', true, {
             payload: {order_id: order_id},
           });

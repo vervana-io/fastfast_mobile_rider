@@ -298,18 +298,8 @@ export const OrderRequest = observer(() => {
             setTimeout(() => {
               toggleBoxHeight();
             }, 500);
-          } else {
-            console.error(
-              "I'M NOT ",
-              data.order_id,
-              !checkForOrderById(data.order_id),
-            );
           }
         } else {
-          console.error(
-            'ORDER ONGOING IS MORE THAN 1',
-            ordersStore.ongoingOrderCount,
-          );
           ordersStore.clearNotifiedOrder();
         }
       } else {
