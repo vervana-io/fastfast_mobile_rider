@@ -24,7 +24,6 @@ import {BottomActions} from '@components/utils';
 import {DefaultLayout} from '@layouts/default';
 import BackgroundJob from 'react-native-background-actions';
 // import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
-import RiderMap from '@components/ui/map/claudeAIMap';
 import PermissionManager from '@handlers/permissionHandler';
 import {functions} from '@helpers/functions';
 import {UsePusher} from '@hooks/usePusher';
@@ -39,6 +38,7 @@ import Toast from 'react-native-toast-message';
 import {OrderRequest} from './components/orderRequest';
 import {Todos} from './components/todos';
 // import io from 'socket.io-client';
+import RiderMap from '@components/ui/map/claudeAIMap';
 import {useAppState} from '@hooks/useAppState';
 import {useOrders} from '@hooks/useOrders';
 import useSocket from '@hooks/useSocket';
@@ -64,7 +64,7 @@ export const Home = observer((props: HomeProps) => {
   const [appState, setAppState] = useState<AppStateStatus>(
     AppState.currentState,
   );
-  // const [shouldCheckPerms, setShouldCheckPerms] = useState(false);
+  const [shouldCheckPerms, setShouldCheckPerms] = useState(false);
 
   const isFocussed = useIsFocused();
 
@@ -140,7 +140,6 @@ export const Home = observer((props: HomeProps) => {
   const GeoLocate = useCallback(() => {
     Geoloc.getCurrentPosition(
       position => {
-        console.log('position', position);
         setRidersPosition({
           // title: 'You',
           latitude: position?.coords?.latitude,
@@ -148,20 +147,11 @@ export const Home = observer((props: HomeProps) => {
         });
       },
       error => {
-        console.log('===================================');
-        console.log(error.code);
-        console.log('====================================');
         if (error.code === 3) {
           // GeoLocate();
-          console.log('====================================');
-          console.log('Retry: ' + retryCount);
-          console.log('====================================');
           if (retryCount < 2) {
             setRetryCount(retryCount + 1);
           } else if (retryCount >= 3) {
-            console.log('====================================');
-            console.log('Got here: ' + retryCount);
-            console.log('====================================');
             setShowRerender(true);
           }
           Toast.show({
@@ -241,18 +231,14 @@ export const Home = observer((props: HomeProps) => {
           lon2,
         );
         if (comparePositions) {
-          console.log('got to compare right');
           updateOnlineStatus(1);
         } else {
           const hasAddress = await SheetManager.show('addressSheetNewIOS');
-          console.log('got to compare wrong');
-          console.log('hasAddress', hasAddress);
           if (hasAddress) {
             updateOnlineStatus(1);
           }
         }
       } else {
-        console.log('got to no address set');
         Toast.show({
           type: 'warning',
           text1: 'Going Online?',
@@ -264,7 +250,6 @@ export const Home = observer((props: HomeProps) => {
         }
       }
     } else {
-      console.log('going offline');
       updateOnlineStatus(0);
     }
   }, [
@@ -456,45 +441,48 @@ export const Home = observer((props: HomeProps) => {
 
   // pusher event setup
   useEffect(() => {
-    subscribe('FastFast', (data: PusherEvent) => {
-      if (data.eventName === 'user_compliance_approve') {
-        userDetails.refetch();
-        Toast.show({
-          type: 'success',
-          text1: 'Compliance Approval',
-          text2:
-            'Your compliance has been approved you can now go online to receive orders.',
-          swipeable: true,
-          visibilityTime: 6000,
-        });
-      }
-      if (data.eventName === 'user_compliance_reject') {
-        userDetails.refetch();
-        Toast.show({
-          type: 'error',
-          text1: 'Compliance Approval',
-          text2: 'Your compliance has been rejected',
-          swipeable: true,
-          visibilityTime: 6000,
-        });
-      }
-      if (data.eventName === 'rider_new_order') {
-        const dData = data.data;
-        const parsed = JSON.parse(dData);
-        ordersStore.setNotifiedOrder(parsed);
-      }
-      if (data.eventName === 'rider_cancel_order') {
-      }
-      if (data.eventName === 'rider_order_pickup') {
-        Toast.show({
-          type: 'success',
-          text1: 'Order Ready for Pickup',
-          text2: 'Your order is ready for pickup',
-          swipeable: true,
-          visibilityTime: 6000,
-        });
-      }
-    });
+    subscribe(
+      `private-orders.approved.${userD?.user?.id}`,
+      (data: PusherEvent) => {
+        if (data.eventName === 'user_compliance_approve') {
+          userDetails.refetch();
+          Toast.show({
+            type: 'success',
+            text1: 'Compliance Approval',
+            text2:
+              'Your compliance has been approved you can now go online to receive orders.',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+        if (data.eventName === 'user_compliance_reject') {
+          userDetails.refetch();
+          Toast.show({
+            type: 'error',
+            text1: 'Compliance Approval',
+            text2: 'Your compliance has been rejected',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+        if (data.eventName === 'rider_new_order') {
+          const dData = data.data;
+          const parsed = JSON.parse(dData);
+          ordersStore.setNotifiedOrder(parsed);
+        }
+        if (data.eventName === 'rider_cancel_order') {
+        }
+        if (data.eventName === 'rider_order_pickup') {
+          Toast.show({
+            type: 'success',
+            text1: 'Order Ready for Pickup',
+            text2: 'Your order is ready for pickup',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+      },
+    );
   }, [subscribe, userDetails]);
 
   // open the order details sheet if we have a selected order
@@ -515,7 +503,6 @@ export const Home = observer((props: HomeProps) => {
     try {
       const watchID = Geolocation.watchPosition(
         position => {
-          console.log('watchPosition', JSON.stringify(position));
           updateRiderLocation(userD.user?.id.toString() ?? '', position.coords);
           // here we check if the user has selected an order and the order is picked up already
           if (selectedOrder?.id) {
@@ -536,20 +523,11 @@ export const Home = observer((props: HomeProps) => {
           }
         },
         error => {
-          console.log('====================================');
-          console.log(error.code);
-          console.log('====================================');
           if (error.code === 3) {
             // GeoLocate();
-            console.log('====================================');
-            console.log('Retry: ' + retryCount);
-            console.log('====================================');
             if (retryCount < 2) {
               setRetryCount(retryCount + 1);
             } else if (retryCount >= 3) {
-              console.log('====================================');
-              console.log('Got here: ' + retryCount);
-              console.log('====================================');
               setShowRerender(true);
             }
             Toast.show({
@@ -605,7 +583,7 @@ export const Home = observer((props: HomeProps) => {
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
 
   BackgroundJob.on('expiration', () => {
-    console.log('iOS: I am being closed!');
+    // console.log('iOS: I am being closed!');
   });
 
   const taskRandom = async (taskData: any) => {
@@ -619,7 +597,6 @@ export const Home = observer((props: HomeProps) => {
     await new Promise(async resolve => {
       // For loop with a delay
       const {delay} = taskData;
-      console.log(BackgroundJob.isRunning(), delay);
       watchBackgroundUpdates();
       for (let i = 0; BackgroundJob.isRunning(); i++) {
         // console.log('Runned -> ', i);
@@ -783,6 +760,7 @@ export const Home = observer((props: HomeProps) => {
             location={ridersPosition}
             onLocationUpdate={loc => console.log(loc)}
           />
+          {/* <AppMapView /> */}
         </Box>
         <OnlineSection />
         <BottomActions show={showRerender} navigation={navigation} />

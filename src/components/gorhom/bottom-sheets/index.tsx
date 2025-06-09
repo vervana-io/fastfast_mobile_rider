@@ -1,9 +1,10 @@
+import {observer} from 'mobx-react-lite';
+import React from 'react';
 import {GuarantorFormSheet} from './guarantorFormViewSheet';
 import {OrderDetailsViewSheet} from './orderDetailsViewSheet';
 import {ProfileViewSheet} from './profileViewSheet';
-import React from 'react';
 
-export const AllBottomSheets = () => {
+export const AllBottomSheets = observer(() => {
   return (
     <>
       <ProfileViewSheet />
@@ -11,4 +12,4 @@ export const AllBottomSheets = () => {
       <GuarantorFormSheet />
     </>
   );
-};
+});
