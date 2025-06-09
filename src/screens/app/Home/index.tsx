@@ -148,7 +148,6 @@ export const Home = observer((props: HomeProps) => {
         });
       },
       error => {
-        console.log('====================================');
         console.log(error.code);
         console.log('====================================');
         if (error.code === 3) {

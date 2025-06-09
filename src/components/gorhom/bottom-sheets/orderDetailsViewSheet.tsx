@@ -854,8 +854,6 @@ export const OrderDetailsViewSheet = observer(() => {
     }
   }, [isForeground, sheetOpen]);
 
-  console.log(sheetRef.current, 'sheetRef.current ');
-
   return sheetOpen ? (
     <BottomSheet
       ref={sheetRef}

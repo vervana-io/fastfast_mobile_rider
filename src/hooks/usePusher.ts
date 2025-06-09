@@ -62,7 +62,6 @@ export const UsePusher = (): PusherHookReturn => {
   const subscribe = useCallback(
     async (channelName: string, callback: (data: any) => void) => {
       if (pusher) {
-        console.log('THERE IS PUSHER');
         await pusher.subscribe({
           channelName: channelName,
           onSubscriptionSucceeded: data => {
@@ -80,7 +79,7 @@ export const UsePusher = (): PusherHookReturn => {
             callback(event);
           },
           onSubscriptionError(channelName, message, e) {
-            console.log(`Subscription error: ${channelName}, ${message}`);
+            console.error(`Subscription error: ${channelName}, ${message}`);
           },
         });
       }

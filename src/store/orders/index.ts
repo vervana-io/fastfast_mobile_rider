@@ -45,17 +45,13 @@ class OrdersStore {
   }
 
   setNotifiedOrder(val: notificationsType) {
-    console.log('=================order===================');
-    console.log(val);
-    console.log('====================================');
-
     // check for duplicate request
     if (val.request_id && this.notifiedOrder.request_id) {
       if (val.request_id === this.notifiedOrder.request_id) {
         return;
       }
     }
-    console.log(this.ongoingOrderCount, 'this.ongoingOrderCount');
+
     if (this.ongoingOrderCount < 20) {
       playEffectForNotifications();
       this.notifiedOrder = val;

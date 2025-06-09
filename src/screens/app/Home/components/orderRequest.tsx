@@ -113,11 +113,6 @@ export const OrderRequest = observer(() => {
     mainNotificationOrder?.request_id,
   ]);
 
-  console.log(
-    'mainNotificationOrderFor',
-    JSON.stringify(mainNotificationOrder, null, 2),
-  );
-
   const Request = useCallback(
     () => (
       <Box w="full" bg="#1B1B1B" rounded="xl" height={300} mt={-300} p={4}>
@@ -262,10 +257,6 @@ export const OrderRequest = observer(() => {
       // const notification_name = JSON.parse(data.data)?.notification_name;
       // here we check if the notification is for an order request
       // after which we then check if we already have the order accepted
-      console.log(
-        JSON.stringify(NotificationOrder, null, 2),
-        'fULLNotificationOrder',
-      );
 
       const CompleteNotification = JSON.parse(data.data);
 
@@ -279,7 +270,6 @@ export const OrderRequest = observer(() => {
           // here we check if an order is already being handled by the user
           // with this, the rider can only have one order at a time
           if (!checkForOrderById(data.order_id)) {
-            console.log("I'M INNNN");
             const payload: notificationsType = {
               data: JSON.parse(
                 data.data || {
@@ -309,21 +299,21 @@ export const OrderRequest = observer(() => {
               toggleBoxHeight();
             }, 500);
           } else {
-            console.log(
+            console.error(
               "I'M NOT ",
               data.order_id,
               !checkForOrderById(data.order_id),
             );
           }
         } else {
-          console.log(
+          console.error(
             'ORDER ONGOING IS MORE THAN 1',
             ordersStore.ongoingOrderCount,
           );
           ordersStore.clearNotifiedOrder();
         }
       } else {
-        console.log('no order request');
+        console.error('no order request');
       }
     }
   }, [NotificationOrder, checkForOrderById, toggleBoxHeight]);

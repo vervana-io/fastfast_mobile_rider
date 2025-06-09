@@ -78,11 +78,6 @@ export const Login = (props: LoginProp) => {
     login.mutate(payload, {
       onSuccess: (val: apiType) => {
         if (val.status) {
-          console.log(
-            'Successful login',
-            JSON.stringify(val, null, 2),
-            val?.data?.access_token?.token,
-          );
           //store the token in the async storage, let's write the aync func from scratch
           AsyncStorage.setItem(
             STORAGE_KEY.ACCESS_TOKEN,
