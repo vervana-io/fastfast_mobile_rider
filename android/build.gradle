@@ -4,7 +4,7 @@ buildscript {
         minSdkVersion = 21
         compileSdkVersion = 34
         targetSdkVersion = 34
-        kotlinVersion = "1.8.10"
+        kotlin_version = '1.8.10'
         // Add this line for react-native-inappbrowser-reborn
         androidXBrowser = "1.5.0"
         if (System.properties['os.arch'] == "aarch64") {
@@ -28,8 +28,8 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle:8.1.0")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
-        classpath 'com.google.gms:google-services:4.4.1'
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath 'com.google.gms:google-services:4.4.0'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
     }
 }

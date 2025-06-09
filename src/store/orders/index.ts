@@ -1,3 +1,7 @@
+import {playEffectForNotifications} from '@handlers/playEffect';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {notificationsType, orderType} from '@types/orderTypes';
+import {makeAutoObservable} from 'mobx';
 import {
   clearPersistedStore,
   configurePersistable,
@@ -5,12 +9,6 @@ import {
   makePersistable,
   stopPersisting,
 } from 'mobx-persist-store';
-import {notificationsType, orderType} from '@types/orderTypes';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Notification} from '@notifee/react-native';
-import {makeAutoObservable} from 'mobx';
-import { playEffectForNotifications } from '@handlers/playEffect';
 
 interface hasArrivedType {
   order_id: number;
@@ -48,15 +46,20 @@ class OrdersStore {
 
   setNotifiedOrder(val: notificationsType) {
     console.log('=================order===================');
-    console.log(val.data);
+    console.log(val);
     console.log('====================================');
-    // check for duplicate request 
+
+    // check for duplicate request
     if (val.request_id && this.notifiedOrder.request_id) {
       if (val.request_id === this.notifiedOrder.request_id) {
         return;
       }
     }
-    if (this.ongoingOrderCount < 1) {
+    console.log(this.ongoingOrderCount, 'this.ongoingOrderCount');
+    if (this.ongoingOrderCount < 20) {
+      playEffectForNotifications();
+      this.notifiedOrder = val;
+    } else {
       playEffectForNotifications();
       this.notifiedOrder = val;
     }

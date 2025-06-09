@@ -1,4 +1,21 @@
 /* eslint-disable react-native/no-inline-styles */
+import {ExpandIcon} from '@assets/svg/Expand';
+import {PhoneIcon} from '@assets/svg/PhoneIcon';
+import {QuestionIcon} from '@assets/svg/QuestionIcon';
+import TablerIcon from '@assets/svg/Tabler';
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet';
+import {toastConfig} from '@helpers/toastConfig';
+import {useAppState} from '@hooks/useAppState';
+import {useOrders} from '@hooks/useOrders';
+import {bottomSheetStore} from '@store/bottom-sheet';
+import {ordersStore} from '@store/orders';
+import {apiType} from '@types/apiTypes';
+import {uploadedOrderType} from '@types/generalType';
+import {observer} from 'mobx-react-lite';
 import {
   AddIcon,
   Box,
@@ -6,37 +23,18 @@ import {
   Center,
   CloseIcon,
   DeleteIcon,
-  Divider,
   HStack,
   Image,
   Pressable,
   Text,
   VStack,
 } from 'native-base';
-import {Alert, Linking, StyleSheet} from 'react-native';
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetScrollView,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
-
-import {ExpandIcon} from '@assets/svg/Expand';
-import {LocationPin2} from '@assets/svg/LocationPin2';
-import {PhoneIcon} from '@assets/svg/PhoneIcon';
-import {QuestionIcon} from '@assets/svg/QuestionIcon';
+import {Alert, Linking, StyleSheet} from 'react-native';
 import {SheetManager} from 'react-native-actions-sheet';
-import Toast from 'react-native-toast-message';
-import {apiType} from '@types/apiTypes';
-import {bottomSheetStore} from '@store/bottom-sheet';
 import {launchImageLibrary} from 'react-native-image-picker';
-import {observer} from 'mobx-react-lite';
-import {ordersStore} from '@store/orders';
-import {toastConfig} from '@helpers/toastConfig';
-import {uploadedOrderType} from '@types/generalType';
-import {useAppState} from '@hooks/useAppState';
-import {useOrders} from '@hooks/useOrders';
+import Toast from 'react-native-toast-message';
+import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
 
 export const OrderDetailsViewSheet = observer(() => {
   const sheetRef: any = useRef<BottomSheet>(null);
@@ -232,6 +230,17 @@ export const OrderDetailsViewSheet = observer(() => {
   }, [ordersData.customer?.phone_number_one]);
 
   // callbacks
+  // const handleSheetChanges = useCallback((index: number) => {
+  //   console.log('handleSheetChanges', index);
+  //   if (index === 2) {
+  //     setViewDetails('full');
+  //   } else if (index === 1) {
+  //     setViewDetails('mid');
+  //   } else {
+  //     setViewDetails('small');
+  //   }
+  // }, []);
+
   const handleSheetChanges = useCallback((index: number) => {
     console.log('handleSheetChanges', index);
     if (index === 2) {
@@ -240,6 +249,12 @@ export const OrderDetailsViewSheet = observer(() => {
       setViewDetails('mid');
     } else {
       setViewDetails('small');
+    }
+
+    // Sync MobX store: if sheet is closed, set to false
+    // For gorhom, index === -1 means fully closed; sometimes 0 is also used for closed
+    if (index === -1 || index === 0) {
+      bottomSheetStore.SetSheet('orderDetailsView', false);
     }
   }, []);
 
@@ -304,7 +319,7 @@ export const OrderDetailsViewSheet = observer(() => {
               rounded="full"
               w="36px"
               h="36px">
-              <LocationPin2 />
+              <TablerIcon />
             </Center>
           </Pressable>
         </HStack>
@@ -334,7 +349,8 @@ export const OrderDetailsViewSheet = observer(() => {
                     {ordersData?.seller?.trading_name}
                   </Text>
                   <Text color="themeLight.gray.2" fontSize="xs">
-                    {ordersData?.seller?.address}
+                    {ordersData?.seller?.address ??
+                      'Seller Address not Available'}
                   </Text>
                 </VStack>
                 <HStack space={2}>
@@ -365,11 +381,23 @@ export const OrderDetailsViewSheet = observer(() => {
                 <Text color="white" fontWeight="bold">
                   Delivery Fee: ₦{ordersData?.delivery_fee}
                 </Text>
+                <Text color="white" fontWeight="bold">
+                  Customer Address: {ordersData?.delivery_address}
+                </Text>
+                <Text color="white" fontWeight="bold">
+                  Customer Name: {ordersData?.customer?.first_name}{' '}
+                  {ordersData?.customer?.last_name}
+                </Text>
                 <VStack bg="white" rounded="lg" my={4} p={4} space={2}>
                   {ordersData.order_products &&
-                    ordersData.order_products?.map((el, i) => (
-                      <Text key={i} color="black">
-                        {el.quantity}x {el.product?.title}
+                    ordersData.order_products?.map((product_in_order, i) => (
+                      <Text
+                        key={
+                          product_in_order.id || product_in_order.product?.id
+                        }
+                        color="black">
+                        {product_in_order.quantity}x{' '}
+                        {product_in_order.product?.title}
                       </Text>
                     ))}
                 </VStack>
@@ -441,6 +469,8 @@ export const OrderDetailsViewSheet = observer(() => {
             rounded="lg"
           />
           <Pressable
+            accessibilityLabel="Close sheet"
+            accessibilityRole="button"
             onPress={() => handleSnapPress(1)}
             position="absolute"
             zIndex={4}
@@ -460,7 +490,23 @@ export const OrderDetailsViewSheet = observer(() => {
                 {ordersData?.seller?.trading_name}
               </Text>
               <Text color="themeLight.gray.2" fontSize="xs">
-                {ordersData?.seller?.address}
+                {ordersData?.seller?.address ?? 'Seller Address not Available'}
+              </Text>
+            </VStack>
+            <VStack space={1} mt={5}>
+              <Text fontWeight="bold" color="black" fontSize="xs">
+                {'Customer Address'}
+              </Text>
+              <Text color="themeLight.gray.2" fontSize="lg">
+                {ordersData?.delivery_address}
+              </Text>
+            </VStack>
+            <VStack space={1} mt={5}>
+              <Text fontWeight="bold" color="black" fontSize="xs">
+                {'Customer Name'}
+              </Text>
+              <Text color="themeLight.gray.2" fontSize="lg">
+                {`${ordersData?.customer?.first_name} ${ordersData?.customer?.last_name}`}
               </Text>
             </VStack>
             <HStack justifyContent="space-between" alignItems="center" mt={2}>
@@ -693,7 +739,7 @@ export const OrderDetailsViewSheet = observer(() => {
     ],
   );
 
-  const OrderComplete = useCallback(
+  const OrderComplete = useMemo(
     () => (
       <Box py={6} px={4} bg="#fff" h="full" roundedTop="2xl">
         <Center my={8}>
@@ -763,8 +809,17 @@ export const OrderDetailsViewSheet = observer(() => {
     [ordersData?.delivery_pin, ordersData?.pick_up_pin, ordersData?.status],
   );
 
-  const handleClosePress = () => sheetRef.current.close();
-  const handleExpand = () => sheetRef.current.expand();
+  const handleClosePress = () => {
+    if (sheetRef.current) {
+      sheetRef.current.close();
+    }
+  };
+
+  const handleExpand = () => {
+    if (sheetRef.current) {
+      sheetRef.current.expand();
+    }
+  };
 
   useEffect(() => {
     if (sheetOpen && order_id) {
@@ -774,11 +829,20 @@ export const OrderDetailsViewSheet = observer(() => {
     }
   }, [order_id, sheetOpen]);
 
+  // useEffect(() => {
+  //   if (sheetOpen) {
+  //     handleExpand;
+  //   } else {
+  //     handleClosePress;
+  //     bottomSheetStore.SetSheet('orderDetailsView', false);
+  //   }
+  // }, [sheetOpen]);
+
   useEffect(() => {
     if (sheetOpen) {
-      handleExpand;
+      handleExpand();
     } else {
-      handleClosePress;
+      handleClosePress();
       bottomSheetStore.SetSheet('orderDetailsView', false);
     }
   }, [sheetOpen]);
@@ -790,32 +854,34 @@ export const OrderDetailsViewSheet = observer(() => {
     }
   }, [isForeground, sheetOpen]);
 
-  return (
-    sheetOpen && (
-      <BottomSheet
-        ref={sheetRef}
-        index={1}
-        snapPoints={snapPoints}
-        backdropComponent={renderBackdrop}
-        backgroundStyle={{backgroundColor: 'transparent'}}
-        enableDynamicSizing={false}
-        handleComponent={null}
-        // enablePanDownToClose
-        onChange={handleSheetChanges}>
-        <BottomSheetView>
-          {showFullPin ? (
-            <FullPin />
-          ) : orderCompleted ? (
-            <OrderComplete />
-          ) : hasViewDetails === 'full' ? (
-            ContentFull()
-          ) : (
-            Content()
-          )}
-          <Toast config={toastConfig} />
-        </BottomSheetView>
-      </BottomSheet>
-    )
+  console.log(sheetRef.current, 'sheetRef.current ');
+
+  return sheetOpen ? (
+    <BottomSheet
+      ref={sheetRef}
+      index={1}
+      snapPoints={snapPoints}
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{backgroundColor: 'transparent'}}
+      enableDynamicSizing={false}
+      handleComponent={null}
+      // enablePanDownToClose
+      onChange={handleSheetChanges}>
+      <BottomSheetView>
+        {showFullPin ? (
+          <FullPin />
+        ) : orderCompleted ? (
+          <OrderComplete />
+        ) : hasViewDetails === 'full' ? (
+          ContentFull()
+        ) : (
+          Content()
+        )}
+        <Toast config={toastConfig} />
+      </BottomSheetView>
+    </BottomSheet>
+  ) : (
+    <></>
   );
 });
 
