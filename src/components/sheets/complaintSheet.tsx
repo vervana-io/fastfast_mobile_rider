@@ -1,9 +1,4 @@
 /* eslint-disable react-native/no-inline-styles */
-import ActionSheet, {
-  ActionSheetRef,
-  SheetManager,
-  SheetProps,
-} from 'react-native-actions-sheet';
 import {
   Alerts,
   AlertsProps,
@@ -12,14 +7,20 @@ import {
 } from '@components/ui';
 import {Box, Button, Text, TextArea, VStack} from 'native-base';
 import React, {useCallback, useRef, useState} from 'react';
+import ActionSheet, {
+  ActionSheetRef,
+  SheetManager,
+  SheetProps,
+} from 'react-native-actions-sheet';
 
-import {ListType} from './orderHelp';
-import Toast from 'react-native-toast-message';
-import {WIN_HEIGHT} from '../../config';
+import {useOrders} from '@hooks/useOrders';
+import {bottomSheetStore} from '@store/bottom-sheet';
+import {ordersStore} from '@store/orders';
 import {apiType} from '@types/index';
 import {observer} from 'mobx-react-lite';
-import {ordersStore} from '@store/orders';
-import {useOrders} from '@hooks/useOrders';
+import Toast from 'react-native-toast-message';
+import {WIN_HEIGHT} from '../../config';
+import {ListType} from './orderHelp';
 
 export const ComplaintSheet = observer((props: SheetProps) => {
   const complaintSheetRef = useRef<ActionSheetRef>(null);
@@ -53,6 +54,12 @@ export const ComplaintSheet = observer((props: SheetProps) => {
               SheetManager.hide('ComplaintSheet');
               setShowCancelOrder(true);
             }, 1000);
+            if (data.title === 'Reassignment') {
+              ordersStore.clearNotifiedOrder();
+              ordersStore.setSelectedOrder({});
+              ordersStore.setSelectedOrderId(0);
+              bottomSheetStore.SetSheet('orderDetailsView', false);
+            }
           } else {
             Toast.show({
               type: 'error',

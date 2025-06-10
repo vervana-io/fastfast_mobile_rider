@@ -1,6 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import * as React from 'react';
 
+import {Alert, Linking} from 'react-native';
 import {
   Badge,
   Box,
@@ -13,23 +14,23 @@ import {
   Text,
   VStack,
 } from 'native-base';
-import {Alert, Linking} from 'react-native';
 import {getBuildNumber, getVersion} from 'react-native-device-info';
 
 import {Dollar} from '@assets/svg/Dollar';
+import {Home} from '@screens/app';
+import {LocationPin} from '@assets/svg/LocationPin';
 import {OrdersIcon} from '@assets/svg/OrdersIcon';
-import {useAuth} from '@hooks/useAuth';
-import {createDrawerNavigator} from '@react-navigation/drawer';
-import {createStackNavigator} from '@react-navigation/stack';
-import {addressesStore} from '@store/addresses';
-import {authStore} from '@store/auth';
-import {bottomSheetStore} from '@store/bottom-sheet';
-import {ordersStore} from '@store/orders';
-import {rootConfig} from '@store/root';
-import {observer} from 'mobx-react-lite';
 import {SheetManager} from 'react-native-actions-sheet';
 import {WIN_WIDTH} from '../config';
-import {Home} from '@screens/app';
+import {addressesStore} from '@store/addresses';
+import {authStore} from '@store/auth';
+import { bottomSheetStore } from '@store/bottom-sheet';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+import {createStackNavigator} from '@react-navigation/stack';
+import {observer} from 'mobx-react-lite';
+import {ordersStore} from '@store/orders';
+import { rootConfig } from '@store/root';
+import {useAuth} from '@hooks/useAuth';
 
 const navOptions = {
   headerShown: false,
@@ -46,8 +47,6 @@ const AppStack = createStackNavigator();
 
 const AppStackNavigator = () => (
   <AppStack.Navigator screenOptions={navOptions}>
-    {/* <AppStack.Screen name="Dashboard" component={Dashboard} /> */}
-    {/* <AppStack.Screen name="Home-root" component={Dashboard} /> */}
     <AppStack.Screen name="Home-root" component={Home} />
   </AppStack.Navigator>
 );
@@ -142,6 +141,17 @@ const DrawerContent = observer(({navigation, state}: any) => {
           </Box>
 
           <VStack mt={8} space={3}>
+            {/* <Pressable py={2} onPress={() => openSheet('addressSheetNewIOS')}>
+              <HStack alignItems="center" space={2} justifyContent="flex-start">
+                <LocationPin />
+                <VStack flex={1}>
+                  <Text>Change Area</Text>
+                  <Text fontSize="xs" color="themeLight.gray.2" isTruncated>
+                    {selectedAddress}
+                  </Text>
+                </VStack>
+              </HStack>
+            </Pressable> */}
             <Pressable py={2} onPress={() => openSheet('EarningsSheet')}>
               <HStack alignItems="center" space={2}>
                 <Dollar />

@@ -12,7 +12,7 @@
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
-  [GMSServices provideAPIKey:@"AIzaSyBkuuBvnpwGK0l-_5eiO429SErpwE5SxSA"];
+  [GMSServices provideAPIKey:@"AIzaSyAZTQAnphqXl7pidnK9RvU3bPrWbxAnMVg"];
   [FIRApp configure];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];

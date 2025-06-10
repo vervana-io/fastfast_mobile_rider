@@ -140,7 +140,6 @@ export const Home = observer((props: HomeProps) => {
   const GeoLocate = useCallback(() => {
     Geoloc.getCurrentPosition(
       position => {
-        console.log('position', position);
         setRidersPosition({
           // title: 'You',
           latitude: position?.coords?.latitude,
@@ -148,20 +147,11 @@ export const Home = observer((props: HomeProps) => {
         });
       },
       error => {
-        console.log('====================================');
-        console.log(error.code);
-        console.log('====================================');
         if (error.code === 3) {
           // GeoLocate();
-          console.log('====================================');
-          console.log('Retry: ' + retryCount);
-          console.log('====================================');
           if (retryCount < 2) {
             setRetryCount(retryCount + 1);
           } else if (retryCount >= 3) {
-            console.log('====================================');
-            console.log('Got here: ' + retryCount);
-            console.log('====================================');
             setShowRerender(true);
           }
           Toast.show({
@@ -241,18 +231,14 @@ export const Home = observer((props: HomeProps) => {
           lon2,
         );
         if (comparePositions) {
-          console.log('got to compare right');
           updateOnlineStatus(1);
         } else {
           const hasAddress = await SheetManager.show('addressSheetNewIOS');
-          console.log('got to compare wrong');
-          console.log('hasAddress', hasAddress);
           if (hasAddress) {
             updateOnlineStatus(1);
           }
         }
       } else {
-        console.log('got to no address set');
         Toast.show({
           type: 'warning',
           text1: 'Going Online?',
@@ -264,7 +250,6 @@ export const Home = observer((props: HomeProps) => {
         }
       }
     } else {
-      console.log('going offline');
       updateOnlineStatus(0);
     }
   }, [
@@ -489,7 +474,6 @@ export const Home = observer((props: HomeProps) => {
       `private-orders.approved.userId`,
       (data: PusherEvent) => {
         if (data.eventName === 'rider_new_order') {
-          console.log('NEW ORDER CAME IN!', JSON.stringify(data, null, 2));
           const dData = data.data;
           const parsed = JSON.parse(dData);
           ordersStore.setNotifiedOrder(parsed);
@@ -519,7 +503,6 @@ export const Home = observer((props: HomeProps) => {
     try {
       const watchID = Geolocation.watchPosition(
         position => {
-          console.log('watchPosition', JSON.stringify(position));
           updateRiderLocation(userD.user?.id.toString() ?? '', position.coords);
           // here we check if the user has selected an order and the order is picked up already
           if (selectedOrder?.id) {
@@ -540,20 +523,11 @@ export const Home = observer((props: HomeProps) => {
           }
         },
         error => {
-          console.log('====================================');
-          console.log(error.code);
-          console.log('====================================');
           if (error.code === 3) {
             // GeoLocate();
-            console.log('====================================');
-            console.log('Retry: ' + retryCount);
-            console.log('====================================');
             if (retryCount < 2) {
               setRetryCount(retryCount + 1);
             } else if (retryCount >= 3) {
-              console.log('====================================');
-              console.log('Got here: ' + retryCount);
-              console.log('====================================');
               setShowRerender(true);
             }
             Toast.show({
@@ -609,7 +583,7 @@ export const Home = observer((props: HomeProps) => {
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
 
   BackgroundJob.on('expiration', () => {
-    console.log('iOS: I am being closed!');
+    // console.log('iOS: I am being closed!');
   });
 
   const taskRandom = async (taskData: any) => {
@@ -623,7 +597,6 @@ export const Home = observer((props: HomeProps) => {
     await new Promise(async resolve => {
       // For loop with a delay
       const {delay} = taskData;
-      console.log(BackgroundJob.isRunning(), delay);
       watchBackgroundUpdates();
       for (let i = 0; BackgroundJob.isRunning(); i++) {
         // console.log('Runned -> ', i);

@@ -1,14 +1,7 @@
-import {
-  Pusher,
-  PusherAuthorizerResult,
-  PusherEvent,
-} from '@pusher/pusher-websocket-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Pusher, PusherEvent} from '@pusher/pusher-websocket-react-native';
 import {authStore} from '@store/auth';
 import {useCallback, useEffect} from 'react';
 import {STORAGE_KEY} from '../constant';
-import async from '../config/async.ts';
-
 interface PusherHookReturn {
   subscribe: (channelName: string, callback: (data: any) => void) => void;
   pusherEvent: any;
@@ -91,7 +84,7 @@ export const UsePusher = (): PusherHookReturn => {
 
           },
           onSubscriptionError(channelName, message, e) {
-            console.log(`Subscription error: ${channelName}, ${message}`);
+            console.error(`Subscription error: ${channelName}, ${message}`);
           },
         });
       }

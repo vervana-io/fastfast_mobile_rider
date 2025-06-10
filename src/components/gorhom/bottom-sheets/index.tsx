@@ -1,15 +1,15 @@
 import {observer} from 'mobx-react-lite';
+import React from 'react';
 import {GuarantorFormSheet} from './guarantorFormViewSheet';
 import {OrderDetailsViewSheet} from './orderDetailsViewSheet';
-import React from 'react';
 import {ProfileViewSheet} from './profileViewSheet';
 
 export const AllBottomSheets = observer(() => {
   return (
     <>
-      {/* <ProfileViewSheet /> */}
+      <ProfileViewSheet />
       <OrderDetailsViewSheet />
-      {/* <GuarantorFormSheet /> */}
+      <GuarantorFormSheet />
     </>
   );
 });

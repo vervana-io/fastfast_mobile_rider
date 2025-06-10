@@ -1,4 +1,5 @@
-## fastlane documentation
+fastlane documentation
+----
 
 # Installation
 
@@ -18,11 +19,15 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 [bundle exec] fastlane prepare
 ```
 
-### copy_constants
+
+
+### copy_env
 
 ```sh
-[bundle exec] fastlane copy_constants
+[bundle exec] fastlane copy_env
 ```
+
+
 
 ### ios_clean
 
@@ -30,39 +35,51 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 [bundle exec] fastlane ios_clean
 ```
 
----
+
+
+----
+
 
 ## iOS
 
-### ios develop
+### ios dev
 
 ```sh
-[bundle exec] fastlane ios develop
+[bundle exec] fastlane ios dev
 ```
 
-### ios production
+
+
+### ios main
 
 ```sh
-[bundle exec] fastlane ios production
+[bundle exec] fastlane ios main
 ```
 
----
+
+
+----
+
 
 ## Android
 
-### android develop
+### android dev
 
 ```sh
-[bundle exec] fastlane android develop
+[bundle exec] fastlane android dev
 ```
 
-### android production
+
+
+### android main
 
 ```sh
-[bundle exec] fastlane android production
+[bundle exec] fastlane android main
 ```
 
----
+
+
+----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
 

@@ -3,6 +3,7 @@ import {Animated, View} from 'react-native';
 import MapView, {Marker} from 'react-native-maps';
 /* eslint-disable react-native/no-inline-styles */
 import React, {useEffect, useRef} from 'react';
+
 import {ordersStore} from '@store/orders';
 import {markersType} from '@types/mapTypes';
 import MapViewDirections from 'react-native-maps-directions';
@@ -180,7 +181,7 @@ const RiderMap: React.FC<RiderMapProps> = ({
         <MapViewDirections
           origin={currentLocation}
           destination={destinationCoords}
-          apikey={'AIzaSyB7-DZbnJ_GP62ef8sifDLj1C_x43VMwi0'}
+          apikey={process.env.GOOGLE_API_KEY ?? ''}
           strokeWidth={3} // Customize the line width
           // lineDashPattern={[5, 5]}
           strokeColor="#1B7A41" // Customize the line color
