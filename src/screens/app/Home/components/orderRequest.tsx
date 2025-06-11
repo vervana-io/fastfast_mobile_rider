@@ -17,6 +17,7 @@ import Animated, {
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT} from '../../../../config';
 
+import {UsePusher} from '@hooks/usePusher.ts';
 export const OrderRequest = observer(() => {
   const NotificationOrder: any = ordersStore.notifiedOrder;
   const selectedOrder: any = ordersStore.selectedOrder;
@@ -30,7 +31,7 @@ export const OrderRequest = observer(() => {
   const boxHeight = useSharedValue(WIN_HEIGHT * boxChangeableHeight);
 
   const {acceptOrder, reassignOrder} = useOrders();
-
+  const {unsuscribe, subscribe} = UsePusher();
   const allOrders = ordersStore.orders;
 
   const triggerReassign = useCallback(() => {
@@ -96,6 +97,22 @@ export const OrderRequest = observer(() => {
               setMainNotificationOrder({});
               ordersStore.setSelectedOrderId(Number(order_id));
               bottomSheetStore.SetSheet('orderDetailsView', true);
+              unsuscribe('private.orders.approved.userId')
+              subscribe(`private.orders.ready.${order_id}`, (data: any) => {
+                //waiting for when seller mark order this order to be ready
+                //events - ready, arrival, pick up, delivered
+                console.log('data', data);
+                if (data.eventName === 'rider_order_pickup') {
+                  Toast.show({
+                    type: 'success',
+                    text1: 'Order Ready for Pickup',
+                    text2: 'Your order is ready for pickup',
+                    swipeable: true,
+                    visibilityTime: 6000,
+                  });
+                }
+
+              })
             } else {
               Toast.show({
                 type: 'warning',
@@ -258,8 +275,11 @@ export const OrderRequest = observer(() => {
       // here we check if the notification is for an order request
       // after which we then check if we already have the order accepted
 
-      const CompleteNotification = JSON.parse(data.data);
-
+      const CompleteNotification = data.data;
+      console.log(
+        'CompleteNotification',
+        CompleteNotification.notification_name,
+      );
       if (CompleteNotification.notification_name === 'order_request') {
         // first we check if the rider already has an ongoing order
         console.log(
@@ -271,23 +291,7 @@ export const OrderRequest = observer(() => {
           // with this, the rider can only have one order at a time
           if (!checkForOrderById(data.order_id)) {
             const payload: notificationsType = {
-              data: JSON.parse(
-                data.data || {
-                  notification_name: 'order_request',
-                  order_id: selectedOrder?.id,
-                  amount: selectedOrder?.total_amount,
-                  delivery_pin: selectedOrder?.delivery_pin,
-                  id: selectedOrder?.id,
-                  pick_up_pin: selectedOrder?.pick_up_pin,
-                  reference: selectedOrder?.reference,
-                  rider_id: selectedOrder?.rider_id,
-                  sub_total: selectedOrder?.sub_total,
-                  delivery_fee: selectedOrder?.delivery_fee,
-                  title: selectedOrder?.title ?? 'ADD TITLE',
-                  address: selectedOrder?.address,
-                  customer_address: selectedOrder?.receiver_street,
-                },
-              ),
+              data: CompleteNotification,
               order_id: data.order_id ?? '',
               request_id: data.request_id ?? '',
               rider_id: data.rider_id ?? '',

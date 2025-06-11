@@ -35,7 +35,7 @@ import {SheetManager} from 'react-native-actions-sheet';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
-
+import {UsePusher} from '@hooks/usePusher.ts';
 export const OrderDetailsViewSheet = observer(() => {
   const sheetRef: any = useRef<BottomSheet>(null);
   const sheetOpen = bottomSheetStore.sheets.orderDetailsView;
@@ -65,6 +65,7 @@ export const OrderDetailsViewSheet = observer(() => {
 
   const {isBackground, isForeground, currentAppState} = useAppState();
 
+  const {unsuscribe, subscribe} = UsePusher();
   // variables
   const snapPoints = useMemo(() => ['30%', '60%', '85%'], []);
 
@@ -149,6 +150,7 @@ export const OrderDetailsViewSheet = observer(() => {
               per_page: 6,
               status: '1',
             });
+            unsuscribe(`private.orders.ready.${order_id}`);
             setUploadedOrder([]);
             const pay: any = {
               customer_id: ordersData.customer_id,
@@ -212,7 +214,8 @@ export const OrderDetailsViewSheet = observer(() => {
   useEffect(() => {
     if (NotificationOrder.data) {
       const data = NotificationOrder;
-      const notification_name = JSON.parse(data.data)?.notification_name;
+      console.log('NotificationOrder', data);
+      const notification_name = data.data.notification_name;
       // here we check if the notification is for an order request
       // after which we then check if we already have the order accepted
       if (notification_name === 'order_pickup') {

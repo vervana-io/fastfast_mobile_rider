@@ -52,13 +52,14 @@ class OrdersStore {
       }
     }
 
-    if (this.ongoingOrderCount < 20) {
-      playEffectForNotifications();
+    playEffectForNotifications();
+    this.notifiedOrder = val;
+    this.notifiedOrder = val;
+   /* if (this.ongoingOrderCount < 20) {
       this.notifiedOrder = val;
     } else {
       playEffectForNotifications();
-      this.notifiedOrder = val;
-    }
+    }*/
   }
 
   setArrival(val: hasArrivedType) {
