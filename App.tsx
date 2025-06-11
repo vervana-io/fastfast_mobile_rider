@@ -26,8 +26,25 @@ import Toast from 'react-native-toast-message';
 import {QueryClientProvider} from 'react-query';
 import {rootClientQuery} from './src/config';
 import {theme} from './theme';
+import * as Sentry from '@sentry/react-native';
 
-export default function App() {
+Sentry.init({
+  dsn: 'https://e9ca8c81f6e238154a6708a1a0abea5d@o4509238962880512.ingest.de.sentry.io/4509315561226320',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
+
+export default Sentry.wrap(function App() {
   LogBox.ignoreLogs([
     'In React 18',
     'The native module for Flipper',
@@ -120,4 +137,4 @@ export default function App() {
       </QueryClientProvider>
     </>
   );
-}
+});
