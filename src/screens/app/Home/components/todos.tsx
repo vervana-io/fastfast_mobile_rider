@@ -16,7 +16,7 @@ import {UsePusher} from '@hooks/usePusher';
 import {WIN_WIDTH} from '../../../../config';
 import {addressesStore} from '@store/addresses';
 import {authStore} from '@store/auth';
-import { bottomSheetStore } from '@store/bottom-sheet';
+import {bottomSheetStore} from '@store/bottom-sheet';
 import {checklist} from '@store/checklist';
 import {observer} from 'mobx-react-lite';
 

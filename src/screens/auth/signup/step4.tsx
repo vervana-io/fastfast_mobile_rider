@@ -11,23 +11,23 @@ import {
 import React, {useEffect, useState} from 'react';
 import {object, string} from 'yup';
 
-import {AuthLayout} from '@layouts/authLayout';
-import {BackButton} from '@components/ui';
 import {BikeIcon} from '@assets/svg/BikeIcon';
-import {Formik} from 'formik';
 import {ImageFillIcon} from '@assets/svg/ImageFillIcon';
-import {Input} from '@components/inputs';
-import {Platform} from 'react-native';
-import {SignupTop} from './components/signupTop';
-import Toast from 'react-native-toast-message';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import {VehicleIcon} from '@assets/svg/VehicleIcon';
-import {apiType} from '@types/apiTypes';
-import {authStore} from '@store/auth';
-import {getApiLevel} from 'react-native-device-info';
-import {launchImageLibrary} from 'react-native-image-picker';
-import messaging from '@react-native-firebase/messaging';
+import {Input} from '@components/inputs';
+import {BackButton} from '@components/ui';
 import {useAuth} from '@hooks/useAuth';
+import {AuthLayout} from '@layouts/authLayout';
+import messaging from '@react-native-firebase/messaging';
+import {authStore} from '@store/auth';
+import {apiType} from '@types/apiTypes';
+import {Formik} from 'formik';
+import {Platform} from 'react-native';
+import {getApiLevel} from 'react-native-device-info';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+import {launchImageLibrary} from 'react-native-image-picker';
+import Toast from 'react-native-toast-message';
+import {SignupTop} from './components/signupTop';
 
 interface SignUpStep4Type {
   route?: any;
@@ -118,6 +118,14 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
               text2: e.response.message,
             });
           }
+          //ideally, the http file should return exactly the complete error response.
+          if (errorS === 413) {
+            Toast.show({
+              type: 'error',
+              text1: 'Rider Registration',
+              text2: 'Image size is too large',
+            });
+          }
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
               const el = errorS[key];
@@ -150,7 +158,14 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
         },
         onError: (e: any) => {
           const errorS = e.status;
-          console.log('error status', errorS);
+          //ideally, the http file should return exactly the complete error response.
+          if (errorS === 413) {
+            Toast.show({
+              type: 'error',
+              text1: 'Rider Registration',
+              text2: 'Image size is too large',
+            });
+          }
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
               const el = errorS[key];
