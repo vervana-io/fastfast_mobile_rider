@@ -40,7 +40,7 @@ jobs:
           # Clean commit message for JSON
           CLEAN_MSG=$(echo "$COMMIT_MESSAGE" | tr -d '\n\r' | sed 's/"/\\"/g' | head -c 200)
 
-          for PLATFORM in ios; do
+          for PLATFORM in android ios; do
             WORKFLOW_ID="primary-$PLATFORM"
             echo "Triggering Bitrise build for $PLATFORM..."
             

@@ -80,7 +80,7 @@ android {
     namespace "com.fastfastrider"
     defaultConfig {
         applicationId "com.fastfastrider"
-       minSdkVersion 21
+        minSdkVersion 21
         targetSdkVersion 34
         versionCode 64
         versionName "1.0"
@@ -120,13 +120,13 @@ android {
 }
 
 dependencies {
- implementation platform('com.google.firebase:firebase-bom:32.5.0')
+    implementation platform('com.google.firebase:firebase-bom:32.5.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-crashlytics'
     debugImplementation("com.facebook.flipper:flipper:0.182.0")
-debugImplementation("com.facebook.flipper:flipper-network-plugin:0.182.0")
-debugImplementation("com.facebook.flipper:flipper-fresco-plugin:0.182.0")
+    debugImplementation("com.facebook.flipper:flipper-network-plugin:0.182.0")
+    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:0.182.0")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

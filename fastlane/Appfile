@@ -11,9 +11,5 @@ for_platform :ios do
 end
 
 for_platform :android do 
- # package_name("com.fastfast")
- 
- # for_lane :dev do
- #   package_name("com.fastfast.develop")
- # end
+ package_name("com.fastfast")
 end

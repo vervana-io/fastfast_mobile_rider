@@ -47,12 +47,12 @@ lane :prepare do |options|
 end
 
 lane :copy_env do |options|
-env_url = ENV["BITRISEIO_#{options[:stage]}_ENV_URL"]
-dot_env_file = File.join(Dir.pwd, ".env")
-destination_path = File.expand_path("../.env", Dir.pwd)
+  env_url = ENV["BITRISEIO_#{options[:stage]}_ENV_URL"]
+  dot_env_file = File.join(Dir.pwd, ".env")
+  destination_path = File.expand_path("../.env", Dir.pwd)
 
-sh("curl", env_url, "-o", dot_env_file)
-sh("mv", dot_env_file, destination_path)
+  sh("curl", env_url, "-o", dot_env_file)
+  sh("mv", dot_env_file, destination_path)
 end
 
 
@@ -154,7 +154,6 @@ platform :android do
    gradle(
      "project_dir": "android",
      "task": "clean bundle",
-     "flavor": "develop",
      "build_type": "Release",
      "properties": {
        "android.injected.signing.store.file" => ENV["ANDROID_RELEASE_STORE_FILE"],
@@ -170,27 +169,6 @@ platform :android do
     release_status: "draft",
     track_promote_to: "internal"
    )
-
-   supply(
-     track: "internal",
-     json_key: ENV["GOOGLE_PLAY_JSON_KEY"],
-     release_status: "completed",
-     skip_upload_apk: true,
-     skip_upload_aab: true,
-     skip_upload_metadata: true,
-     skip_upload_images: true,
-     skip_upload_screenshots: true
-   )
-
-   aab_path = lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
-   puts "AAB built at: #{aab_path}"
-
-   firebase_app_distribution(
-    app: ENV["FIREBASE_DISTRIBUTION_APP_ID"],
-    service_credentials_file: ENV["FIREBASE_SERVICE_ACCOUNT"],
-    android_artifact_type: "AAB",
-    android_artifact_path: aab_path
-   )
  end
 
  lane :main do
@@ -198,7 +176,6 @@ platform :android do
    gradle(
      "project_dir": "android",
      "task": "clean bundle",
-     "flavor": "production",
      "build_type": "Release",
      "properties": {
        "android.injected.signing.store.file" => ENV["ANDROID_RELEASE_STORE_FILE"],
