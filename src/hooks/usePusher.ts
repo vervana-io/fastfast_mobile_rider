@@ -33,8 +33,11 @@ export const usePusher = (): PusherHookReturn => {
         onAuthorizer: async (channelName: string, socketId: string) => {
           try {
             const token = await AsyncStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
+            if (!token) {
+              return undefined;
+            }
             const response = await fetch(
-              'https://testriderapi.fastfastapp.com/api/broadcasting/auth',
+              `${process.env.BASE_URL}broadcasting/auth`,
               {
                 method: 'POST',
                 headers: {
@@ -50,7 +53,7 @@ export const usePusher = (): PusherHookReturn => {
             const body = await response.json();
             return body;
           } catch (error) {
-            console.error('Au thorizer error', error);
+            console.error('Authorizer error', error);
             return undefined;
           }
         },

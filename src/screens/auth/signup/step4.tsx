@@ -18,6 +18,7 @@ import {Input} from '@components/inputs';
 import {BackButton} from '@components/ui';
 import {useAuth} from '@hooks/useAuth';
 import {AuthLayout} from '@layouts/authLayout';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import {authStore} from '@store/auth';
 import {apiType} from '@types/apiTypes';
@@ -27,6 +28,7 @@ import {getApiLevel} from 'react-native-device-info';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
+import {STORAGE_KEY} from '../../../constant';
 import {SignupTop} from './components/signupTop';
 
 interface SignUpStep4Type {
@@ -95,6 +97,10 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
           console.log('====================================');
           if (val.status) {
             // Alert.alert('Registration Successful');
+            AsyncStorage.setItem(
+              STORAGE_KEY.ACCESS_TOKEN,
+              val?.data?.access_token?.token,
+            );
             navigation.navigate('Auth', {screen: 'Completion'});
             authStore.setRegisterData({
               registerData: {},
