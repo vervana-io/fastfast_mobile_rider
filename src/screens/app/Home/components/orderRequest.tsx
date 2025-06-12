@@ -2,6 +2,7 @@ import {LocationPin} from '@assets/svg/LocationPin';
 import {SmilleyTear} from '@assets/svg/SmilleyTear';
 import {formatter} from '@helpers/formatter';
 import {useOrders} from '@hooks/useOrders';
+import {authStore} from '@store/auth';
 import {bottomSheetStore} from '@store/bottom-sheet';
 import {ordersStore} from '@store/orders';
 import {apiType, notificationsType} from '@types/index';
@@ -16,11 +17,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT} from '../../../../config';
+import {usePusher} from '../../../../hooks/usePusher';
 
 export const OrderRequest = observer(() => {
+  const {unsuscribe, subscribe} = usePusher();
   const NotificationOrder: any = ordersStore.notifiedOrder;
   const selectedOrder: any = ordersStore.selectedOrder;
-
+  const userD = authStore.auth;
   const [showReassign, setShowReassign] = useState(false);
   const [showOrder, setShowOrder] = useState<boolean>(true);
   const [mainNotificationOrder, setMainNotificationOrder] =
@@ -30,6 +33,15 @@ export const OrderRequest = observer(() => {
   const boxHeight = useSharedValue(WIN_HEIGHT * boxChangeableHeight);
 
   const {acceptOrder, reassignOrder} = useOrders();
+
+  useEffect(() => {
+    if (!bottomSheetStore.sheets.orderDetailsView) {
+      setMainNotificationOrder({});
+      setShowOrder(false);
+      setShowReassign(false);
+      // Reset any other local state here
+    }
+  }, [bottomSheetStore.sheets.orderDetailsView]);
 
   const allOrders = ordersStore.orders;
 
@@ -52,15 +64,11 @@ export const OrderRequest = observer(() => {
           {
             onSuccess: (val: apiType) => {
               if (val.status) {
-                console.log('good', val);
                 setShowReassign(false);
                 setShowOrder(false);
                 ordersStore.clearNotifiedOrder();
                 setMainNotificationOrder({});
               } else {
-                console.log('====================================');
-                console.log(val);
-                console.log('====================================');
                 Toast.show({
                   type: 'warning',
                   text1: 'Order Request',
@@ -96,6 +104,21 @@ export const OrderRequest = observer(() => {
               setMainNotificationOrder({});
               ordersStore.setSelectedOrderId(Number(order_id));
               bottomSheetStore.SetSheet('orderDetailsView', true);
+              unsuscribe('private.orders.approved.userId');
+              subscribe(`private.orders.ready.${order_id}`, (data: any) => {
+                //waiting for when seller mark order this order to be ready
+                //events - ready, arrival, pick up, delivered
+                console.log('data', data);
+                if (data.eventName === 'rider_order_pickup') {
+                  Toast.show({
+                    type: 'success',
+                    text1: 'Order Ready for Pickup',
+                    text2: 'Your order is ready for pickup',
+                    swipeable: true,
+                    visibilityTime: 6000,
+                  });
+                }
+              });
             } else {
               Toast.show({
                 type: 'warning',
@@ -243,9 +266,7 @@ export const OrderRequest = observer(() => {
 
   const checkForOrderById = useCallback(
     (order_id: number) => {
-      console.log('checking order', order_id);
       const order = allOrders.find(o => o.id === order_id);
-      console.log('order', order);
       return order;
     },
     [allOrders],
@@ -262,11 +283,8 @@ export const OrderRequest = observer(() => {
 
       if (CompleteNotification.notification_name === 'order_request') {
         // first we check if the rider already has an ongoing order
-        console.log(
-          ordersStore.ongoingOrderCount,
-          'ordersStore.ongoingOrderCount',
-        );
-        if (ordersStore.ongoingOrderCount < 20) {
+
+        if (ordersStore.ongoingOrderCount < 1) {
           // here we check if an order is already being handled by the user
           // with this, the rider can only have one order at a time
           if (!checkForOrderById(data.order_id)) {

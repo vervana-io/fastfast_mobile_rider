@@ -26,7 +26,7 @@ import BackgroundJob from 'react-native-background-actions';
 // import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
 import PermissionManager from '@handlers/permissionHandler';
 import {functions} from '@helpers/functions';
-import {UsePusher} from '@hooks/usePusher';
+import {usePusher} from '@hooks/usePusher';
 import {PusherEvent} from '@pusher/pusher-websocket-react-native';
 import Geolocation from '@react-native-community/geolocation';
 import {addressesStore} from '@store/addresses';
@@ -49,6 +49,7 @@ import {ordersStore} from '@store/orders';
 import {rootConfig} from '@store/root';
 import {markersType} from '@types/mapTypes';
 import {observer} from 'mobx-react-lite';
+import {notificationsType} from '@types/index';
 
 enableLatestRenderer();
 
@@ -74,7 +75,7 @@ export const Home = observer((props: HomeProps) => {
     longitude: location?.coords.longitude ?? 0,
   });
 
-  const {subscribe} = UsePusher();
+  const {subscribe, unsuscribe} = usePusher();
 
   // we initialize the socket here
   // const {isConnected, emit} = useSocket2();
@@ -135,6 +136,64 @@ export const Home = observer((props: HomeProps) => {
       selectedOrder.status,
       userD?.user?.id,
     ],
+  );
+
+  const orderApprovedSubscription = useCallback(
+    (onlineStatus: any) => {
+      if (onlineStatus) {
+        subscribe(
+          `private-orders.approved.${userD?.user?.id}`,
+          (event: PusherEvent) => {
+            //console.log('pusher event orderApprovedSubscription', JSON.stringify(data));
+            if (event.eventName === 'rider_new_order') {
+              const dData = event.data;
+              const parsed = JSON.parse(dData);
+              console.log('Parsed order', parsed.order);
+              console.log('field', parsed.order.data);
+              const data = parsed.order;
+
+              const d: notificationsType = {
+                order_id: data.order_id,
+                title: 'New Oorder',
+                request_id: data.request_id,
+                user_id: '23',
+                data: {
+                  order_id: data.order_id,
+                  reference: 'feeere',
+                  title: 'New Order',
+                  notification_name: 'order_request',
+                  rider_id: data.rider_id,
+                  id: 234,
+                  pick_up_pin: '2344',
+                  delivery_pin: '23344',
+                  amount: data.amount,
+                  delivery_fee: data.delivery_fee,
+                  sub_total: data.sub_total,
+                  customer_address: {
+                    latitude: data.data.customer_address.latitude,
+                    longitude: data.data.customer_address.longitude,
+                    city: data.data.customer_address.city,
+                    street: data.data.customer_address.street,
+                    house_number: data.data.customer_address.house_number,
+                  },
+                  address: {
+                    latitude: 899,
+                    longitude: data.data.address.longitude,
+                    city: data.data.address.city,
+                    house_number: data.data.address.house_number,
+                    street: '',
+                  },
+                },
+              };
+              ordersStore.setNotifiedOrder(d);
+            }
+          },
+        );
+      } else {
+        unsuscribe(`private-orders.approved.${userD?.user?.id}`);
+      }
+    },
+    [subscribe, unsuscribe, userD?.user?.id],
   );
 
   const GeoLocate = useCallback(() => {
@@ -199,6 +258,7 @@ export const Home = observer((props: HomeProps) => {
               setOnlineStatus(onlineStatus ? false : true);
               rootConfig.setIsOnline(onlineStatus ? false : true);
               userDetails.refetch();
+              orderApprovedSubscription(onlineStatus);
             } else {
               Toast.show({
                 type: 'error',
@@ -210,7 +270,7 @@ export const Home = observer((props: HomeProps) => {
         },
       );
     },
-    [onlineStatus, toggleOnlineStatus, userDetails],
+    [onlineStatus, toggleOnlineStatus, userDetails, orderApprovedSubscription],
   );
 
   // set Rider status to Online - depreciated
@@ -483,7 +543,7 @@ export const Home = observer((props: HomeProps) => {
         }
       },
     );
-  }, [subscribe, userDetails]);
+  }, [onlineStatus, orderApprovedSubscription, subscribe, userDetails]);
 
   // open the order details sheet if we have a selected order
   useEffect(() => {

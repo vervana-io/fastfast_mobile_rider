@@ -1,5 +1,6 @@
 import {playEffectForNotifications} from '@handlers/playEffect';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {bottomSheetStore} from '@store/bottom-sheet';
 import {notificationsType, orderType} from '@types/orderTypes';
 import {makeAutoObservable} from 'mobx';
 import {
@@ -52,12 +53,14 @@ class OrdersStore {
       }
     }
 
-    if (this.ongoingOrderCount < 20) {
+    if (this.ongoingOrderCount < 1) {
+      // clear all order state
       playEffectForNotifications();
       this.notifiedOrder = val;
     } else {
-      playEffectForNotifications();
-      this.notifiedOrder = val;
+      console.error(
+        'ongoing order count is greater than 1, you have an ongoing order',
+      );
     }
   }
 
@@ -76,6 +79,24 @@ class OrdersStore {
 
   setSelectedOrderId(id: number) {
     this.selectedOrderId = id;
+  }
+  resetAllOrderState() {
+    this.setSelectedOrder({});
+    this.setSelectedOrderId(0);
+    this.clearNotifiedOrder();
+    this.ongoingOrderCount = 0;
+    this.tempHasArrived = {order_id: 0, has_arrived: false};
+    // Reset any other order-related state here
+
+    // Also reset order-related sheets
+    if (typeof bottomSheetStore?.SetSheet === 'function') {
+      bottomSheetStore.SetSheet('orderDetailsView', false);
+      bottomSheetStore.SetSheet('rateCustomerSheet', false);
+      // Add more sheets as needed
+    }
+    if (bottomSheetStore?.sheetContentData) {
+      bottomSheetStore.sheetContentData = {};
+    }
   }
 
   setSelectedOrder(val: orderType) {
