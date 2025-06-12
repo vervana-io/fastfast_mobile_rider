@@ -262,11 +262,8 @@ export const OrderRequest = observer(() => {
 
       if (CompleteNotification.notification_name === 'order_request') {
         // first we check if the rider already has an ongoing order
-        console.log(
-          ordersStore.ongoingOrderCount,
-          'ordersStore.ongoingOrderCount',
-        );
-        if (ordersStore.ongoingOrderCount < 20) {
+
+        if (ordersStore.ongoingOrderCount < 1) {
           // here we check if an order is already being handled by the user
           // with this, the rider can only have one order at a time
           if (!checkForOrderById(data.order_id)) {

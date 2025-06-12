@@ -1,3 +1,8 @@
+import {addressesStore} from '@store/addresses';
+import {authStore} from '@store/auth';
+import {bottomSheetStore} from '@store/bottom-sheet';
+import {checklist} from '@store/checklist';
+import {observer} from 'mobx-react-lite';
 import {
   Box,
   Button,
@@ -9,16 +14,8 @@ import {
   VStack,
 } from 'native-base';
 import React, {useCallback, useEffect, useState} from 'react';
-
-import {SheetManager} from 'react-native-actions-sheet';
 import {StyleSheet} from 'react-native';
-import {UsePusher} from '@hooks/usePusher';
-import {WIN_WIDTH} from '../../../../config';
-import {addressesStore} from '@store/addresses';
-import {authStore} from '@store/auth';
-import {bottomSheetStore} from '@store/bottom-sheet';
-import {checklist} from '@store/checklist';
-import {observer} from 'mobx-react-lite';
+import {SheetManager} from 'react-native-actions-sheet';
 
 export const Todos = observer(() => {
   const ChecklistData = checklist.checklist;
@@ -174,11 +171,7 @@ export const Todos = observer(() => {
         style={style.shadow}
         borderWidth={1}
         borderColor="trueGray.300">
-        {userD.user?.complaince_status === 2 &&
-        userD.rider?.selfie &&
-        userD.rider.first_guarantor_name
-          ? Pending()
-          : Incomplete()}
+        {userD.rider?.selfie ? Pending() : Incomplete()}
       </Box>
     </Box>
   );
