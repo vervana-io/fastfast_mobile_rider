@@ -356,26 +356,28 @@ export const OrderDetailsViewSheet = observer(() => {
                       'Seller Address not Available'}
                   </Text>
                 </VStack>
-                <HStack space={2}>
-                  <Button
-                    leftIcon={<QuestionIcon />}
-                    w="44px"
-                    h="44px"
-                    rounded="2xl"
-                    onPress={() => SheetManager.show('orderHelpSheet')}
-                    bg="white"
-                    _pressed={{bg: 'rgba(255,255,255, .4)'}}
-                  />
-                  <Button
-                    leftIcon={<PhoneIcon />}
-                    w="44px"
-                    h="44px"
-                    rounded="2xl"
-                    onPress={callCustomer}
-                    bg="white"
-                    _pressed={{bg: 'rgba(255,255,255, .4)'}}
-                  />
-                </HStack>
+                {ordersData?.status_name === 'delivered' ? null : (
+                  <HStack space={2}>
+                    <Button
+                      leftIcon={<QuestionIcon />}
+                      w="44px"
+                      h="44px"
+                      rounded="2xl"
+                      onPress={() => SheetManager.show('orderHelpSheet')}
+                      bg="white"
+                      _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                    />
+                    <Button
+                      leftIcon={<PhoneIcon />}
+                      w="44px"
+                      h="44px"
+                      rounded="2xl"
+                      onPress={callCustomer}
+                      bg="white"
+                      _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                    />
+                  </HStack>
+                )}
               </HStack>
               <Box mt={2}>
                 {/* <Text color="white" fontWeight="bold">

@@ -1,10 +1,13 @@
 /* eslint-disable react-native/no-inline-styles */
-import ActionSheet, {
-  ActionSheetRef,
-  ScrollView,
-  SheetManager,
-  SheetProps,
-} from 'react-native-actions-sheet';
+import {ExpandIcon} from '@assets/svg/Expand';
+import {PhoneIcon} from '@assets/svg/PhoneIcon';
+import {QuestionIcon} from '@assets/svg/QuestionIcon';
+import {useOrders} from '@hooks/useOrders';
+import {useIsFocused} from '@react-navigation/native';
+import {ordersStore} from '@store/orders';
+import {uploadedOrderType} from '@types/generalType';
+import {apiType} from '@types/index';
+import {observer} from 'mobx-react-lite';
 import {
   AddIcon,
   Box,
@@ -20,23 +23,16 @@ import {
   VStack,
   useColorMode,
 } from 'native-base';
-import {Linking, StyleSheet} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {WIN_HEIGHT, WIN_WIDTH} from '../../config';
+import {Linking, StyleSheet} from 'react-native';
+import ActionSheet, {
+  ActionSheetRef,
+  ScrollView,
+  SheetManager,
+  SheetProps,
+} from 'react-native-actions-sheet';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-
-import {CameraScreen} from '../ui/camera';
-import {ExpandIcon} from '@assets/svg/Expand';
-import {PhoneIcon} from '@assets/svg/PhoneIcon';
-import {QuestionIcon} from '@assets/svg/QuestionIcon';
-import {apiType} from '@types/index';
-import {observer} from 'mobx-react-lite';
-import {orderType} from '@types/orderTypes';
-import {ordersStore} from '@store/orders';
-import {uploadedOrderType} from '@types/generalType';
-import {useIsFocused} from '@react-navigation/native';
-import {useOrders} from '@hooks/useOrders';
-import useSocket from '@hooks/useSocket';
+import {WIN_HEIGHT, WIN_WIDTH} from '../../config';
 
 export const OrderDetailsSheet = observer((props: SheetProps) => {
   const orderDetailsSheetRef = useRef<ActionSheetRef>(null);
@@ -46,7 +42,6 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
   const [uploadedOrder, setUploadedOrder] = useState<uploadedOrderType[]>([]);
   const allowedUpload = 2;
   const [errorMessage, setErrorMessage] = useState('');
-  // const [ordersData, setOrdersData] = useState<Partial<orderType>>({});
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [showFullPin, setShowFullPin] = useState(false);
 
@@ -227,26 +222,28 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
                   {ordersData?.seller?.address}
                 </Text>
               </VStack>
-              <HStack space={2}>
-                <Button
-                  leftIcon={<QuestionIcon />}
-                  w="44px"
-                  h="44px"
-                  rounded="2xl"
-                  onPress={() => SheetManager.show('orderHelpSheet')}
-                  bg="white"
-                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
-                />
-                <Button
-                  leftIcon={<PhoneIcon />}
-                  w="44px"
-                  h="44px"
-                  rounded="2xl"
-                  onPress={callCustomer}
-                  bg="white"
-                  _pressed={{bg: 'rgba(255,255,255, .4)'}}
-                />
-              </HStack>
+              {ordersData?.status_name === 'delivered' ? null : (
+                <HStack space={2}>
+                  <Button
+                    leftIcon={<QuestionIcon />}
+                    w="44px"
+                    h="44px"
+                    rounded="2xl"
+                    onPress={() => SheetManager.show('orderHelpSheet')}
+                    bg="white"
+                    _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                  />
+                  <Button
+                    leftIcon={<PhoneIcon />}
+                    w="44px"
+                    h="44px"
+                    rounded="2xl"
+                    onPress={callCustomer}
+                    bg="white"
+                    _pressed={{bg: 'rgba(255,255,255, .4)'}}
+                  />
+                </HStack>
+              )}
             </HStack>
             <Box mt={2}>
               <Text color="white" fontWeight="bold">

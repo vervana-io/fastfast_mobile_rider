@@ -78,14 +78,12 @@ export const Login = (props: LoginProp) => {
     login.mutate(payload, {
       onSuccess: (val: apiType) => {
         if (val.status) {
-          //store the token in the async storage, let's write the aync func from scratch
           AsyncStorage.setItem(
             STORAGE_KEY.ACCESS_TOKEN,
             val?.data?.access_token?.token,
           );
           navigation.replace('App');
         } else {
-          // Alert.alert(val.message);
           Toast.show({
             type: 'error',
             text1: 'Login',
