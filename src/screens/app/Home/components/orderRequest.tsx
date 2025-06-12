@@ -16,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT} from '../../../../config';
+import {UsePusher} from '@hooks/usePusher.ts';
 
 export const OrderRequest = observer(() => {
   const NotificationOrder: any = ordersStore.notifiedOrder;
@@ -30,6 +31,7 @@ export const OrderRequest = observer(() => {
   const boxHeight = useSharedValue(WIN_HEIGHT * boxChangeableHeight);
 
   const {acceptOrder, reassignOrder} = useOrders();
+  const {unsuscribe, subscribe} = UsePusher();
 
   const allOrders = ordersStore.orders;
 
@@ -96,6 +98,22 @@ export const OrderRequest = observer(() => {
               setMainNotificationOrder({});
               ordersStore.setSelectedOrderId(Number(order_id));
               bottomSheetStore.SetSheet('orderDetailsView', true);
+              unsuscribe('private.orders.approved.userId')
+              subscribe(`private.orders.ready.userId.${order_id}`, (data: any) => {
+                //waiting for when seller mark order this order to be ready
+                //events - ready, arrival, pick up, delivered
+                console.log('data', data);
+                if (data.eventName === 'rider_order_pickup') {
+                  Toast.show({
+                    type: 'success',
+                    text1: 'Order Ready for Pickup',
+                    text2: 'Your order is ready for pickup',
+                    swipeable: true,
+                    visibilityTime: 6000,
+                  });
+                }
+
+              })
             } else {
               Toast.show({
                 type: 'warning',
