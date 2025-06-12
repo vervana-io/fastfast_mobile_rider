@@ -11,6 +11,7 @@ import BottomSheet, {
 import {toastConfig} from '@helpers/toastConfig';
 import {useAppState} from '@hooks/useAppState';
 import {useOrders} from '@hooks/useOrders';
+import {usePusher} from '@hooks/usePusher';
 import {bottomSheetStore} from '@store/bottom-sheet';
 import {ordersStore} from '@store/orders';
 import {apiType} from '@types/apiTypes';
@@ -59,12 +60,13 @@ export const OrderDetailsViewSheet = observer(() => {
   } = useOrders();
 
   const {payload} = bottomSheetStore.sheetContentData;
-  const order_id = payload?.order_id ?? ordersStore.selectedOrderId;
+  const order_id = ordersStore.selectedOrderId;
+  // const order_id = payload?.order_id ?? ordersStore.selectedOrderId;
   const ordersData = ordersStore.selectedOrder;
   const request_id = payload?.request_id ?? ordersData?.misc_rider_info?.id;
 
   const {isBackground, isForeground, currentAppState} = useAppState();
-
+  const {unsuscribe, subscribe} = usePusher();
   // variables
   const snapPoints = useMemo(() => ['30%', '60%', '85%'], []);
 
@@ -150,6 +152,7 @@ export const OrderDetailsViewSheet = observer(() => {
               status: '1',
             });
             setUploadedOrder([]);
+            unsuscribe(`private.orders.ready.${order_id}`);
             const pay: any = {
               customer_id: ordersData.customer_id,
               delivery_fee: ordersData.delivery_fee,
@@ -426,13 +429,27 @@ export const OrderDetailsViewSheet = observer(() => {
                     I have arrived
                   </Button>
                 ) : (
-                  <Button
-                    _text={{fontWeight: 'bold'}}
-                    rounded="full"
-                    py={4}
-                    onPress={() => handleSnapPress(2)}>
-                    Proceed to pickup
-                  </Button>
+                  <>
+                    {ordersData?.status_name === 'delivered' ? (
+                      <Button
+                        _text={{fontWeight: 'bold'}}
+                        rounded="full"
+                        py={4}
+                        isDisabled
+                        disabled
+                        onPress={() => handleSnapPress(2)}>
+                        YOU'VE DELIVERED THIS ORDER 👍
+                      </Button>
+                    ) : (
+                      <Button
+                        _text={{fontWeight: 'bold'}}
+                        rounded="full"
+                        py={4}
+                        onPress={() => handleSnapPress(2)}>
+                        Proceed to pickup
+                      </Button>
+                    )}
+                  </>
                 )}
               </Box>
             </Box>
@@ -763,9 +780,8 @@ export const OrderDetailsViewSheet = observer(() => {
             rounded="full"
             _text={{fontWeight: 'bold'}}
             onPress={() => {
+              ordersStore.resetAllOrderState();
               SheetManager.hide('orderDetailsSheet');
-              ordersStore.setSelectedOrder({});
-              ordersStore.setSelectedOrderId(0);
             }}>
             Back home
           </Button>
@@ -837,6 +853,16 @@ export const OrderDetailsViewSheet = observer(() => {
   //     bottomSheetStore.SetSheet('orderDetailsView', false);
   //   }
   // }, [sheetOpen]);
+
+  useEffect(() => {
+    if (!bottomSheetStore.sheets.orderDetailsView) {
+      setUploadedOrder([]);
+      setOrderCompleted(false);
+      setShowFullPin(false);
+      setViewDetails('mid');
+      // Reset any other local state here
+    }
+  }, [bottomSheetStore.sheets.orderDetailsView]);
 
   useEffect(() => {
     if (sheetOpen) {

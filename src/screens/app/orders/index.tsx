@@ -98,6 +98,9 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
     (order_id: number, item: orderType) => {
       try {
         if (userIsOnline) {
+          ordersStore.setSelectedOrder({});
+          ordersStore.setSelectedOrderId(0);
+          ordersStore.clearNotifiedOrder();
           ordersStore.setSelectedOrderId(order_id);
           ordersStore.setSelectedOrder(item);
           bottomSheetStore.SetSheet('orderDetailsView', true, {

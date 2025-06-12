@@ -63,7 +63,8 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
   // const {singleOrder} = orderStates;
 
   const payload: any = props.payload;
-  const order_id = payload?.order_id ?? ordersStore.selectedOrderId;
+  const order_id = ordersStore.selectedOrderId;
+  // const order_id = payload?.order_id ?? ordersStore.selectedOrderId;
   const ordersData = ordersStore.selectedOrder;
   const request_id = payload?.request_id ?? ordersData?.misc_rider_info?.id;
 
@@ -612,9 +613,8 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
             rounded="full"
             _text={{fontWeight: 'bold'}}
             onPress={() => {
+              ordersStore.resetAllOrderState();
               SheetManager.hide('orderDetailsSheet');
-              ordersStore.setSelectedOrder({});
-              ordersStore.setSelectedOrderId(0);
             }}>
             Back home
           </Button>
