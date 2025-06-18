@@ -40,9 +40,6 @@ class MainApplication : Application(), ReactApplication {
             // If you opted-in for the New Architecture, we load the native entry point for this app.
             load()
         }
-        // Only initialize Flipper in debug builds
-        if (BuildConfig.DEBUG) {
-            ReactNativeFlipper.initializeFlipper(this, reactNativeHost.reactInstanceManager)
-        }
+        ReactNativeFlipper.initializeFlipper(this, reactNativeHost.reactInstanceManager)
     }
 }

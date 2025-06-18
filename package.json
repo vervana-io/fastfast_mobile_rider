@@ -63,7 +63,7 @@
     "react-native-dotenv": "^3.4.9",
     "react-native-error-boundary": "^1.2.4",
     "react-native-flash-message": "^0.4.2",
-    "react-native-flipper": "^0.212.0",
+    "react-native-flipper": "^0.268.0",
     "react-native-fs": "^2.20.0",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-gesture-handler": "2.18.1",
