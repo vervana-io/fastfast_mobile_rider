@@ -11,5 +11,5 @@ for_platform :ios do
 end
 
 for_platform :android do 
- package_name("com.fastfast")
+ package_name("com.fastfastrider")
 end
