@@ -62,11 +62,9 @@ export const ForgotStep2 = (props: Step2Props) => {
                 },
                 {
                   onSuccess: (val: any) => {
-                    console.log('res', val);
                     if (val.status) {
                       navigation.navigate('Login');
                     } else {
-                      console.log(val);
                       Toast.show({
                         type: 'error',
                         text1: 'Forgot Password',

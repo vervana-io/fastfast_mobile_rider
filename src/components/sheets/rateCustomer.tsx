@@ -27,7 +27,7 @@ import {authStore} from '@store/auth';
 import {formatter} from '@helpers/formatter';
 import {observer} from 'mobx-react-lite';
 import {ordersStore} from '@store/orders';
-import { useOrders } from '@hooks/useOrders';
+import {useOrders} from '@hooks/useOrders';
 
 interface ratingType {
   message: string;
@@ -165,10 +165,9 @@ export const RateCustomerSheet = observer((props: SheetProps) => {
           rounded="full"
           mt={8}
           onPress={() => {
+            ordersStore.resetAllOrderState();
             SheetManager.hide('rateCustomerSheet');
             SheetManager.hide('orderDetailsSheet');
-            ordersStore.setSelectedOrder({});
-            ordersStore.setSelectedOrderId(0);
           }}
           bg="themeLight.primary.base"
           _text={{fontWeight: 'bold'}}>

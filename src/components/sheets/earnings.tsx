@@ -79,8 +79,6 @@ export const Earnings = observer((props: SheetProps) => {
       },
       {},
     );
-    console.log('start', formatter.formatDate(start, 'YYYY-MM-DD'));
-    console.log('end', formatter.formatDate(end, 'YYYY-MM-DD'));
   };
 
   const handlePrev = useCallback(() => {

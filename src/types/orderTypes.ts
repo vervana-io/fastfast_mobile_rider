@@ -13,6 +13,7 @@ export interface orderType {
   business_id: number;
   rider_id: number;
   address_id: number;
+  status_name: 'delivered' | 'picked_up' | 'ready' | 'preparation' | 'pending';
   promotion_id: number;
   group_id: number;
   sub_total: number;
@@ -55,6 +56,7 @@ export interface orderType {
   created_at: string;
   updated_at: string;
   seller: sellerTypes;
+  delivery_address: string;
   customer: customerTypes;
   misc_rider_info: riderType;
   address: addressesTypes;

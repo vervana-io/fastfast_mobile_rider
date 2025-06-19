@@ -1,38 +1,31 @@
-import {Alert, Platform} from 'react-native';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {
   Box,
   Button,
   Center,
   HStack,
   Heading,
-  Image,
   Link,
   Spinner,
   Text,
   VStack,
 } from 'native-base';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 import React, {useCallback, useState} from 'react';
-import {object, ref, string} from 'yup';
+import {Platform} from 'react-native';
+import {object, string} from 'yup';
 
-import { AuthLayout } from '@layouts/authLayout';
-import {DefaultLayout} from '@layouts/default';
-import {Formik} from 'formik';
-import {GoogleIcon} from '@assets/svg/GoogleIcon';
-import {Input} from '@components/inputs';
-import {Pattern} from '@assets/svg/Pattern';
 import {RiderLogo} from '@assets/svg/RiderLogo';
+import {Input} from '@components/inputs';
 import {SSOButtons} from '@components/ui/ssobuttons';
-import Toast from 'react-native-toast-message';
-import {WIN_HEIGHT} from '../../../config';
-import {apiType} from '@types/index';
-import {authStore} from '@store/auth';
-import messaging from '@react-native-firebase/messaging';
-import {navigate} from '@navigation/NavigationService';
 import {useAuth} from '@hooks/useAuth';
+import {AuthLayout} from '@layouts/authLayout';
+import {navigate} from '@navigation/NavigationService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from '@react-native-firebase/messaging';
+import {apiType} from '@types/index';
+import {Formik} from 'formik';
+import Toast from 'react-native-toast-message';
+import {STORAGE_KEY} from '../../../constant';
 
 GoogleSignin.configure({
   webClientId:
@@ -85,9 +78,12 @@ export const Login = (props: LoginProp) => {
     login.mutate(payload, {
       onSuccess: (val: apiType) => {
         if (val.status) {
+          AsyncStorage.setItem(
+            STORAGE_KEY.ACCESS_TOKEN,
+            val?.data?.access_token?.token,
+          );
           navigation.replace('App');
         } else {
-          // Alert.alert(val.message);
           Toast.show({
             type: 'error',
             text1: 'Login',
@@ -96,7 +92,6 @@ export const Login = (props: LoginProp) => {
         }
       },
       onError: (e: any) => {
-        console.log('res error', e);
         if (e.status === 401) {
           // Alert.alert('Invalid Credentials');
           Toast.show({
@@ -106,7 +101,6 @@ export const Login = (props: LoginProp) => {
           });
         } else if (e.status === 422) {
           const errorS = e.data.errors;
-          console.log('error', errorS);
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
               const el = errorS[key];
@@ -135,7 +129,7 @@ export const Login = (props: LoginProp) => {
           <ButtonWithSSO />
           <Formik
             initialValues={{
-              email: authStore.email ?? '',
+              email: '',
               password: '',
             }}
             validationSchema={loginSchema}

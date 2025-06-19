@@ -121,7 +121,6 @@ export const Validation = (props: ValidationType) => {
     let nPin = pin.join(',');
     nPin = nPin.replaceAll(',', '');
     Clipboard.setString('');
-    console.log('N Pin', nPin);
     if (nPin.length > 0) {
       validateEmailToken.mutate(
         {email: params.email, token: nPin},
@@ -147,11 +146,9 @@ export const Validation = (props: ValidationType) => {
   const doRegister = () => {
     register.mutate(params, {
       onSuccess: (val: apiType) => {
-        console.log('res', val);
         if (val.status) {
           navigate('Completion', undefined);
         } else {
-          console.log(val);
           Toast.show({
             type: 'error',
             text1: 'Create Account',
@@ -376,7 +373,7 @@ export const Validation = (props: ValidationType) => {
                   w={12}
                   // onChangeText={(e: string) => setPin5(e)}
                   onChangeText={value => handleLastInputChange(value)}
-                  onBlur={() => console.log('oops')}
+                  onBlur={}
                   borderRadius={14}
                   fontSize="25px"
                   maxLength={1}

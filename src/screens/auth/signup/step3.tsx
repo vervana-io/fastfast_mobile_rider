@@ -43,9 +43,6 @@ export const SignUpStep3 = observer((props: SignUpStep2Type) => {
     phone_number: string().required('Your phone number is required'),
   });
   useEffect(() => {
-    console.log('================step 3====================');
-    console.log(regData);
-    console.log('====================================');
   }, [regData, regData?.registerData?.email]);
 
   return (

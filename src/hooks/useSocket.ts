@@ -37,21 +37,16 @@ const useSocket = ({url, options = {}, isOnline = false}: UseSocketOptions) => {
   // Function to emit a message
   const emitMessage = (event: string, message: any) => {
     if (socketRef.current) {
-      console.log('emitting messaging event', event);
       socketRef.current.emit(event, message);
     } else {
-      console.log('Cannot emit, socket is not connected');
     }
   };
 
   // Function to create a room
   const createRoom = (roomName: number) => {
     if (socketRef.current && isConnected) {
-      console.log('creating room');
       socketRef.current.emit('createRoom', roomName);
-      console.log(`Room ${roomName} created/joined`);
     } else {
-      console.log('Cannot create room, socket is not connected');
     }
   };
 
@@ -62,10 +57,8 @@ const useSocket = ({url, options = {}, isOnline = false}: UseSocketOptions) => {
         roomName,
         (roomExists: boolean) => {
           if (roomExists) {
-            console.log(`Room ${roomName} exists`);
             return true;
           } else {
-            console.log(`Room ${roomName} does not exist`);
             return false;
           }
         },
@@ -100,7 +93,6 @@ const useSocket = ({url, options = {}, isOnline = false}: UseSocketOptions) => {
     position: GeoPosition['coords'],
   ) => {
     if (socketRef.current) {
-      console.log('updateRiderLocation', riderId);
       socketRef.current.emit('updateRiderLocation', {
         riderId,
         position,
@@ -112,7 +104,6 @@ const useSocket = ({url, options = {}, isOnline = false}: UseSocketOptions) => {
   const disconnectSocket = () => {
     if (socketRef.current && isConnected) {
       socketRef.current.disconnect();
-      console.log('Socket disconnected manually.');
     }
   };
 
@@ -120,7 +111,6 @@ const useSocket = ({url, options = {}, isOnline = false}: UseSocketOptions) => {
   const reconnectSocket = () => {
     if (socketRef.current && isConnected) {
       socketRef.current.connect();
-      console.log('Socket disconnected manually.');
     }
   };
 

@@ -77,14 +77,9 @@ class PermissionManager {
       );
       this.checkPerms();
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Permission Granted. You can now receive notifications.');
         return true;
       } else if (granted === PermissionsAndroid.RESULTS.DENIED) {
-        console.log('Permission Denied. Notification permission is required.');
       } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-        console.log(
-          'Permission Blocked. Notification permission has been blocked.',
-        );
         Alert.alert(
           'Notification has not been granted!',
           'Please long press on app icon, select App Info, select Notifications and enable all notifications.',

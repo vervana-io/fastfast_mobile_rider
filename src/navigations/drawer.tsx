@@ -94,7 +94,6 @@ const DrawerContent = observer(({navigation, state}: any) => {
   };
 
   const openExtLink = (link: string) => {
-    console.log('link ', link);
     Linking.canOpenURL(link).then(supported => {
       if (supported) {
         Linking.openURL(link);

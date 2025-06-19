@@ -1,33 +1,53 @@
 import './src/components/sheets/sheets';
 
 /* eslint-disable react-native/no-inline-styles */
-import {ColorMode, NativeBaseProvider, StorageManager} from 'native-base';
-import React, {useEffect} from 'react';
 import {
   checkApplicationNotificationPermission,
   registerAppWithFCM,
   registerListenerWithFCM,
 } from '@handlers/fcmHandler';
+import {ColorMode, NativeBaseProvider, StorageManager} from 'native-base';
+import React, {useEffect} from 'react';
 
+import {NeedsUpdateModal} from '@components/ui';
+import {ErrorFallback} from '@components/utils';
+import {toastConfig} from '@helpers/toastConfig';
 import {AppNavigator} from '@navigation/index';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ErrorBoundary from 'react-native-error-boundary';
-import {ErrorFallback} from '@components/utils';
-import FlashMessage from 'react-native-flash-message';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {LogBox} from 'react-native';
-import { NeedsUpdateModal } from '@components/ui';
-import {QueryClientProvider} from 'react-query';
-import Toast from 'react-native-toast-message';
-import {authStore} from '@store/auth';
 import crashlytics from '@react-native-firebase/crashlytics';
 import messaging from '@react-native-firebase/messaging';
-import {rootClientQuery} from './src/config';
+import {authStore} from '@store/auth';
 import {rootConfig} from '@store/root';
+import {LogBox} from 'react-native';
+import ErrorBoundary from 'react-native-error-boundary';
+import FlashMessage from 'react-native-flash-message';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
+import {QueryClientProvider} from 'react-query';
+import {rootClientQuery} from './src/config';
 import {theme} from './theme';
-import {toastConfig} from '@helpers/toastConfig';
+import * as Sentry from '@sentry/react-native';
 
-export default function App() {
+Sentry.init({
+  dsn: process.env.SENTRY_DSN, // Replace with your Sentry DSN
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [
+    Sentry.mobileReplayIntegration(),
+    Sentry.feedbackIntegration(),
+  ],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
+
+export default Sentry.wrap(function App() {
   LogBox.ignoreLogs([
     'In React 18',
     'The native module for Flipper',
@@ -53,7 +73,7 @@ export default function App() {
     });
     /* Log the error to an error reporting service */
     if (__DEV__) {
-      console.log('ERROR_BOUNDARY', error, stackTrace);
+      console.error(error)
     }
   };
 
@@ -70,7 +90,7 @@ export default function App() {
       try {
         await AsyncStorage.setItem('@color-mode', value);
       } catch (e) {
-        console.log(e);
+        console.error(e)
       }
     },
   };
@@ -82,13 +102,11 @@ export default function App() {
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
     if (enabled) {
-      console.log('Authorization status:', authStatus);
     }
   }
 
   const getToken = async () => {
     const token = await messaging().getToken();
-    console.log('token', token);
   };
 
   useEffect(() => {
@@ -120,4 +138,4 @@ export default function App() {
       </QueryClientProvider>
     </>
   );
-}
+});

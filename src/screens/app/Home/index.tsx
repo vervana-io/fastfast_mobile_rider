@@ -1,13 +1,4 @@
 import {
-  Alert,
-  AppState,
-  AppStateStatus,
-  Linking,
-  Platform,
-  StyleSheet,
-} from 'react-native';
-import {AnimatedRegion, enableLatestRenderer} from 'react-native-maps';
-import {
   Box,
   Button,
   Center,
@@ -16,45 +7,49 @@ import {
   Pressable,
   Spinner,
   Text,
-  VStack,
 } from 'native-base';
+import React, {useCallback, useEffect, useState} from 'react';
+import {
+  Alert,
+  AppState,
+  AppStateStatus,
+  Linking,
+  Platform,
+  StyleSheet,
+} from 'react-native';
 import Geoloc, {GeoPosition} from 'react-native-geolocation-service';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {enableLatestRenderer} from 'react-native-maps';
 
-import BackgroundJob from 'react-native-background-actions';
-import {BicycleIcon} from '@assets/svg/BicycleIcon';
 import {BottomActions} from '@components/utils';
-import {CancelOrderModal} from '@components/ui';
 import {DefaultLayout} from '@layouts/default';
+import BackgroundJob from 'react-native-background-actions';
 // import Geolocation, {GeoPosition} from 'react-native-geolocation-service';
-import Geolocation from '@react-native-community/geolocation';
-import MapView from '@components/ui/map/mapView';
-import {OrderRequest} from './components/orderRequest';
 import PermissionManager from '@handlers/permissionHandler';
+import {functions} from '@helpers/functions';
+import {usePusher} from '@hooks/usePusher';
 import {PusherEvent} from '@pusher/pusher-websocket-react-native';
-import RiderMap from '@components/ui/map/claudeAIMap';
-import {SheetManager} from 'react-native-actions-sheet';
-import Toast from 'react-native-toast-message';
-import {Todos} from './components/todos';
-import {UsePusher} from '@hooks/usePusher';
+import Geolocation from '@react-native-community/geolocation';
 import {addressesStore} from '@store/addresses';
-import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
 import {bottomSheetStore} from '@store/bottom-sheet';
-import {functions} from '@helpers/functions';
+import {apiType} from '@types/apiTypes';
+import {SheetManager} from 'react-native-actions-sheet';
+import Toast from 'react-native-toast-message';
+import {OrderRequest} from './components/orderRequest';
+import {Todos} from './components/todos';
 // import io from 'socket.io-client';
-import {markersType} from '@types/mapTypes';
-import {myLocationNotification} from '@handlers/localNotifications';
-import {observer} from 'mobx-react-lite';
-import {orderType} from '@types/index';
-import {ordersStore} from '@store/orders';
-import {rootConfig} from '@store/root';
+import RiderMap from '@components/ui/map/claudeAIMap';
 import {useAppState} from '@hooks/useAppState';
-import {useDrawerStatus} from '@react-navigation/drawer';
-import {useIsFocused} from '@react-navigation/native';
 import {useOrders} from '@hooks/useOrders';
 import useSocket from '@hooks/useSocket';
 import {useUser} from '@hooks/useUser';
+import {useDrawerStatus} from '@react-navigation/drawer';
+import {useIsFocused} from '@react-navigation/native';
+import {ordersStore} from '@store/orders';
+import {rootConfig} from '@store/root';
+import {markersType} from '@types/mapTypes';
+import {observer} from 'mobx-react-lite';
+import {notificationsType} from '@types/index';
 
 enableLatestRenderer();
 
@@ -80,7 +75,7 @@ export const Home = observer((props: HomeProps) => {
     longitude: location?.coords.longitude ?? 0,
   });
 
-  const {subscribe} = UsePusher();
+  const {subscribe, unsuscribe} = usePusher();
 
   // we initialize the socket here
   // const {isConnected, emit} = useSocket2();
@@ -105,7 +100,7 @@ export const Home = observer((props: HomeProps) => {
   const selectedOrder = ordersStore.selectedOrder;
   const address = addressesStore.selectedAddress;
 
-  const {toggleOnlineStatus, userDetails} = useUser({
+  const {toggleOnlineStatus, userDetails, updateLocationDetails} = useUser({
     enableFetchAddress: true,
     enableFetchUser: true,
   });
@@ -143,10 +138,64 @@ export const Home = observer((props: HomeProps) => {
     ],
   );
 
+  const orderApprovedSubscription = useCallback(
+    (onlineStatus: any) => {
+      if (onlineStatus) {
+        subscribe(
+          `private-orders.approved.${userD?.user?.id}`,
+          (event: PusherEvent) => {
+            if (event.eventName === 'rider_new_order') {
+              const dData = event.data;
+              const parsed = JSON.parse(dData);
+              const data = parsed.order;
+
+              const d: notificationsType = {
+                order_id: data.order_id,
+                title: 'New Oorder',
+                request_id: data.request_id,
+                user_id: '23',
+                data: {
+                  order_id: data.order_id,
+                  reference: 'feeere',
+                  title: 'New Order',
+                  notification_name: 'order_request',
+                  rider_id: data.rider_id,
+                  id: 234,
+                  pick_up_pin: '2344',
+                  delivery_pin: '23344',
+                  amount: data.amount,
+                  delivery_fee: data.delivery_fee,
+                  sub_total: data.sub_total,
+                  customer_address: {
+                    latitude: data.data.customer_address.latitude,
+                    longitude: data.data.customer_address.longitude,
+                    city: data.data.customer_address.city,
+                    street: data.data.customer_address.street,
+                    house_number: data.data.customer_address.house_number,
+                  },
+                  address: {
+                    latitude: 899,
+                    longitude: data.data.address.longitude,
+                    city: data.data.address.city,
+                    house_number: data.data.address.house_number,
+                    street: '',
+                  },
+                },
+              };
+              ordersStore.setNotifiedOrder(d);
+            }
+          },
+        );
+      } else {
+        unsuscribe(`private-orders.approved.${userD?.user?.id}`);
+      }
+    },
+    [subscribe, unsuscribe, userD?.user?.id],
+  );
+
   const GeoLocate = useCallback(() => {
     Geoloc.getCurrentPosition(
       position => {
-        console.log('position', position);
         setRidersPosition({
           // title: 'You',
           latitude: position?.coords?.latitude,
@@ -154,20 +203,11 @@ export const Home = observer((props: HomeProps) => {
         });
       },
       error => {
-        console.log('====================================');
-        console.log(error.code);
-        console.log('====================================');
         if (error.code === 3) {
           // GeoLocate();
-          console.log('====================================');
-          console.log('Retry: ' + retryCount);
-          console.log('====================================');
           if (retryCount < 2) {
             setRetryCount(retryCount + 1);
           } else if (retryCount >= 3) {
-            console.log('====================================');
-            console.log('Got here: ' + retryCount);
-            console.log('====================================');
             setShowRerender(true);
           }
           Toast.show({
@@ -215,6 +255,7 @@ export const Home = observer((props: HomeProps) => {
               setOnlineStatus(onlineStatus ? false : true);
               rootConfig.setIsOnline(onlineStatus ? false : true);
               userDetails.refetch();
+              orderApprovedSubscription(onlineStatus);
             } else {
               Toast.show({
                 type: 'error',
@@ -226,7 +267,7 @@ export const Home = observer((props: HomeProps) => {
         },
       );
     },
-    [onlineStatus, toggleOnlineStatus, userDetails],
+    [onlineStatus, toggleOnlineStatus, userDetails, orderApprovedSubscription],
   );
 
   // set Rider status to Online - depreciated
@@ -247,18 +288,14 @@ export const Home = observer((props: HomeProps) => {
           lon2,
         );
         if (comparePositions) {
-          console.log('got to compare right');
           updateOnlineStatus(1);
         } else {
           const hasAddress = await SheetManager.show('addressSheetNewIOS');
-          console.log('got to compare wrong');
-          console.log('hasAddress', hasAddress);
           if (hasAddress) {
             updateOnlineStatus(1);
           }
         }
       } else {
-        console.log('got to no address set');
         Toast.show({
           type: 'warning',
           text1: 'Going Online?',
@@ -270,7 +307,6 @@ export const Home = observer((props: HomeProps) => {
         }
       }
     } else {
-      console.log('going offline');
       updateOnlineStatus(0);
     }
   }, [
@@ -317,7 +353,15 @@ export const Home = observer((props: HomeProps) => {
               w="full"
               h="full"
               bg={onlineStatus ? 'rgba(0, 150, 85, .7)' : 'rgba(0,0,0, .7)'}
-              onPress={goOnline}
+              onPress={async () => {
+                if (ridersPosition?.latitude && ridersPosition?.longitude) {
+                  updateLocationDetails.mutate({
+                    latitude: String(ridersPosition.latitude),
+                    longitude: String(ridersPosition.longitude),
+                  });
+                }
+                goOnline();
+              }}
               _pressed={{bg: 'themeLight.accent'}}
               _text={{fontWeight: 'bold', fontSize: 'lg'}}>
               {toggleOnlineStatus.isLoading ? <Spinner color="white" /> : 'Go'}
@@ -462,46 +506,49 @@ export const Home = observer((props: HomeProps) => {
 
   // pusher event setup
   useEffect(() => {
-    subscribe('FastFast', (data: PusherEvent) => {
-      if (data.eventName === 'user_compliance_approve') {
-        userDetails.refetch();
-        Toast.show({
-          type: 'success',
-          text1: 'Compliance Approval',
-          text2:
-            'Your compliance has been approved you can now go online to receive orders.',
-          swipeable: true,
-          visibilityTime: 6000,
-        });
-      }
-      if (data.eventName === 'user_compliance_reject') {
-        userDetails.refetch();
-        Toast.show({
-          type: 'error',
-          text1: 'Compliance Approval',
-          text2: 'Your compliance has been rejected',
-          swipeable: true,
-          visibilityTime: 6000,
-        });
-      }
-      if (data.eventName === 'rider_new_order') {
-        const dData = data.data;
-        const parsed = JSON.parse(dData);
-        ordersStore.setNotifiedOrder(parsed);
-      }
-      if (data.eventName === 'rider_cancel_order') {
-      }
-      if (data.eventName === 'rider_order_pickup') {
-        Toast.show({
-          type: 'success',
-          text1: 'Order Ready for Pickup',
-          text2: 'Your order is ready for pickup',
-          swipeable: true,
-          visibilityTime: 6000,
-        });
-      }
-    });
-  }, [subscribe, userDetails]);
+    subscribe(
+      `private-orders.approved.${userD?.user?.id}`,
+      (data: PusherEvent) => {
+        if (data.eventName === 'user_compliance_approve') {
+          userDetails.refetch();
+          Toast.show({
+            type: 'success',
+            text1: 'Compliance Approval',
+            text2:
+              'Your compliance has been approved you can now go online to receive orders.',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+        if (data.eventName === 'user_compliance_reject') {
+          userDetails.refetch();
+          Toast.show({
+            type: 'error',
+            text1: 'Compliance Approval',
+            text2: 'Your compliance has been rejected',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+        if (data.eventName === 'rider_new_order') {
+          const dData = data.data;
+          const parsed = JSON.parse(dData);
+          ordersStore.setNotifiedOrder(parsed);
+        }
+        if (data.eventName === 'rider_cancel_order') {
+        }
+        if (data.eventName === 'rider_order_pickup') {
+          Toast.show({
+            type: 'success',
+            text1: 'Order Ready for Pickup',
+            text2: 'Your order is ready for pickup',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+      },
+    );
+  }, [onlineStatus, orderApprovedSubscription, subscribe, userDetails]);
 
   // open the order details sheet if we have a selected order
   useEffect(() => {
@@ -521,7 +568,6 @@ export const Home = observer((props: HomeProps) => {
     try {
       const watchID = Geolocation.watchPosition(
         position => {
-          console.log('watchPosition', JSON.stringify(position));
           updateRiderLocation(userD.user?.id.toString() ?? '', position.coords);
           // here we check if the user has selected an order and the order is picked up already
           if (selectedOrder?.id) {
@@ -542,20 +588,11 @@ export const Home = observer((props: HomeProps) => {
           }
         },
         error => {
-          console.log('====================================');
-          console.log(error.code);
-          console.log('====================================');
           if (error.code === 3) {
             // GeoLocate();
-            console.log('====================================');
-            console.log('Retry: ' + retryCount);
-            console.log('====================================');
             if (retryCount < 2) {
               setRetryCount(retryCount + 1);
             } else if (retryCount >= 3) {
-              console.log('====================================');
-              console.log('Got here: ' + retryCount);
-              console.log('====================================');
               setShowRerender(true);
             }
             Toast.show({
@@ -611,7 +648,6 @@ export const Home = observer((props: HomeProps) => {
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
 
   BackgroundJob.on('expiration', () => {
-    console.log('iOS: I am being closed!');
   });
 
   const taskRandom = async (taskData: any) => {
@@ -625,10 +661,8 @@ export const Home = observer((props: HomeProps) => {
     await new Promise(async resolve => {
       // For loop with a delay
       const {delay} = taskData;
-      console.log(BackgroundJob.isRunning(), delay);
       watchBackgroundUpdates();
       for (let i = 0; BackgroundJob.isRunning(); i++) {
-        // console.log('Runned -> ', i);
         // watchBackgroundUpdates();
         // await BackgroundJob.updateNotification({taskDesc: 'Runned -> ' + i});
         await sleep(delay);
@@ -652,7 +686,6 @@ export const Home = observer((props: HomeProps) => {
   };
 
   function handleOpenURL(evt: any) {
-    console.log(evt.url);
     // do something with the url
   }
 
@@ -737,47 +770,6 @@ export const Home = observer((props: HomeProps) => {
               <HamburgerIcon color="themeLight.primary.base" size={6} />
             </Center>
           </Pressable>
-          {/* {ordersStore.selectedOrderId ? (
-            <Box safeArea>
-              <Pressable
-                bg="white"
-                py={2}
-                rounded="lg"
-                onPress={() =>
-                  SheetManager.show('orderDetailsSheet', {
-                    payload: {order_id: ordersStore?.selectedOrderId},
-                  })
-                }>
-                <HStack
-                  space={3}
-                  flex={1}
-                  shadow="9"
-                  alignItems="center"
-                  px={3}>
-                  <BicycleIcon />
-                  <VStack>
-                    <Text color="themeLight.gray.1" fontWeight="bold">
-                      Click to reveal order
-                    </Text>
-                    <Text
-                      fontSize="xs"
-                      color="themeLight.gray.1"
-                      fontWeight="light">
-                      Heading to{' '}
-                      {ordersStore.selectedOrder.status &&
-                      ordersStore.selectedOrder.status < 3
-                        ? 'restaurant'
-                        : ordersStore.selectedOrder.status === 3
-                        ? 'customer'
-                        : ordersStore.selectedOrder.status === 4
-                        ? 'Delivered'
-                        : null}
-                    </Text>
-                  </VStack>
-                </HStack>
-              </Pressable>
-            </Box>
-          ) : null} */}
         </HStack>
         {userD.user?.complaince_status !== 1 ? <Todos /> : null}
         <OrderRequest />
@@ -786,9 +778,14 @@ export const Home = observer((props: HomeProps) => {
           <RiderMap
             riderImage={require('@assets/img/marker.png')}
             destinationCoords={markers[1]}
-            location={ridersPosition}
-            onLocationUpdate={loc => console.log(loc)}
+            location={
+              ridersPosition
+            }
+            onLocationUpdate={
+              loc => {}
+            }
           />
+          {/* <AppMapView /> */}
         </Box>
         <OnlineSection />
         <BottomActions show={showRerender} navigation={navigation} />

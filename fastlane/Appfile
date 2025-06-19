@@ -1,0 +1,15 @@
+for_platform :ios do
+  app_identifier("org.fastfastrider")
+  apple_id(ENV["APPLE_EMAIL_ADDRESS"])
+
+  itc_team_id(ENV["APP_STORE_CONNECT_TEAM_ID"])
+  team_id(ENV["APPLE_DEVELOPER_PORTAL_TEAM_ID"])
+
+  for_lane :dev do
+    app_identifier("org.fastfastrider.develop")
+  end
+end
+
+for_platform :android do 
+ package_name("com.fastfastrider")
+end

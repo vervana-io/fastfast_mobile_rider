@@ -1,28 +1,29 @@
+import {LocationPin} from '@assets/svg/LocationPin';
+import {SmilleyTear} from '@assets/svg/SmilleyTear';
+import {formatter} from '@helpers/formatter';
+import {useOrders} from '@hooks/useOrders';
+import {authStore} from '@store/auth';
+import {bottomSheetStore} from '@store/bottom-sheet';
+import {ordersStore} from '@store/orders';
+import {apiType, notificationsType} from '@types/index';
+import {observer} from 'mobx-react-lite';
+import {Box, Button, Center, HStack, Text, VStack} from 'native-base';
+import React, {useCallback, useEffect, useState} from 'react';
+import {StyleSheet} from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import {Box, Button, Center, HStack, Text, VStack} from 'native-base';
-import React, {useCallback, useEffect, useState} from 'react';
-import {apiType, notificationsType} from '@types/index';
-
-import {LocationPin} from '@assets/svg/LocationPin';
-import {SheetManager} from 'react-native-actions-sheet';
-import {SmilleyTear} from '@assets/svg/SmilleyTear';
-import {StyleSheet} from 'react-native';
 import Toast from 'react-native-toast-message';
-import {UsePusher} from '@hooks/usePusher';
 import {WIN_HEIGHT} from '../../../../config';
-import {bottomSheetStore} from '@store/bottom-sheet';
-import {formatter} from '@helpers/formatter';
-import {observer} from 'mobx-react-lite';
-import {ordersStore} from '@store/orders';
-import {useOrders} from '@hooks/useOrders';
+import {usePusher} from '../../../../hooks/usePusher';
 
 export const OrderRequest = observer(() => {
+  const {unsuscribe, subscribe} = usePusher();
   const NotificationOrder: any = ordersStore.notifiedOrder;
-  // const notificationData = notification ? JSON.parse(notification) : null;
+  const selectedOrder: any = ordersStore.selectedOrder;
+  const userD = authStore.auth;
   const [showReassign, setShowReassign] = useState(false);
   const [showOrder, setShowOrder] = useState<boolean>(true);
   const [mainNotificationOrder, setMainNotificationOrder] =
@@ -32,6 +33,15 @@ export const OrderRequest = observer(() => {
   const boxHeight = useSharedValue(WIN_HEIGHT * boxChangeableHeight);
 
   const {acceptOrder, reassignOrder} = useOrders();
+
+  useEffect(() => {
+    if (!bottomSheetStore.sheets.orderDetailsView) {
+      setMainNotificationOrder({});
+      setShowOrder(false);
+      setShowReassign(false);
+      // Reset any other local state here
+    }
+  }, [bottomSheetStore.sheets.orderDetailsView]);
 
   const allOrders = ordersStore.orders;
 
@@ -54,15 +64,11 @@ export const OrderRequest = observer(() => {
           {
             onSuccess: (val: apiType) => {
               if (val.status) {
-                console.log('good', val);
                 setShowReassign(false);
                 setShowOrder(false);
                 ordersStore.clearNotifiedOrder();
                 setMainNotificationOrder({});
               } else {
-                console.log('====================================');
-                console.log(val);
-                console.log('====================================');
                 Toast.show({
                   type: 'warning',
                   text1: 'Order Request',
@@ -96,8 +102,22 @@ export const OrderRequest = observer(() => {
               setShowOrder(false);
               ordersStore.clearNotifiedOrder();
               setMainNotificationOrder({});
-              ordersStore.setSelectedOrderId(order_id);
+              ordersStore.setSelectedOrderId(Number(order_id));
               bottomSheetStore.SetSheet('orderDetailsView', true);
+              unsuscribe('private.orders.approved.userId');
+              subscribe(`private.orders.ready.${order_id}`, (data: any) => {
+                //waiting for when seller mark order this order to be ready
+                //events - ready, arrival, pick up, delivered
+                if (data.eventName === 'rider_order_pickup') {
+                  Toast.show({
+                    type: 'success',
+                    text1: 'Order Ready for Pickup',
+                    text2: 'Your order is ready for pickup',
+                    swipeable: true,
+                    visibilityTime: 6000,
+                  });
+                }
+              });
             } else {
               Toast.show({
                 type: 'warning',
@@ -117,7 +137,7 @@ export const OrderRequest = observer(() => {
 
   const Request = useCallback(
     () => (
-      <Box w="full" bg="#1B1B1B" rounded="xl" p={4}>
+      <Box w="full" bg="#1B1B1B" rounded="xl" height={300} mt={-300} p={4}>
         <Center>
           <Text color="white" fontWeight="bold" fontSize="30px">
             ₦
@@ -141,8 +161,8 @@ export const OrderRequest = observer(() => {
                 <Box />
               </Center>
               <Text color="white" flex={1}>
-                {mainNotificationOrder?.data?.address.house_number}{' '}
-                {mainNotificationOrder?.data?.address?.street}{' '}
+                {mainNotificationOrder?.data?.address.house_number}
+                {mainNotificationOrder?.data?.address?.street}
                 {mainNotificationOrder?.data?.address?.city}
               </Text>
             </HStack>
@@ -160,8 +180,8 @@ export const OrderRequest = observer(() => {
             <HStack alignItems="center" space={2}>
               <LocationPin fill="white" />
               <Text color="white" flex={1}>
-                {mainNotificationOrder?.data?.customer_address?.house_number}{' '}
-                {mainNotificationOrder?.data?.customer_address?.street}{' '}
+                {mainNotificationOrder?.data?.customer_address?.house_number}
+                {mainNotificationOrder?.data?.customer_address?.street}
                 {mainNotificationOrder?.data?.customer_address?.city}
               </Text>
             </HStack>
@@ -245,9 +265,7 @@ export const OrderRequest = observer(() => {
 
   const checkForOrderById = useCallback(
     (order_id: number) => {
-      console.log('checking order', order_id);
       const order = allOrders.find(o => o.id === order_id);
-      console.log('order', order);
       return order;
     },
     [allOrders],
@@ -256,17 +274,37 @@ export const OrderRequest = observer(() => {
   useEffect(() => {
     if (NotificationOrder.data) {
       const data = NotificationOrder;
-      const notification_name = JSON.parse(data.data)?.notification_name;
+      // const notification_name = JSON.parse(data.data)?.notification_name;
       // here we check if the notification is for an order request
       // after which we then check if we already have the order accepted
-      if (notification_name === 'order_request') {
+
+      const CompleteNotification = JSON.parse(data.data);
+
+      if (CompleteNotification.notification_name === 'order_request') {
         // first we check if the rider already has an ongoing order
+
         if (ordersStore.ongoingOrderCount < 1) {
           // here we check if an order is already being handled by the user
           // with this, the rider can only have one order at a time
           if (!checkForOrderById(data.order_id)) {
             const payload: notificationsType = {
-              data: JSON.parse(data.data),
+              data: JSON.parse(
+                data.data || {
+                  notification_name: 'order_request',
+                  order_id: selectedOrder?.id,
+                  amount: selectedOrder?.total_amount,
+                  delivery_pin: selectedOrder?.delivery_pin,
+                  id: selectedOrder?.id,
+                  pick_up_pin: selectedOrder?.pick_up_pin,
+                  reference: selectedOrder?.reference,
+                  rider_id: selectedOrder?.rider_id,
+                  sub_total: selectedOrder?.sub_total,
+                  delivery_fee: selectedOrder?.delivery_fee,
+                  title: selectedOrder?.title ?? 'ADD TITLE',
+                  address: selectedOrder?.address,
+                  customer_address: selectedOrder?.receiver_street,
+                },
+              ),
               order_id: data.order_id ?? '',
               request_id: data.request_id ?? '',
               rider_id: data.rider_id ?? '',
@@ -282,7 +320,7 @@ export const OrderRequest = observer(() => {
           ordersStore.clearNotifiedOrder();
         }
       } else {
-        console.log('no order request');
+        console.error('no order request');
       }
     }
   }, [NotificationOrder, checkForOrderById, toggleBoxHeight]);
@@ -291,9 +329,13 @@ export const OrderRequest = observer(() => {
     <Animated.View style={[styles.box, animatedBoxStyle]}>
       <Box px={3}>
         {/* {notificationData?.amount && !showReassign && <Request />}  */}
-        {mainNotificationOrder?.data?.amount && !showReassign ? (
+        {mainNotificationOrder?.data?.delivery_fee != null && !showReassign ? (
           <Request />
         ) : null}
+        {/* {selectedOrder?.delivery_fee != null && !showReassign ? (
+          <Request />
+        ) : null} */}
+        {/* <Request /> */}
         {showReassign && <Reassign />}
       </Box>
     </Animated.View>
@@ -310,3 +352,5 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
 });
+
+// you stopped at trying to show the order request sheet.

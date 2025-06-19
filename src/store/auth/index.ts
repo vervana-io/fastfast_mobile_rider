@@ -71,7 +71,6 @@ class AuthStore {
   }
 
   setLastActiveTime(val: number) {
-    console.log('storing last active time ', val);
     this.lastActivetime = val;
   }
 

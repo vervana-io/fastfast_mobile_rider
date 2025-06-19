@@ -1,8 +1,7 @@
 import {apiInstance} from './axios';
-// import {BASE_URL} from 'react-native-dotenv';
 import {authStore} from '@store/auth';
 
-const BASE_URL = __DEV__ ? process.env.BASE_URL_DEV : process.env.BASE_URL_PROD;
+const BASE_URL = process.env.BASE_URL;
 
 class Http {
   async get(path: string, options: any = {}) {
@@ -15,12 +14,10 @@ class Http {
           headers,
         },
       });
-      // console.log(res);
       return new Promise(resolve => {
         resolve(res);
       });
     } catch (e: any) {
-      // const error: ApiErrorType = e;
       return Promise.reject(e);
     }
   }
@@ -35,12 +32,10 @@ class Http {
           options,
         },
       });
-      // console.log('options', options);
       return new Promise(resolve => {
         resolve(res);
       });
     } catch (e) {
-      // console.log('post error', e.response);
       return Promise.reject(e);
     }
   }

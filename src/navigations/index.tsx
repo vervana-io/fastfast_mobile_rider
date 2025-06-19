@@ -63,7 +63,6 @@ export const AppNavigator = () => {
       //   onStateChange={async () => {
       //     const previousRouteName = routeName;
       //     // const currentRouteName = navigationRef.getCurrentRoute();
-      //     console.log('route', previousRouteName);
       //     // setRouteName(currentRouteName);
       //   }}
     >

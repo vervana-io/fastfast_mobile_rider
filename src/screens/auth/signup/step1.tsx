@@ -11,7 +11,7 @@ import {
   VStack,
 } from 'native-base';
 import {Linking, Modal} from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState, useMemo} from 'react';
 import {object, ref, string} from 'yup';
 
 import {AuthLayout} from '@layouts/authLayout';
@@ -28,96 +28,84 @@ import {__passwords__} from '@helpers/regex/constants';
 import {apiType} from '@types/apiTypes';
 import {authStore} from '@store/auth';
 import {navigate} from '@navigation/NavigationService';
-import { observer } from 'mobx-react-lite';
+import {observer} from 'mobx-react-lite';
 import {registerStoreType} from '@types/authType';
 import {useAuth} from '@hooks/useAuth';
 
-interface WorkListType {
-  icon: any;
-  title: string;
-  description: string;
-  id: number;
-  days: number[];
-}
+const step1Schema = object({
+  email: string().email().required('Email is required'),
+  password: string()
+    .matches(
+      __passwords__.M8L1.expression,
+      'Minimum eight characters, at least one letter',
+    )
+    .required('Password is required'),
+  confirm: string()
+    .oneOf([ref('password')], 'Passwords must match')
+    .required('Confirm Password is required'),
+});
 
-interface SignUpStep1Type {
-  route?: any;
-  navigation?: any;
-}
+const initialValues = {
+  email: '',
+  password: '',
+  confirm: '',
+};
 
-export const SignUpStep1 = observer((props: SignUpStep1Type) => {
+export const SignUpStep1 = observer(props => {
   const {route, navigation} = props;
   const [modalVisible, setModalVisible] = useState(false);
-  const [emailGood, setEmailGood] = useState<boolean>(false);
+  const [emailGood, setEmailGood] = useState(false);
   const [terms, setTerms] = useState(false);
-  const [showLoading, setShowLoading] = useState(false);
 
-  const emref: any = useRef(null);
+  const emref = useRef(null);
 
   const {sendEmailToken, checkIfEmailExist} = useAuth();
 
-  const openBrowser = (url: string) => {
+  // Memoized external browser opener
+  const openBrowser = useCallback((url: string) => {
     Linking.openURL(url).catch(err => console.error('An error occurred', err));
-  };
+  }, []);
 
-  const step1Shema = object({
-    email: string().email().required('Email is required'),
-    password: string()
-      .matches(
-        __passwords__.M8L1.expression,
-        'Minimum eight characters, at least one letter',
-      )
-      .required('Password is required'),
-    confirm: string()
-      .oneOf([ref('password')], 'Passwords must match')
-      .required('Confirm Password is required'),
-  });
-
-  const checkEmail = (email: string) => {
-    if (email !== '') {
-      checkIfEmailExist.mutate(
-        {email},
-        {
-          onSuccess: (val: apiType) => {
-            if (val.status) {
-              setEmailGood(false);
-              emref?.current?.setErrors({['email']: 'Email already exist'});
-            } else if (!val.status) {
-              setEmailGood(true);
-              emref?.current?.setErrors({});
-            } else {
-              setEmailGood(false);
-              emref?.current?.setErrors({
-                ['email']: 'Could not validate email',
-              });
-            }
+  // Memoized email checker
+  const checkEmail = useCallback(
+    (email: string) => {
+      if (email !== '') {
+        checkIfEmailExist.mutate(
+          {email},
+          {
+            onSuccess: (val: apiType) => {
+              if (val.status) {
+                setEmailGood(false);
+                emref?.current?.setErrors({['email']: 'Email already exist'});
+              } else if (!val.status) {
+                setEmailGood(true);
+                emref?.current?.setErrors({});
+              } else {
+                setEmailGood(false);
+                emref?.current?.setErrors({
+                  ['email']: 'Could not validate email',
+                });
+              }
+            },
           },
-        },
-      );
-    }
-  };
+        );
+      }
+    },
+    [checkIfEmailExist],
+  );
 
-  // we check if the user has a previous registration session
-  // if they do, we redirect them to the previous session
-  const proceedPreviousSession = () => {
+  // Memoized previous session handler
+  const proceedPreviousSession = useCallback(() => {
     setModalVisible(false);
     const step = authStore.registerData.step;
     const registerData = authStore.registerData.registerData;
-    console.log('===============logs=====================');
-    console.log(authStore.registerData);
-    console.log('====================================');
     if (step === 2) {
       navigate('SignUpStep2', {params: registerData});
-      console.log('got step 2');
     } else if (step === 5) {
-      navigate('Validation', {
-        params: registerData,
-      });
+      navigate('Validation', {params: registerData});
     } else if (step === 3) {
       navigate('SignUpStep3', {params: registerData});
-      console.log('got step 3');
     } else if (step === 4) {
-      // if a provider exist at this stage, then the user should start again
       if (authStore.registerData.registerData?.provider) {
         authStore.setRegisterData({
           registerData: {},
@@ -133,16 +121,18 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
         navigate('SignUpStep4', {params: registerData});
       }
     }
-  };
+  }, []);
 
-  const clearPreviousSession = () => {
+  // Memoized clear session handler
+  const clearPreviousSession = useCallback(() => {
     authStore.setRegisterData({
       registerData: {},
       step: undefined,
     });
     setModalVisible(false);
-  };
+  }, []);
 
+  // On mount, check for previous session
   useEffect(() => {
     if (authStore.registerData?.step) {
       if (authStore.registerData.method !== 'provider') {
@@ -161,7 +151,8 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
     }
   }, []);
 
-  const ButtonWithSSO = useCallback(
+  // Memoized SSO Button
+  const ButtonWithSSO = useMemo(
     () => (
       <Box mt={4} w={'full'}>
         <VStack mb={6}>
@@ -174,7 +165,7 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
         </VStack>
         <SSOButtons
           navigation={navigation}
-          showLoading={(e: boolean) => setShowLoading(e)}
+          showLoading={(e: boolean) => {}} // No-op for performance
           type="signup"
         />
       </Box>
@@ -185,7 +176,7 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
   return (
     <AuthLayout>
       <Box flex={1} pt={16}>
-        <Pressable onPress={() => navigation.goBack()} px={8}>
+        <Pressable onPress={navigation.goBack} px={8}>
           <RiderLogo />
         </Pressable>
         <VStack mt={8} px={8}>
@@ -193,13 +184,11 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
             Sign up for an {'\n'}Account
           </Heading>
           <Formik
-            initialValues={{
-              email: '',
-              password: '',
-              confirm: '',
-            }}
-            validationSchema={step1Shema}
+            initialValues={initialValues}
+            validationSchema={step1Schema}
             innerRef={emref}
+            validateOnChange={false}
+            validateOnBlur={true}
             onSubmit={values => {
               const det: registerStoreType = {
                 registerData: values,
@@ -207,23 +196,17 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
               };
               authStore.setRegisterData(det);
               sendEmailToken.mutate(
-                {
-                  email: values.email,
-                },
+                {email: values.email},
                 {
                   onSuccess: (val: apiType) => {
-                    console.log('res', val);
                     if (val.status) {
                       const dpd = {
                         email: values.email,
                         data: det,
                         redirectRule: {status: true, route: 'SignUpStep2'},
                       };
-                      navigate('Validation', {
-                        params: dpd,
-                      });
+                      navigate('Validation', {params: dpd});
                     } else {
-                      console.log(val);
                       Toast.show({
                         type: 'error',
                         text1: 'Create Account',
@@ -256,10 +239,9 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
                         onBlur={handleBlur('email')}
                         autoComplete="email"
                         errorMessage={errors.email}
-                        hasError={errors.email && touched.email ? true : false}
+                        hasError={!!(errors.email && touched.email)}
                         value={values.email}
                         autoCapitalize="none"
-                        // py={Platform.OS === 'ios' ? 4 : 2}
                         onEndEditing={() => checkEmail(values.email)}
                         keyboardType="email-address"
                       />
@@ -285,11 +267,8 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
                         onChangeText={handleChange('password')}
                         onBlur={handleBlur('password')}
                         errorMessage={errors.password}
-                        hasError={
-                          errors.password && touched.password ? true : false
-                        }
+                        hasError={!!(errors.password && touched.password)}
                         value={values.password}
-                        // py={Platform.OS === 'ios' ? 4 : 2}
                       />
                     </Box>
                     <Box w="full" mt={3}>
@@ -303,9 +282,7 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
                         onChangeText={handleChange('confirm')}
                         onBlur={handleBlur('confirm')}
                         errorMessage={errors.confirm}
-                        hasError={
-                          errors.confirm && touched.confirm ? true : false
-                        }
+                        hasError={!!(errors.confirm && touched.confirm)}
                         value={values.confirm}
                       />
                     </Box>
@@ -315,7 +292,7 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
                   <Checkbox
                     value={terms ? '1' : '0'}
                     color="themeDark.primary.base"
-                    onChange={e => setTerms(e)}>
+                    onChange={setTerms}>
                     <HStack
                       alignItems="center"
                       space={1}
@@ -350,7 +327,7 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
                   rounded="60px"
                   py={4}
                   mb={3}
-                  onPress={() => handleSubmit()}
+                  onPress={handleSubmit as any}
                   bg="themeLight.accent"
                   isDisabled={!emailGood || sendEmailToken.isLoading || !terms}
                   isLoading={sendEmailToken.isLoading}
@@ -362,7 +339,7 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
                   }}>
                   Next
                 </Button>
-                <ButtonWithSSO />
+                {ButtonWithSSO}
                 <Center mb={8}>
                   <HStack space={2}>
                     <Text>Already have an account?</Text>
@@ -385,9 +362,7 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
           animationType="slide"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}>
+          onRequestClose={() => setModalVisible(false)}>
           <Box bg="rgba(0,0,0, .5)" flex={1} justifyContent="center" p={4}>
             <Center bg="white" w="full" rounded="md" p={4} px={4}>
               <Text fontWeight="bold" fontSize="md" mb={6} mt={4}>
@@ -406,7 +381,7 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
                   py={4}
                   px={8}
                   _text={{fontWeight: 'bold'}}
-                  onPress={() => proceedPreviousSession()}
+                  onPress={proceedPreviousSession}
                   rounded="full"
                   bg="themeLight.accent">
                   Yes Continue
@@ -415,7 +390,7 @@ export const SignUpStep1 = observer((props: SignUpStep1Type) => {
                   py={4}
                   px={8}
                   _text={{fontWeight: 'bold', color: 'themeLight.accent'}}
-                  onPress={() => clearPreviousSession()}
+                  onPress={clearPreviousSession}
                   rounded="full"
                   borderColor="themeLight.accent"
                   variant="outline">

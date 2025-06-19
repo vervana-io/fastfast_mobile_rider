@@ -1,8 +1,12 @@
 import {Pusher, PusherEvent} from '@pusher/pusher-websocket-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {authStore} from '@store/auth';
 import {useCallback, useEffect} from 'react';
+import {STORAGE_KEY} from '../constant';
 
 interface PusherHookReturn {
   subscribe: (channelName: string, callback: (data: any) => void) => void;
+  unsuscribe: (channelName: string) => void;
   pusherEvent: any;
   //   bind: (eventName: string, callback: (data: any) => void) => void;
   //   unsubscribe: (channelName: string) => void;
@@ -16,14 +20,43 @@ const PusherInstance = {
 };
 
 const pusher = Pusher.getInstance();
+const userD = authStore.auth;
 
-export const UsePusher = (): PusherHookReturn => {
+export const usePusher = (): PusherHookReturn => {
   const pusherEvent = PusherEvent;
   useEffect(() => {
     const initialize = async () => {
       await pusher.init({
+        authorizerTimeoutInSeconds: 30, //30sec
         apiKey: PusherInstance.appKey ?? '',
         cluster: PusherInstance.cluster ?? '',
+        onAuthorizer: async (channelName: string, socketId: string) => {
+          try {
+            const token = await AsyncStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
+            if (!token) {
+              return undefined;
+            }
+            const response = await fetch(
+              `${process.env.BASE_URL}broadcasting/auth`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: 'Bearer ' + token,
+                },
+                body: JSON.stringify({
+                  socket_id: socketId,
+                  channel_name: channelName,
+                }),
+              },
+            );
+            const body = await response.json();
+            return body;
+          } catch (error) {
+            console.error('Authorizer error', error);
+            return undefined;
+          }
+        },
       });
       await pusher.connect();
     };
@@ -34,30 +67,47 @@ export const UsePusher = (): PusherHookReturn => {
   const subscribe = useCallback(
     async (channelName: string, callback: (data: any) => void) => {
       if (pusher) {
-        await pusher.subscribe({
-          channelName: channelName,
-          onSubscriptionSucceeded: data => {
-            console.log(`Subscribed to ${channelName}`);
-            console.log(`I can now access me: ${data}`);
-          },
-          onMemberAdded: member => {
-            console.log(`Member added: ${member}`);
-          },
-          onMemberRemoved: member => {
-            console.log(`Member removed: ${member}`);
-          },
-          onEvent: (event: PusherEvent) => {
-            // console.log(`Event received: ${event}`);
-            callback(event);
-          },
-        });
+        const Id = userD?.user?.id?.toString() || '';
+        channelName = channelName.replace('userId', Id);
+        await pusher
+          .subscribe({
+            channelName: channelName,
+            onSubscriptionSucceeded: data => {
+            },
+            onMemberAdded: member => {
+            },
+            onMemberRemoved: member => {
+            },
+            onEvent: (event: PusherEvent) => {
+              callback(event);
+            },
+            onSubscriptionError(channelName, message, e) {
+              console.error(`Subscription error: ${channelName}, ${message}`);
+            },
+          })
+          .catch(console.error);
       }
     },
     [],
   );
 
+  const unsuscribe = useCallback(async (channelName: string) => {
+    const Id = userD?.user?.id?.toString() || '';
+    channelName = channelName.replace('userId', Id);
+    pusher.trigger({
+      eventName: '',
+      channelName: '',
+      data: {},
+      userId: Id,
+    });
+    await pusher.unsubscribe({
+      channelName,
+    });
+  }, []);
+
   return {
     subscribe,
     pusherEvent,
+    unsuscribe,
   };
 };

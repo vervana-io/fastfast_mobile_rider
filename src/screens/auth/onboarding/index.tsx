@@ -57,7 +57,6 @@ export const Onboarding = () => {
 
   const pagerScrolled = (e: any) => {
     const position = e.nativeEvent.position;
-    console.log('position ', position);
     setOnSelected(position);
   };
 

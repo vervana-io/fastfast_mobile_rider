@@ -57,12 +57,10 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
     Geolocation.getCurrentPosition(
       position => {
         setLocation(position);
-        console.log(position);
       },
       error => {
         // Alert.alert(`Code ${error.code}`, error.message);
         setLocation(null);
-        console.log(error);
       },
       {
         accuracy: {
@@ -81,9 +79,7 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
   };
 
   useEffect(() => {
-    console.log('================step 4====================');
-    console.log(regData.registerData.token);
-    console.log('====================================');
+
   }, [regData]);
 
   const proceed = async () => {
@@ -112,7 +108,6 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
         },
         onError: (e: any) => {
           const errorS = e.data.errors;
-          console.log('error', errorS);
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
               const el = errorS[key];
@@ -139,7 +134,6 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
         },
         onError: (e: any) => {
           const errorS = e.data.errors;
-          console.log('error', errorS);
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
               const el = errorS[key];
@@ -161,7 +155,6 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
     //   {
     //     onSuccess: val => {
     //       const res = val.results[0];
-    //       console.log('val', JSON.stringify(res));
     //       const payload = {
     //         city: functions.filterGeoData(
     //           'administrative_area_level_2',
@@ -189,7 +182,6 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
     //         country: 'Nigeria',
     //         is_primary: 1,
     //       };
-    //       console.log('result', payload);
     //     },
     //   },
     // );
@@ -236,10 +228,8 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
 
   const callValidate = (val: string) => {
     setAccountNumber(val);
-    console.log('length', val.length);
     if (val !== '') {
       if (val.length > 9) {
-        console.log('greater than 9');
         doValidateBank(val);
       }
     }
