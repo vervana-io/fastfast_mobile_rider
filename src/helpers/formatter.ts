@@ -503,8 +503,6 @@ export const formatter = {
       return words;
     }
 
-    console.log('convert su ', number);
-
     // return convertAmountToWords(number);
   },
 

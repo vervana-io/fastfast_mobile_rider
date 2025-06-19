@@ -64,7 +64,6 @@ export const ContractTypeSheet = observer((props: SheetProps) => {
 
   useEffect(() => {
     const type = userD.rider?.contract_type.toString() ?? '';
-    console.log('contract type', type);
     setService(type);
   }, [userD.rider?.contract_type]);
 

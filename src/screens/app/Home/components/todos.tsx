@@ -31,7 +31,6 @@ export const Todos = observer(() => {
     ).length;
     const result = (completedTasks / ChecklistData.length) * 100;
     const res = parseInt(result.toFixed(2), 10);
-    console.log('percentage', res);
     return res;
   };
   const percentage = calculatePercentage();

@@ -72,7 +72,6 @@ export const ForgotStep1 = (props: Step2Props) => {
                 },
                 {
                   onSuccess: (val: apiType) => {
-                    console.log('res', val);
                     if (val.status) {
                       const upd = {
                         email: values.email,
@@ -80,7 +79,6 @@ export const ForgotStep1 = (props: Step2Props) => {
                       };
                       navigation.navigate('Validate', {params: upd});
                     } else {
-                      console.log(val);
                       Toast.show({
                         type: 'error',
                         text1: 'Create Account',

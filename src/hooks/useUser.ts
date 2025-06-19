@@ -1,6 +1,7 @@
 import {
   AuthType,
   addressesTypes,
+  locationData,
   apiPaginatedType,
   apiType,
   profileUpdateType,
@@ -39,7 +40,6 @@ export const useUser = (config?: userConfig) => {
     {
       enabled: Boolean(config?.enableFetchUser) && authStore.isLoggedIn,
       onSuccess: (val: apiType) => {
-        // console.log('val', val);
         if (val.status) {
           const data: any = val.data;
           const payload: AuthType = {
@@ -54,6 +54,15 @@ export const useUser = (config?: userConfig) => {
       },
     },
   );
+
+  const updateLocationDetails = useMutation(async (data: locationData) => {
+    try {
+      const req: any = await http.post('set-location', data);
+      return req.data;
+    } catch (error) {
+      throw error;
+    }
+  });
 
   const fetchAddress = useQuery(
     ['fetchAddress'],
@@ -138,6 +147,7 @@ export const useUser = (config?: userConfig) => {
     fetchAddress,
     profileUpdate,
     deleteAddress,
+    updateLocationDetails,
     updatePasswordWithEmail,
   };
 };

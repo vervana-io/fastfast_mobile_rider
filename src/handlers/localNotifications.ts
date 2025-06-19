@@ -41,7 +41,6 @@ export const billsNotification = async (message: string) => {
     });
     return noti;
   } catch (e) {
-    console.log(e);
     throw e;
   }
 };
@@ -54,7 +53,6 @@ export const transfersNotification = async (message: string) => {
     });
     return noti;
   } catch (e) {
-    console.log(e);
     throw e;
   }
 };
@@ -67,7 +65,6 @@ export const myLocationNotification = async (message: string) => {
     });
     return noti;
   } catch (e) {
-    console.log(e);
     throw e;
   }
 };

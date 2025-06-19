@@ -3,9 +3,7 @@ import {Vibration} from 'react-native';
 
 const ONE_SECOND_IN_MS = 1000;
 const sound = new Sound('correct.mp3', Sound.MAIN_BUNDLE, error => {
-  if (error) {
-    console.log('Error loading sound: ', error);
-  }
+  if (error) {  }
 });
 
 const vibrateFunc = () => {

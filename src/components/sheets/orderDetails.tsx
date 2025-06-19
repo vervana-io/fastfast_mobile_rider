@@ -74,7 +74,6 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
         quality: 1,
       },
       (response: any) => {
-        console.log('result', response);
       },
     );
   };
@@ -665,7 +664,6 @@ export const OrderDetailsSheet = observer((props: SheetProps) => {
       onChange={(position, height) => {
         // Get the offset from bottom
         const offsetFromBottom = height - position;
-        // console.log('reached top', offsetFromBottom);
         // setTimeout(() => {
 
         // }, 50);

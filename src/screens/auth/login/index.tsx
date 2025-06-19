@@ -92,7 +92,6 @@ export const Login = (props: LoginProp) => {
         }
       },
       onError: (e: any) => {
-        console.log('res error', e);
         if (e.status === 401) {
           // Alert.alert('Invalid Credentials');
           Toast.show({
@@ -102,7 +101,6 @@ export const Login = (props: LoginProp) => {
           });
         } else if (e.status === 422) {
           const errorS = e.data.errors;
-          console.log('error', errorS);
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
               const el = errorS[key];

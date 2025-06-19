@@ -234,7 +234,6 @@ export const OrderDetailsViewSheet = observer(() => {
 
   // callbacks
   // const handleSheetChanges = useCallback((index: number) => {
-  //   console.log('handleSheetChanges', index);
   //   if (index === 2) {
   //     setViewDetails('full');
   //   } else if (index === 1) {
@@ -245,7 +244,6 @@ export const OrderDetailsViewSheet = observer(() => {
   // }, []);
 
   const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
     if (index === 2) {
       setViewDetails('full');
     } else if (index === 1) {

@@ -20,13 +20,11 @@ export const GeoLocateComp = () => {
   const requestPermission = async () => {
     if (Platform.OS === 'android') {
       const checkEnabled: boolean = await isLocationEnabled();
-      console.log('checkEnabled', checkEnabled);
       if (checkEnabled) {
         requestPerms();
       } else {
         try {
           const enableResult = await promptForEnableLocationIfNeeded();
-          console.log('enableResult', enableResult);
           // The user has accepted to enable the location services
           // data can be :
           //  - "already-enabled" if the location services has been already enabled
@@ -53,11 +51,11 @@ export const GeoLocateComp = () => {
               [
                 // {
                 //   text: 'Ask me later',
-                //   onPress: () => console.log('Ask me later pressed'),
+                //   onPress: () => {},
                 // },
                 {
                   text: 'Cancel',
-                  onPress: () => console.log('Cancel Pressed'),
+                  onPress: () => {},
                   style: 'cancel',
                 },
                 {text: 'OK', onPress: () => requestPermission()},
@@ -73,7 +71,6 @@ export const GeoLocateComp = () => {
 
   const requestPerms = async () => {
     const res = await PermissionManager.requestPermission('LOCATION');
-    console.log('setting', res);
     if (res) {
       checkPerms();
       setModalVisible(false);
@@ -84,7 +81,6 @@ export const GeoLocateComp = () => {
     const checkPermission = async () => {
       checkPerms();
       const check = hasPermission;
-      console.log('perms', check);
       if (check !== 'granted') {
         setModalVisible(true);
       } else {

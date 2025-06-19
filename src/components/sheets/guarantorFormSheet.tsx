@@ -64,14 +64,12 @@ export const GuarantorFormSheet = observer((props: SheetProps) => {
       'WorkDurationSheet',
     );
     if (_workDuration) {
-      console.log('work duration', _workDuration);
       setWorkDuration(_workDuration);
     }
   };
 
   const doUpdate = useCallback(
     async (update: profileUpdateType) => {
-      console.log('updating...');
       profileUpdate.mutate(update, {
         onSuccess: (val: apiType) => {
           if (val.status) {
@@ -125,7 +123,6 @@ export const GuarantorFormSheet = observer((props: SheetProps) => {
                     ...values,
                     previous_place_of_work_duration: workDuration.label,
                   };
-                  console.log('values', upd);
                   doUpdate(upd);
                 } else {
                   Toast.show({

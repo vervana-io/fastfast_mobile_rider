@@ -108,7 +108,6 @@ export const OrderRequest = observer(() => {
               subscribe(`private.orders.ready.${order_id}`, (data: any) => {
                 //waiting for when seller mark order this order to be ready
                 //events - ready, arrival, pick up, delivered
-                console.log('data', data);
                 if (data.eventName === 'rider_order_pickup') {
                   Toast.show({
                     type: 'success',

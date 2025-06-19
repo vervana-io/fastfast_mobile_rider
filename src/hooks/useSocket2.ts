@@ -17,11 +17,9 @@ export const useSocket2 = (): UseSocketReturn => {
     socketRef.current = io(SOCKET_SERVER_URL);
 
     const onConnect = () => {
-      console.log('Socket connected');
     };
 
     const onDisconnect = () => {
-      console.log('Socket disconnected');
     };
 
     socketRef.current.on('connect', onConnect);
@@ -38,14 +36,12 @@ export const useSocket2 = (): UseSocketReturn => {
 
   useEffect(() => {
     if (socketRef.current) {
-      console.log('isconnected', socketRef.current?.connected);
       setIsConnected(socketRef.current?.connected);
     }
   }, []);
 
   const emit = useCallback(() => {
     if (socketRef.current) {
-      console.log('isconnected', socketRef.current?.connected);
 
       //   socketRef.current.emit(event, data);
     }

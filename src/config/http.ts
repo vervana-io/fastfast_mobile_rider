@@ -14,12 +14,10 @@ class Http {
           headers,
         },
       });
-      // console.log(res);
       return new Promise(resolve => {
         resolve(res);
       });
     } catch (e: any) {
-      // const error: ApiErrorType = e;
       return Promise.reject(e);
     }
   }
@@ -34,12 +32,10 @@ class Http {
           options,
         },
       });
-      // console.log('options', options);
       return new Promise(resolve => {
         resolve(res);
       });
     } catch (e) {
-      // console.log('post error', e.response);
       return Promise.reject(e);
     }
   }

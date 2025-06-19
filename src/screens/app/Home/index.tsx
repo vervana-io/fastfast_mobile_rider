@@ -100,7 +100,7 @@ export const Home = observer((props: HomeProps) => {
   const selectedOrder = ordersStore.selectedOrder;
   const address = addressesStore.selectedAddress;
 
-  const {toggleOnlineStatus, userDetails} = useUser({
+  const {toggleOnlineStatus, userDetails, updateLocationDetails} = useUser({
     enableFetchAddress: true,
     enableFetchUser: true,
   });
@@ -144,12 +144,9 @@ export const Home = observer((props: HomeProps) => {
         subscribe(
           `private-orders.approved.${userD?.user?.id}`,
           (event: PusherEvent) => {
-            //console.log('pusher event orderApprovedSubscription', JSON.stringify(data));
             if (event.eventName === 'rider_new_order') {
               const dData = event.data;
               const parsed = JSON.parse(dData);
-              console.log('Parsed order', parsed.order);
-              console.log('field', parsed.order.data);
               const data = parsed.order;
 
               const d: notificationsType = {
@@ -356,7 +353,15 @@ export const Home = observer((props: HomeProps) => {
               w="full"
               h="full"
               bg={onlineStatus ? 'rgba(0, 150, 85, .7)' : 'rgba(0,0,0, .7)'}
-              onPress={goOnline}
+              onPress={async () => {
+                if (ridersPosition?.latitude && ridersPosition?.longitude) {
+                  updateLocationDetails.mutate({
+                    latitude: String(ridersPosition.latitude),
+                    longitude: String(ridersPosition.longitude),
+                  });
+                }
+                goOnline();
+              }}
               _pressed={{bg: 'themeLight.accent'}}
               _text={{fontWeight: 'bold', fontSize: 'lg'}}>
               {toggleOnlineStatus.isLoading ? <Spinner color="white" /> : 'Go'}
@@ -643,7 +648,6 @@ export const Home = observer((props: HomeProps) => {
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
 
   BackgroundJob.on('expiration', () => {
-    // console.log('iOS: I am being closed!');
   });
 
   const taskRandom = async (taskData: any) => {
@@ -659,7 +663,6 @@ export const Home = observer((props: HomeProps) => {
       const {delay} = taskData;
       watchBackgroundUpdates();
       for (let i = 0; BackgroundJob.isRunning(); i++) {
-        // console.log('Runned -> ', i);
         // watchBackgroundUpdates();
         // await BackgroundJob.updateNotification({taskDesc: 'Runned -> ' + i});
         await sleep(delay);
@@ -683,7 +686,6 @@ export const Home = observer((props: HomeProps) => {
   };
 
   function handleOpenURL(evt: any) {
-    console.log(evt.url);
     // do something with the url
   }
 
@@ -768,47 +770,6 @@ export const Home = observer((props: HomeProps) => {
               <HamburgerIcon color="themeLight.primary.base" size={6} />
             </Center>
           </Pressable>
-          {/* {ordersStore.selectedOrderId ? (
-            <Box safeArea>
-              <Pressable
-                bg="white"
-                py={2}
-                rounded="lg"
-                onPress={() =>
-                  SheetManager.show('orderDetailsSheet', {
-                    payload: {order_id: ordersStore?.selectedOrderId},
-                  })
-                }>
-                <HStack
-                  space={3}
-                  flex={1}
-                  shadow="9"
-                  alignItems="center"
-                  px={3}>
-                  <BicycleIcon />
-                  <VStack>
-                    <Text color="themeLight.gray.1" fontWeight="bold">
-                      Click to reveal order
-                    </Text>
-                    <Text
-                      fontSize="xs"
-                      color="themeLight.gray.1"
-                      fontWeight="light">
-                      Heading to{' '}
-                      {ordersStore.selectedOrder.status &&
-                      ordersStore.selectedOrder.status < 3
-                        ? 'restaurant'
-                        : ordersStore.selectedOrder.status === 3
-                        ? 'customer'
-                        : ordersStore.selectedOrder.status === 4
-                        ? 'Delivered'
-                        : null}
-                    </Text>
-                  </VStack>
-                </HStack>
-              </Pressable>
-            </Box>
-          ) : null} */}
         </HStack>
         {userD.user?.complaince_status !== 1 ? <Todos /> : null}
         <OrderRequest />
@@ -817,8 +778,12 @@ export const Home = observer((props: HomeProps) => {
           <RiderMap
             riderImage={require('@assets/img/marker.png')}
             destinationCoords={markers[1]}
-            location={ridersPosition}
-            onLocationUpdate={loc => console.log(loc)}
+            location={
+              ridersPosition
+            }
+            onLocationUpdate={
+              loc => {}
+            }
           />
           {/* <AppMapView /> */}
         </Box>

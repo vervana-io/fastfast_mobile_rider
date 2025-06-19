@@ -70,9 +70,7 @@ export const SignUpStep2 = (props: SignUpStep1Type) => {
   };
 
   useEffect(() => {
-    console.log('=================step 2===================');
-    console.log(regData);
-    console.log('====================================');
+  
   }, [regData]);
 
   return (

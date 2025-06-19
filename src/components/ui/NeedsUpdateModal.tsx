@@ -19,43 +19,19 @@ export const NeedsUpdateModal = () => {
   const checkForUpdates = () => {
     const inAppUpdates = new SpInAppUpdates(false);
 
-    // curVersion is optional if you don't provide it will automatically take from the app using react-native-device-info
     inAppUpdates
       .checkNeedsUpdate()
       .then(result => {
         if (result.shouldUpdate) {
           setNeedsUpdate(result);
           setModalVisible(true);
-          // const updateOptions: StartUpdateOptions = Platform.select({
-          //   ios: {
-          //     title: '📢 New Update Available!',
-          //     message:
-          //       'We’ve made some exciting improvements to enhance your experience! Update now to enjoy the latest features!',
-          //     buttonUpgradeText: 'Update Now',
-          //     buttonCancelText: 'Cancel',
-          //     updateType: IAUUpdateKind.IMMEDIATE,
-          //     bundleId: 'org.fastfast',
-          //     forceUpgrade: true,
-          //   },
-          //   android: {
-          //     updateType: IAUUpdateKind.IMMEDIATE,
-          //     title: '📢 New Update Available!',
-          //     message:
-          //       'We’ve made some exciting improvements to enhance your experience! Update now to enjoy the latest features!',
-          //     buttonUpgradeText: 'Update Now',
-          //     buttonCancelText: 'Cancel',
-          //     bundleId: 'com.fastfast',
-          //     forceUpgrade: true,
-          //   },
-          // });
-          // inAppUpdates.startUpdate(updateOptions);
         } else {
           setNeedsUpdate(result);
           setModalVisible(false);
         }
       })
-      .catch(err => {
-        console.log('checkForUpdates ERROR ==>', err);
+      .catch(err => {  
+        console.error(err)
       });
   };
 
@@ -96,7 +72,7 @@ export const NeedsUpdateModal = () => {
                 New Update Available!
               </Text>
               <Text textAlign="center">
-                We’ve made some exciting improvements to enhance your
+                We've made some exciting improvements to enhance your
                 experience! Update now to enjoy the latest features!
               </Text>
               <Button

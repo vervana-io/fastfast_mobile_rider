@@ -73,7 +73,7 @@ export default Sentry.wrap(function App() {
     });
     /* Log the error to an error reporting service */
     if (__DEV__) {
-      console.log('ERROR_BOUNDARY', error, stackTrace);
+      console.error(error)
     }
   };
 
@@ -90,7 +90,7 @@ export default Sentry.wrap(function App() {
       try {
         await AsyncStorage.setItem('@color-mode', value);
       } catch (e) {
-        console.log(e);
+        console.error(e)
       }
     },
   };
@@ -102,13 +102,11 @@ export default Sentry.wrap(function App() {
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
     if (enabled) {
-      console.log('Authorization status:', authStatus);
     }
   }
 
   const getToken = async () => {
     const token = await messaging().getToken();
-    console.log('token', token);
   };
 
   useEffect(() => {

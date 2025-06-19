@@ -70,9 +70,6 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
   });
 
   useEffect(() => {
-    console.log('=================Params===================');
-    console.log(regData);
-    console.log('====================================');
   }, [regData]);
 
   const proceed = async (values: any) => {
@@ -92,9 +89,6 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
     if (regData.registerData?.provider) {
       registerWithSSO.mutate(upd, {
         onSuccess: (val: apiType) => {
-          console.log('====================sso================');
-          console.log(val);
-          console.log('====================================');
           if (val.status) {
             // Alert.alert('Registration Successful');
             AsyncStorage.setItem(
@@ -116,7 +110,6 @@ export const SignUpStep4 = (props: SignUpStep4Type) => {
         },
         onError: (e: any) => {
           const errorS = e.status;
-          console.log('error', errorS);
           if (errorS === 401) {
             Toast.show({
               type: 'error',
