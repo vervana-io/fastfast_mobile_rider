@@ -68,7 +68,6 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
   const createAddress = (addData: addAddressType) => {
     addAddress.mutate(addData, {
       onSuccess: (val: apiType) => {
-        console.log('result', val);
         if (val.status) {
           fetchAddress.refetch();
           userDetails.refetch();
@@ -77,7 +76,6 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
       },
       onError: (e: any) => {
         const errorS = e.data.detail.data.error;
-        console.log('error', errorS);
         if (errorS) {
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
@@ -93,7 +91,6 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
   const updateUserAddress = (addData: addAddressType) => {
     updateAddress.mutate(addData, {
       onSuccess: (val: apiType) => {
-        console.log('result', val);
         if (val.status) {
           fetchAddress.refetch();
           userDetails.refetch();
@@ -102,7 +99,6 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
       },
       onError: (e: any) => {
         const errorS = e.data.detail.data.error;
-        console.log('error', errorS);
         if (errorS) {
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
@@ -129,7 +125,6 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
         is_primary: 1,
         address_id: details.id,
       };
-      console.log('to update', det);
       if (det.street) {
         updateUserAddress(det);
       } else {
@@ -167,7 +162,6 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
         country: 'Nigeria',
         is_primary: 1,
       };
-      console.log('to add', payload);
       if (payload.street) {
         createAddress(payload);
       } else {
@@ -191,7 +185,6 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
           onSuccess: val => {
             if (val) {
               const mainResult: GooglePlaceDetail = val.results[0];
-              // console.log('result', JSON.stringify(mainResult));
               chooseLocation(mainResult);
             }
           },
@@ -203,7 +196,6 @@ export const AddressSheetsNewIOS = (props: SheetProps) => {
 
   const getCurrentLocation = useCallback(() => {
     if (location) {
-      // console.log('position', location);
       getGeoCode(location?.coords.latitude, location?.coords.longitude);
     }
   }, [getGeoCode, location]);

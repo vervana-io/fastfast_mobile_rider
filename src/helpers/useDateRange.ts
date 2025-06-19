@@ -44,7 +44,6 @@ const nextDateRange = (state: DateRangeState): void => {
 
 const displayCurrentDate = (state: DateRangeState): string => {
   const date = state.currentDate.toISOString().split('T')[0];
-  console.log(date);
   return date;
 };
 

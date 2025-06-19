@@ -103,7 +103,6 @@ const MapView = observer((props: MapTypes) => {
 
   // get the passed in markers and set distance
   useEffect(() => {
-    console.log('passed markers', markers);
     if (markers && markers.length > 0) {
       setCurentLocation({
         latitude: markers[0].latitude,

@@ -65,11 +65,9 @@ class Store {
 
   setIsOnline(val: boolean) {
     this.isOnline = val;
-    console.log('online state', val);
   }
 
   setShouldLogin(val: boolean) {
-    console.log('user should log in');
     this.shouldLogin = val;
   }
 

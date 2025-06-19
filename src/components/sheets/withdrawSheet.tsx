@@ -64,9 +64,6 @@ export const WithdrawSheet = observer((props: SheetProps) => {
   const [bankList, setBankList] = useState<bankAccountType[]>([]);
 
   useEffect(() => {
-    console.log('=================banks list===================');
-    console.log(listBankAccounts.data?.data);
-    console.log('====================================');
     if (listBankAccounts.data?.data.length > 0) {
       setBankList(listBankAccounts.data.data);
     }

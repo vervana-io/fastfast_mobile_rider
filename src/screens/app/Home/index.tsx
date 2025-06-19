@@ -144,12 +144,9 @@ export const Home = observer((props: HomeProps) => {
         subscribe(
           `private-orders.approved.${userD?.user?.id}`,
           (event: PusherEvent) => {
-            //console.log('pusher event orderApprovedSubscription', JSON.stringify(data));
             if (event.eventName === 'rider_new_order') {
               const dData = event.data;
               const parsed = JSON.parse(dData);
-              console.log('Parsed order', parsed.order);
-              console.log('field', parsed.order.data);
               const data = parsed.order;
 
               const d: notificationsType = {
@@ -643,7 +640,6 @@ export const Home = observer((props: HomeProps) => {
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
 
   BackgroundJob.on('expiration', () => {
-    // console.log('iOS: I am being closed!');
   });
 
   const taskRandom = async (taskData: any) => {
@@ -659,7 +655,6 @@ export const Home = observer((props: HomeProps) => {
       const {delay} = taskData;
       watchBackgroundUpdates();
       for (let i = 0; BackgroundJob.isRunning(); i++) {
-        // console.log('Runned -> ', i);
         // watchBackgroundUpdates();
         // await BackgroundJob.updateNotification({taskDesc: 'Runned -> ' + i});
         await sleep(delay);
@@ -683,7 +678,6 @@ export const Home = observer((props: HomeProps) => {
   };
 
   function handleOpenURL(evt: any) {
-    console.log(evt.url);
     // do something with the url
   }
 
@@ -818,7 +812,7 @@ export const Home = observer((props: HomeProps) => {
             riderImage={require('@assets/img/marker.png')}
             destinationCoords={markers[1]}
             location={ridersPosition}
-            onLocationUpdate={loc => console.log(loc)}
+            onLocationUpdate={loc => console.log('log', loc)}
           />
           {/* <AppMapView /> */}
         </Box>

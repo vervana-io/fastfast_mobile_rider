@@ -56,7 +56,6 @@ export const AddressSheetsNew = observer((props: SheetProps) => {
   const createAddress = useCallback((payload: addressesTypes) => {
     addAddress.mutate(payload, {
       onSuccess: (val: apiType) => {
-        console.log('result', val);
         if (val.status) {
           fetchAddress.refetch();
           SheetManager.hide('addressSheetNew', {
@@ -66,7 +65,6 @@ export const AddressSheetsNew = observer((props: SheetProps) => {
       },
       onError: (e: any) => {
         const errorS = e.data.detail.data.error;
-        console.log('error', errorS);
         if (errorS) {
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
@@ -92,7 +90,6 @@ export const AddressSheetsNew = observer((props: SheetProps) => {
   const updateUserAddress = useCallback((payload: addressesTypes) => {
     updateAddress.mutate(payload, {
       onSuccess: (val: apiType) => {
-        console.log('result', val);
         if (val.status) {
           fetchAddress.refetch();
           SheetManager.hide('addressSheetNew', {
@@ -102,7 +99,6 @@ export const AddressSheetsNew = observer((props: SheetProps) => {
       },
       onError: (e: any) => {
         const errorS = e.data.errors;
-        console.log('error', errorS);
         if (errorS) {
           for (const key in errorS) {
             if (Object.prototype.hasOwnProperty.call(errorS, key)) {
@@ -136,7 +132,6 @@ export const AddressSheetsNew = observer((props: SheetProps) => {
           onSuccess: val => {
             if (val) {
               const mainResult: GooglePlaceDetail = val.results[0];
-              // console.log('result', JSON.stringify(mainResult));
               chooseLocation(mainResult);
             }
           },
@@ -208,7 +203,6 @@ export const AddressSheetsNew = observer((props: SheetProps) => {
 
   const chooseLocation = useCallback(
     (details: GooglePlaceDetail | null | any) => {
-      console.log('result', JSON.stringify(details));
       if (details.id) {
         const det: updateAddressesTypes = {
           house_number: details.house_number ?? '',
@@ -326,7 +320,7 @@ export const AddressSheetsNew = observer((props: SheetProps) => {
       <Box h={WIN_HEIGHT} p={4}>
         <HStack justifyContent="space-between" alignItems="center">
           <Text fontWeight="bold" fontSize="md">
-            Change Active Location
+            Change Active Locationsssss
           </Text>
           <Pressable onPress={() => SheetManager.hide('addressSheetNew')}>
             <CloseIconSolid fill="#757575" />

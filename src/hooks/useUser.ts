@@ -39,7 +39,6 @@ export const useUser = (config?: userConfig) => {
     {
       enabled: Boolean(config?.enableFetchUser) && authStore.isLoggedIn,
       onSuccess: (val: apiType) => {
-        // console.log('val', val);
         if (val.status) {
           const data: any = val.data;
           const payload: AuthType = {

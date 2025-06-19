@@ -85,7 +85,6 @@ export const SSOButtons = (props: SSOButtonsProps) => {
             {
               onSuccess: (val: apiType) => {
                 showLoading(false);
-                console.log(val);
                 if (val.status) {
                   navigation.replace('App');
                 } else {
@@ -99,8 +98,6 @@ export const SSOButtons = (props: SSOButtonsProps) => {
               },
               onError: (e: any) => {
                 showLoading(false);
-                console.log('Error: ' + e);
-
                 if (e.status === 401) {
                   Toast.show({
                     type: 'error',
@@ -108,7 +105,11 @@ export const SSOButtons = (props: SSOButtonsProps) => {
                     text2: 'Invalid Credentials',
                   });
                 } else {
-                  console.log('got here');
+                  Toast.show({
+                    type: 'error',
+                    text1: 'Login',
+                    text2: 'An error occurred, please try again',
+                  });
                 }
               },
             },
@@ -160,7 +161,6 @@ export const SSOButtons = (props: SSOButtonsProps) => {
         // use credentialState response to ensure the user is authenticated
         if (credentialState === appleAuth.State.AUTHORIZED) {
           // user is authenticated
-          console.log('authorizationCode', appleAuthRequestResponse.identityToken);
           showLoading(true);
           if (type === 'login') {
             loginWithSSO.mutate(
@@ -178,8 +178,6 @@ export const SSOButtons = (props: SSOButtonsProps) => {
                 },
                 onError: (e: any) => {
                   showLoading(false);
-                  // console.log('Error: ' + e);
-
                   if (e.status === 401) {
                     Toast.show({
                       type: 'error',
@@ -187,7 +185,11 @@ export const SSOButtons = (props: SSOButtonsProps) => {
                       text2: 'Invalid Credentials',
                     });
                   } else {
-                    console.log('got here');
+                    Toast.show({
+                      type: 'error',
+                      text1: 'Login',
+                      text2: 'An error occurred, please try again',
+                    });
                   }
                 },
               },
@@ -251,7 +253,6 @@ export const SSOButtons = (props: SSOButtonsProps) => {
           {
             onSuccess: (val: apiType) => {
               showLoading(false);
-              console.log(val);
               if (val.status) {
                 navigation.navigate('Splashscreen');
               } else {
@@ -265,8 +266,6 @@ export const SSOButtons = (props: SSOButtonsProps) => {
             },
             onError: (e: any) => {
               showLoading(false);
-              console.log('Error: ' + e);
-
               if (e.status === 401) {
                 Toast.show({
                   type: 'error',
@@ -274,7 +273,11 @@ export const SSOButtons = (props: SSOButtonsProps) => {
                   text2: 'Invalid Credentials',
                 });
               } else {
-                console.log('got here');
+                Toast.show({
+                  type: 'error',
+                  text1: 'Login',
+                  text2: 'An error occurred please try again.',
+                });
               }
             },
           },
@@ -287,12 +290,11 @@ export const SSOButtons = (props: SSOButtonsProps) => {
         });
       }
     } catch (e) {
-      console.log(e);
-      // Toast.show({
-      //   type: 'error',
-      //   text1: 'Login',
-      //   text2: 'An error occurred.',
-      // });
+      Toast.show({
+         type: 'error',
+         text1: 'Login',
+         text2: 'An error occurred.'
+        });
     }
   }, [navigation, showLoading]);
 

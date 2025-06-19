@@ -1,7 +1,9 @@
 import {apiInstance} from './axios';
 import {authStore} from '@store/auth';
 
-const BASE_URL = process.env.BASE_URL;
+//const BASE_URL = process.env.BASE_URL;
+const BASE_URL = "https://testriderapi.fastfastapp.com/api/";
+
 
 class Http {
   async get(path: string, options: any = {}) {
@@ -14,12 +16,10 @@ class Http {
           headers,
         },
       });
-      // console.log(res);
       return new Promise(resolve => {
         resolve(res);
       });
     } catch (e: any) {
-      // const error: ApiErrorType = e;
       return Promise.reject(e);
     }
   }
@@ -34,12 +34,10 @@ class Http {
           options,
         },
       });
-      // console.log('options', options);
       return new Promise(resolve => {
         resolve(res);
       });
     } catch (e) {
-      // console.log('post error', e.response);
       return Promise.reject(e);
     }
   }

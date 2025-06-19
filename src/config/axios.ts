@@ -10,8 +10,6 @@ import {rootConfig} from '@store/root';
 // import {Agent} from 'https';
 
 // const authStore = store.Auth.auth.token;
-// console.log('from axios', authStore);
-
 export const apiInstance = axios.create({
   // .. where we make our configurations
   headers: {
@@ -29,15 +27,12 @@ apiInstance.interceptors.request.use(
     return request;
   },
   error => {
-    // console.log('request error', error);
     return Promise.reject(error);
   },
 );
 
 apiInstance.interceptors.response.use(
   response => {
-    // console.log('res', response);
-    // Edit response config
     debugAPIResponse(response);
     rootConfig.setRequestLoading(false);
     return response;
@@ -46,7 +41,6 @@ apiInstance.interceptors.response.use(
     debugAPIError(error);
     const statusCode = error.response?.status;
     rootConfig.setRequestLoading(false);
-    console.log('error code', statusCode);
     if (statusCode === 403) {
       // config.setShouldLogin(true);
       authStore.logout().then(() => {

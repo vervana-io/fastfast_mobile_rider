@@ -47,13 +47,11 @@ export const DefaultLayout = (props: layoutProps) => {
   async function enforceLocationPressed() {
     if (Platform.OS === 'android') {
       const checkEnabled: boolean = await isLocationEnabled();
-      console.log('checkEnabled', checkEnabled);
       if (checkEnabled) {
         requestPerms();
       } else {
         try {
           const enableResult = await promptForEnableLocationIfNeeded();
-          console.log('enableResult', enableResult);
           // The user has accepted to enable the location services
           // data can be :
           //  - "already-enabled" if the location services has been already enabled
@@ -80,11 +78,11 @@ export const DefaultLayout = (props: layoutProps) => {
               [
                 // {
                 //   text: 'Ask me later',
-                //   onPress: () => console.log('Ask me later pressed'),
+                //   onPress: () => {},
                 // },
                 {
                   text: 'Cancel',
-                  onPress: () => console.log('Cancel Pressed'),
+                  onPress: () => {},
                   style: 'cancel',
                 },
                 {text: 'OK', onPress: () => enforceLocationPressed()},
@@ -100,7 +98,6 @@ export const DefaultLayout = (props: layoutProps) => {
 
   const requestPerms = async () => {
     const res = await PermissionManager.requestPermission('LOCATION');
-    console.log('done', res);
     if (hasPermissionSet && res) {
       hasPermissionSet(res);
       setModalVisible(false);

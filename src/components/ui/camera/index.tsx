@@ -34,7 +34,6 @@ export const CameraScreen = (props: CameraProps) => {
     const photoPath = photo?.path;
     if (photoPath) {
       RNFS.readFile(photoPath, 'base64').then(res => {
-        console.log('test');
       });
     }
   };

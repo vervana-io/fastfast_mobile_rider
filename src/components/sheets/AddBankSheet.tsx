@@ -122,10 +122,8 @@ export const AddBankSheet = observer((props: SheetProps) => {
   const callValidate = useCallback(
     (val: string) => {
       setAccountNumber(val);
-      console.log('length', val.length);
       if (val !== '') {
         if (val.length > 9) {
-          console.log('greater than 9');
           doValidateBank(val);
         }
       }

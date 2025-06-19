@@ -30,7 +30,7 @@ export const NeedsUpdateModal = () => {
           //   ios: {
           //     title: '📢 New Update Available!',
           //     message:
-          //       'We’ve made some exciting improvements to enhance your experience! Update now to enjoy the latest features!',
+          //       'We've made some exciting improvements to enhance your experience! Update now to enjoy the latest features!',
           //     buttonUpgradeText: 'Update Now',
           //     buttonCancelText: 'Cancel',
           //     updateType: IAUUpdateKind.IMMEDIATE,
@@ -41,7 +41,7 @@ export const NeedsUpdateModal = () => {
           //     updateType: IAUUpdateKind.IMMEDIATE,
           //     title: '📢 New Update Available!',
           //     message:
-          //       'We’ve made some exciting improvements to enhance your experience! Update now to enjoy the latest features!',
+          //       'We've made some exciting improvements to enhance your experience! Update now to enjoy the latest features!',
           //     buttonUpgradeText: 'Update Now',
           //     buttonCancelText: 'Cancel',
           //     bundleId: 'com.fastfast',
@@ -54,9 +54,7 @@ export const NeedsUpdateModal = () => {
           setModalVisible(false);
         }
       })
-      .catch(err => {
-        console.log('checkForUpdates ERROR ==>', err);
-      });
+      .catch(err => {      });
   };
 
   // run checker for updates
@@ -96,7 +94,7 @@ export const NeedsUpdateModal = () => {
                 New Update Available!
               </Text>
               <Text textAlign="center">
-                We’ve made some exciting improvements to enhance your
+                We've made some exciting improvements to enhance your
                 experience! Update now to enjoy the latest features!
               </Text>
               <Button

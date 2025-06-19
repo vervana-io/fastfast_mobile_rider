@@ -11,13 +11,11 @@ onlineManager.setEventListener(setOnline => {
 
 setLogger({
   log: message => {
-    console.log('REACT_QUERY:', message);
   },
   warn: message => {
     console.warn(message);
   },
   error: error => {
-    console.log('REACT_QUERY', error);
   },
 });
 

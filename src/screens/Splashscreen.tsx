@@ -55,7 +55,6 @@ export const Splashscreen = (props: SplashscreenProps) => {
           // });
         }
       });
-      console.log('user is logged in');
     }
   }, [navigation, root.newUser, userD.isLoggedIn, userDetails]);
 

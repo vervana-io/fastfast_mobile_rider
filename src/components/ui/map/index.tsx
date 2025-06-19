@@ -24,9 +24,6 @@ export const Map = (props: MapTypes) => {
   //     if (markers && markers?.length > 0) {
   //       const you = markers[0];
   //       const des = markers[1];
-
-  //       console.log('you', you);
-
   //         const newRegion = {
   //           latitude: (parseFloat(pic.latitude) + parseFloat(des.latitude)) / 2,
   //           longitude: (parseFloat(pic.longitude) + parseFloat(des.longitude)) / 2,

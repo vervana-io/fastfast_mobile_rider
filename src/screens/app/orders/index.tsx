@@ -77,7 +77,6 @@ export const OrdersScreen = observer((props: OrdersScreenProps) => {
   //   (order_id: number, item: orderType) => {
   //     navigation.navigate('Home');
   //     if (userIsOnline) {
-  //       console.log('something else.');
   //       ordersStore.setSelectedOrderId(order_id);
   //       // ordersStore.setSelectedOrder(item);
   //       // bottomSheetStore.SetSheet('orderDetailsView', true, {

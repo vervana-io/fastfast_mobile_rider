@@ -73,16 +73,12 @@ export const usePusher = (): PusherHookReturn => {
           .subscribe({
             channelName: channelName,
             onSubscriptionSucceeded: data => {
-              console.log(`I can now access me: ${data}`);
             },
             onMemberAdded: member => {
-              console.log(`Member added: ${member}`);
             },
             onMemberRemoved: member => {
-              console.log(`Member removed: ${member}`);
             },
             onEvent: (event: PusherEvent) => {
-              // console.log(`Event received: ${event}`);
               callback(event);
             },
             onSubscriptionError(channelName, message, e) {
