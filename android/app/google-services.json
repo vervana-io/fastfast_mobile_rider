@@ -68,6 +68,58 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:862410060924:android:6c1e48b7cc85ba305cc5f9",
+        "android_client_info": {
+          "package_name": "com.fastfast.develop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "862410060924-4jjrrtmhpi4a5dc9d7k28doj3lbnj0op.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fastfast.develop",
+            "certificate_hash": "1ec78b023f19bf8893bd43a29c9d65a09180125e"
+          }
+        },
+        {
+          "client_id": "862410060924-oplvaod59e46guviki9aj06ur481tktr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fastfast.develop",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "862410060924-hqcggk82mce69aiunfufj9dmd1luk36b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoEU-1M-3FfST8eVhJNTEVTFHLocEczsA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "862410060924-d96200hnseihf9051lb0h70fi0eb6cco.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "862410060924-024hj36sa2s3ltbsr4kf57j6dra0sd6k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.fastfastvendor"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:862410060924:android:6ed36ae1c56f0f315cc5f9",
         "android_client_info": {
           "package_name": "com.fastfastrider"
@@ -75,11 +127,35 @@
       },
       "oauth_client": [
         {
+          "client_id": "862410060924-1fivb5m54gnbib4ai84le0vf6dv2kefs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fastfastrider",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "862410060924-89eq8vsc78ncd4rluvno45o4vj8c88pm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fastfastrider",
+            "certificate_hash": "3ce69714bbe6cb78bbae77589e5605a8db5b009b"
+          }
+        },
+        {
           "client_id": "862410060924-nci0ltqgi37n498t81l0mip0979rcf2b.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.fastfastrider",
             "certificate_hash": "8958da78aeca18819283081c3afbd51552db20b1"
+          }
+        },
+        {
+          "client_id": "862410060924-q0a2l8v9sjhtn14t80go67407ajonutu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fastfastrider",
+            "certificate_hash": "e471806831515248b2c6fb8d683ea2fcd0c9daa8"
           }
         },
         {
@@ -118,6 +194,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "862410060924-0d2gsemmfum8ddco4efm0ipr6aufg7p0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fastfastvendor",
+            "certificate_hash": "d601d7481af03d7d2c8453fb523934b695f0d54b"
+          }
+        },
         {
           "client_id": "862410060924-hqcggk82mce69aiunfufj9dmd1luk36b.apps.googleusercontent.com",
           "client_type": 3
