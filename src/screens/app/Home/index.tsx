@@ -532,14 +532,7 @@ export const Home = observer((props: HomeProps) => {
         }
         if (data.eventName === 'rider_new_order') {
           const dData = data.data;
-          let parsed = {};
-          try {
-            if (dData) {
-              parsed = JSON.parse(dData);
-            }
-          } catch (e) {
-            console.error('Failed to parse JSON:', dData, e);
-          }
+          const parsed = JSON.parse(dData);
           ordersStore.setNotifiedOrder(parsed);
         }
         if (data.eventName === 'rider_cancel_order') {
@@ -789,9 +782,7 @@ export const Home = observer((props: HomeProps) => {
               ridersPosition
             }
             onLocationUpdate={
-              loc => {
-                console.info(loc.longitude, loc.latitude)      
-              }
+              loc => {}
             }
           />
           {/* <AppMapView /> */}
