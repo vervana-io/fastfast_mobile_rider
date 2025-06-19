@@ -1,9 +1,9 @@
-import {AuthType, registerFieldType} from '@types/authType';
+import {AuthType, registerFieldType} from '../types/authType';
 import {useMutation, useQuery} from 'react-query';
 
 import {SignUpStep1} from '@screens/auth';
 import Toast from 'react-native-toast-message';
-import {apiType} from '@types/apiTypes';
+import {apiType} from '../types/apiTypes';
 import {authStore} from '@store/auth';
 import {http} from '../config';
 import {navigate} from '@navigation/NavigationService';

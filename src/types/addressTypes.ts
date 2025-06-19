@@ -16,6 +16,11 @@ export interface addressesTypes {
   updated_at?: string;
 }
 
+export interface locationData {
+  longitude: string,
+  latitude: string
+}
+
 export interface updateAddressesTypes {
   address_id: number;
   addressable_type?: string;
