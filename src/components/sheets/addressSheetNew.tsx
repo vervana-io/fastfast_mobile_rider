@@ -320,7 +320,7 @@ export const AddressSheetsNew = observer((props: SheetProps) => {
       <Box h={WIN_HEIGHT} p={4}>
         <HStack justifyContent="space-between" alignItems="center">
           <Text fontWeight="bold" fontSize="md">
-            Change Active Locationsssss
+            Change Active Location
           </Text>
           <Pressable onPress={() => SheetManager.hide('addressSheetNew')}>
             <CloseIconSolid fill="#757575" />

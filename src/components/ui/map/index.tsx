@@ -19,23 +19,6 @@ export const Map = (props: MapTypes) => {
 
   const you = markers && markers[0];
 
-  //   useEffect(() => {
-  //     // Calculate the new region that encompasses both pickup and destination
-  //     if (markers && markers?.length > 0) {
-  //       const you = markers[0];
-  //       const des = markers[1];
-  //         const newRegion = {
-  //           latitude: (parseFloat(pic.latitude) + parseFloat(des.latitude)) / 2,
-  //           longitude: (parseFloat(pic.longitude) + parseFloat(des.longitude)) / 2,
-  //           latitudeDelta:
-  //             Math.abs(parseFloat(pic.latitude) - parseFloat(des.latitude)) * 2,
-  //           longitudeDelta:
-  //             Math.abs(parseFloat(pic.longitude) - parseFloat(des.longitude)) * 2,
-  //         };
-  //         setRegion(newRegion);
-  //     }
-  //   }, [markers]);
-
   return (
     <RNMapView
       ref={mapRef}

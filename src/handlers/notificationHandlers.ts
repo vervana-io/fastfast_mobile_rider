@@ -12,17 +12,16 @@ export const requestUserPermission = async () => {
   }
 };
 
-// The call to getInitialNotification should happen within a React lifecycle method after mounting
 export const getInitialNotifications = async () => {
-  // Check whether an initial notification is available
   messaging()
     .getInitialNotification()
     .then((remoteMessage: any) => {
       if (remoteMessage) {
-       
-        // we use this to navigate to the respective page
-        // assuming we pass a type of screen to navigate to
-        
+        console.info(
+          'Notification caused app to open from quit state:',
+          remoteMessage.notification,
+        );
+
       }
     });
 };
@@ -41,7 +40,6 @@ export const notificationListener = async () => {
   
   });
 
-  // Check whether an initial notification is available
   messaging()
     .getInitialNotification()
     .then(remoteMessage => {

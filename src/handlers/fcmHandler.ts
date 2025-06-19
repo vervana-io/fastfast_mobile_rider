@@ -13,6 +13,7 @@ export const getFcmToken = async () => {
   try {
     token = await messaging().getToken();
   } catch (error) {
+    console.error(error);
   }
   return token;
 };
@@ -23,8 +24,10 @@ export async function registerAppWithFCM() {
     await messaging()
       .registerDeviceForRemoteMessages()
       .then(status => {
+        console.info('registerDeviceForRemoteMessages status', status);
       })
       .catch(error => {
+        console.error(error);
       });
   }
 }

@@ -1,9 +1,7 @@
 import {apiInstance} from './axios';
 import {authStore} from '@store/auth';
 
-//const BASE_URL = process.env.BASE_URL;
-const BASE_URL = "https://testriderapi.fastfastapp.com/api/";
-
+const BASE_URL = process.env.BASE_URL;
 
 class Http {
   async get(path: string, options: any = {}) {

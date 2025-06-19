@@ -73,6 +73,7 @@ export default Sentry.wrap(function App() {
     });
     /* Log the error to an error reporting service */
     if (__DEV__) {
+      console.error(error)
     }
   };
 
@@ -89,6 +90,7 @@ export default Sentry.wrap(function App() {
       try {
         await AsyncStorage.setItem('@color-mode', value);
       } catch (e) {
+        console.error(e)
       }
     },
   };
