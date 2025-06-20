@@ -589,7 +589,6 @@ export const Home = observer((props: HomeProps) => {
         },
         error => {
           if (error.code === 3) {
-            // GeoLocate();
             if (retryCount < 2) {
               setRetryCount(retryCount + 1);
             } else if (retryCount >= 3) {
@@ -607,6 +606,7 @@ export const Home = observer((props: HomeProps) => {
               text2:
                 'Location services are disabled, you need to permit this app to use location services',
               autoHide: false,
+              visibilityTime: 6000,
             });
           } else if (error.code === 2) {
             Toast.show({
@@ -618,13 +618,17 @@ export const Home = observer((props: HomeProps) => {
             });
           }
         },
-        // {
-        //   enableHighAccuracy: true,
-        //   distanceFilter: 1,
-        //   useSignificantChanges: true,
-        // },
+        {
+          enableHighAccuracy: true,
+          distanceFilter: 4,
+          interval: 5000,
+          fastestInterval: 2000,
+          useSignificantChanges: false,
+        },
       );
       setSubscriptionId(watchID);
+
+      return () => Geolocation.clearWatch(watchID);
     } catch (error) {
       Alert.alert('WatchPosition Error', JSON.stringify(error));
     }
@@ -641,14 +645,12 @@ export const Home = observer((props: HomeProps) => {
   const clearWatch = () => {
     subscriptionId !== null && Geolocation.clearWatch(subscriptionId);
     setSubscriptionId(null);
-    // setPosition(null);
   };
 
   const sleep = (time: any) =>
     new Promise<void>(resolve => setTimeout(() => resolve(), time));
 
-  BackgroundJob.on('expiration', () => {
-  });
+  BackgroundJob.on('expiration', () => {});
 
   const taskRandom = async (taskData: any) => {
     if (Platform.OS === 'ios') {
@@ -663,8 +665,6 @@ export const Home = observer((props: HomeProps) => {
       const {delay} = taskData;
       watchBackgroundUpdates();
       for (let i = 0; BackgroundJob.isRunning(); i++) {
-        // watchBackgroundUpdates();
-        // await BackgroundJob.updateNotification({taskDesc: 'Runned -> ' + i});
         await sleep(delay);
       }
     });
@@ -694,7 +694,7 @@ export const Home = observer((props: HomeProps) => {
   // start updating background locations
   useEffect(() => {
     const bgUpdates = async () => {
-      if (onlineStatus) {
+      if (onlineStatus && !BackgroundJob.isRunning()) {
         await BackgroundJob.start(taskRandom, options);
       } else {
         await BackgroundJob.stop();
@@ -778,12 +778,8 @@ export const Home = observer((props: HomeProps) => {
           <RiderMap
             riderImage={require('@assets/img/marker.png')}
             destinationCoords={markers[1]}
-            location={
-              ridersPosition
-            }
-            onLocationUpdate={
-              loc => {}
-            }
+            location={ridersPosition}
+            onLocationUpdate={_loc => {}}
           />
           {/* <AppMapView /> */}
         </Box>
