@@ -620,7 +620,7 @@ export const Home = observer((props: HomeProps) => {
         },
         {
           enableHighAccuracy: true,
-          distanceFilter: 4,
+          distanceFilter: 15,
           interval: 5000,
           fastestInterval: 2000,
           useSignificantChanges: false,
