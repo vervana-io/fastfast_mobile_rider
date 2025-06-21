@@ -30,12 +30,6 @@ GoogleSignin.configure({
   offlineAccess: true,
 });
 
-// GoogleSignin.configure({
-//   webClientId:
-//     '862410060924-hqcggk82mce69aiunfufj9dmd1luk36b.apps.googleusercontent.com',
-//   scopes: ['profile', 'email'],
-// });
-
 interface SSOButtonsProps {
   navigation?: any;
   showLoading?: any;
@@ -291,10 +285,10 @@ export const SSOButtons = (props: SSOButtonsProps) => {
       }
     } catch (e) {
       Toast.show({
-         type: 'error',
-         text1: 'Login',
-         text2: 'An error occurred.'
-        });
+        type: 'error',
+        text1: 'Login',
+        text2: 'An error occurred.',
+      });
     }
   }, [navigation, showLoading]);
 
