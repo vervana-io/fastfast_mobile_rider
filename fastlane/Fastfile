@@ -125,7 +125,7 @@ platform :ios do
    build_app(
      workspace: "ios/FastFastRider.xcworkspace",
      scheme: "FastFastRider",
-     suppress_xcode_output: true,
+     suppress_xcode_output: false,
      clean: true
    )
    upload_to_testflight(apple_id: ENV["PRODUCTION_APP_ID"], skip_waiting_for_build_processing: true)
