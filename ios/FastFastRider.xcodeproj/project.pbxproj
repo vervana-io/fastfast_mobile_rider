@@ -615,9 +615,11 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = FastFastRider/FastFastRider.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 0;
 				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = H6SW6D3PZ9;
 				INFOPLIST_FILE = FastFastRider/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "FastFast Rider";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -634,6 +636,7 @@
 				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = org.fastfastrider;
 				PRODUCT_NAME = FastFastRider;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore org.fastfastrider";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
