@@ -53,6 +53,14 @@ lane :copy_env do |options|
 
   sh("curl", env_url, "-o", dot_env_file)
   sh("mv", dot_env_file, destination_path)
+
+  # Firebase Configuration files
+  # IOS 
+  plist_url = ENV["BITRISEIO_FIREBASE_IOS_PLIST_#{options[:stage]}_URL"]
+  plist_file = File.join(Dir.pwd, "info.plist")
+
+  sh("curl", plist_url, "-o", plist_file)
+  sh("mv", plist_file, File.expand_path("../ios/GoogleService-Info.plist", Dir.pwd))
 end
 
 
