@@ -106,7 +106,7 @@ platform :ios do
      ]
    )
    copy_env("stage": "DEV")
-   build_app(
+   build_ios_app(
      workspace: "ios/FastFastRider.xcworkspace",
      scheme: "FastFastRider develop",
      suppress_xcode_output: false,
@@ -122,7 +122,7 @@ platform :ios do
      ]
    )
    copy_env("stage": "MAIN")
-   build_app(
+   build_ios_app(
      workspace: "ios/FastFastRider.xcworkspace",
      scheme: "FastFastRider",
      suppress_xcode_output: false,
