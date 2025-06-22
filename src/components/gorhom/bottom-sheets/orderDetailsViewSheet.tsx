@@ -5,7 +5,6 @@ import {QuestionIcon} from '@assets/svg/QuestionIcon';
 import TablerIcon from '@assets/svg/Tabler';
 import BottomSheet, {
   BottomSheetBackdrop,
-  BottomSheetScrollView,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import {toastConfig} from '@helpers/toastConfig';
@@ -36,6 +35,7 @@ import {SheetManager} from 'react-native-actions-sheet';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
 import {WIN_HEIGHT, WIN_WIDTH} from '../../../config';
+import {ScrollView} from 'react-native-gesture-handler';
 
 export const OrderDetailsViewSheet = observer(() => {
   const sheetRef: any = useRef<BottomSheet>(null);
@@ -65,8 +65,8 @@ export const OrderDetailsViewSheet = observer(() => {
   const ordersData = ordersStore.selectedOrder;
   const request_id = payload?.request_id ?? ordersData?.misc_rider_info?.id;
 
-  const {isBackground, isForeground, currentAppState} = useAppState();
-  const {unsuscribe, subscribe} = usePusher();
+  const {isForeground} = useAppState();
+  const {unsuscribe} = usePusher();
   // variables
   const snapPoints = useMemo(() => ['30%', '60%', '85%'], []);
 
@@ -231,17 +231,6 @@ export const OrderDetailsViewSheet = observer(() => {
       Linking.openURL(`tel:${ordersData.customer?.phone_number_one}`);
     }
   }, [ordersData.customer?.phone_number_one]);
-
-  // callbacks
-  // const handleSheetChanges = useCallback((index: number) => {
-  //   if (index === 2) {
-  //     setViewDetails('full');
-  //   } else if (index === 1) {
-  //     setViewDetails('mid');
-  //   } else {
-  //     setViewDetails('small');
-  //   }
-  // }, []);
 
   const handleSheetChanges = useCallback((index: number) => {
     if (index === 2) {
@@ -496,7 +485,7 @@ export const OrderDetailsViewSheet = observer(() => {
             <CloseIcon size={5} color="themeLight.primary.base" />
           </Pressable>
         </Pressable>
-        <BottomSheetScrollView
+        <ScrollView
           contentContainerStyle={{
             flexGrow: 1,
           }}>
@@ -554,13 +543,6 @@ export const OrderDetailsViewSheet = observer(() => {
                 ))}
             </VStack>
             <HStack space={2}>
-              {/* <VStack>
-                <Text fontWeight="bold">Fee</Text>
-                <Text color="themeLight.gray.2" fontWeight="light">
-                  ₦{ordersData?.sub_total}
-                </Text>
-              </VStack>
-              <Divider orientation="vertical" mx={2} /> */}
               <VStack>
                 <Text fontWeight="bold">Deliver Fee</Text>
                 <Text color="themeLight.gray.2" fontWeight="light">
@@ -729,7 +711,7 @@ export const OrderDetailsViewSheet = observer(() => {
               </>
             ) : null}
           </VStack>
-        </BottomSheetScrollView>
+        </ScrollView>
       </Box>
     ),
     [

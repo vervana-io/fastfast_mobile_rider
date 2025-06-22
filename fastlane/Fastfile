@@ -54,13 +54,18 @@ lane :copy_env do |options|
   sh("curl", env_url, "-o", dot_env_file)
   sh("mv", dot_env_file, destination_path)
 
-  # Firebase Configuration files
-  # IOS 
+  # # Firebase Configuration files
+  # # IOS 
   plist_url = ENV["BITRISEIO_FIREBASE_IOS_PLIST_#{options[:stage]}_URL"]
   plist_file = File.join(Dir.pwd, "info.plist")
 
   sh("curl", plist_url, "-o", plist_file)
   sh("mv", plist_file, File.expand_path("../ios/GoogleService-Info.plist", Dir.pwd))
+
+  # IOS Replace Google reversed client id for current application
+  reversed_client_id = ENV["REVERSED_CLIENT_ID_#{options[:stage]}"]
+  sh "sed -i '' \"s|<string>com\\.googleusercontent\\.apps\\.[^<]*</string>|<string>#{reversed_client_id}</string>|g\" ../ios/FastFastRider/Info.plist"
+  
 end
 
 
@@ -102,7 +107,8 @@ platform :ios do
  lane :dev do
    ensure_env_vars(
      env_vars: [
-      "DEV_APP_ID"
+      "DEV_APP_ID",
+      "REVERSED_CLIENT_ID_DEV"
      ]
    )
    copy_env("stage": "DEV")
@@ -118,7 +124,8 @@ platform :ios do
  lane :main do
    ensure_env_vars(
      env_vars: [
-      "PRODUCTION_APP_ID"
+      "PRODUCTION_APP_ID",
+      "REVERSED_CLIENT_ID_MAIN"
      ]
    )
    copy_env("stage": "MAIN")
