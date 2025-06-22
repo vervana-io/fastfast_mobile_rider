@@ -329,7 +329,7 @@ export const SSOButtons = (props: SSOButtonsProps) => {
 
   return (
     <VStack space={2} mb={8}>
-      {Platform.OS === 'ios' && <Apple />}
+      {/* {Platform.OS === 'ios' && <Apple />} */}
       <Google />
     </VStack>
   );
