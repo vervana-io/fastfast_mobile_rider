@@ -164,7 +164,8 @@ platform :android do
    ensure_env_vars(
     env_vars: [
      "FIREBASE_SERVICE_ACCOUNT", 
-     "FIREBASE_DISTRIBUTION_APP_ID"
+     "FIREBASE_DISTRIBUTION_APP_ID",
+     "GOOGLE_MAPS_API_KEY",
     ]
    )
    gradle(
@@ -190,6 +191,11 @@ platform :android do
 
  lane :main do
    copy_env("stage": "MAIN")
+   ensure_env_vars(
+    env_vars: [
+     "GOOGLE_MAPS_API_KEY",
+    ]
+   )
    gradle(
      "project_dir": "android",
      "task": "clean bundle",
