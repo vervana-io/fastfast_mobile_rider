@@ -734,7 +734,7 @@ export const Home = observer((props: HomeProps) => {
   return (
     <DefaultLayout
       refreshable={false}
-      checkPermissions
+      checkPermissions={true}
       statusBarColor={onlineStatus ? '#009655' : 'white'}
       useKeyboardScroll={false}>
       <Box flex={1} bg="themeLight.gray.3" style={styles.container}>
