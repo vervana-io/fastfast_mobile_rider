@@ -23,6 +23,7 @@ android {
         targetSdkVersion 34
         versionCode 65
         versionName "1.0"
+        resValue "string", "googleMapsApiKey", project.findProperty("GOOGLE_MAPS_API_KEY") ?: System.getenv("GOOGLE_MAPS_API_KEY") ?: ""
     }
     signingConfigs {
         debug {

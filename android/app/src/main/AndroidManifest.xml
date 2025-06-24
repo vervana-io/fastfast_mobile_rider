@@ -40,7 +40,6 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-      <!-- TODO:: ENIOLA, please extract this key and inject it using CI/CD -->
-      <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyB7-DZbnJ_GP62ef8sifDLj1C_x43VMwi0" />
+      <meta-data android:name="com.google.android.geo.API_KEY" android:value="@string/google_maps_key" />
     </application>
 </manifest>
