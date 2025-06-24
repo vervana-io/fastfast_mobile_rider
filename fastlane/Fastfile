@@ -199,10 +199,10 @@ platform :android do
        "android.injected.signing.key.password" => ENV["ANDROID_RELEASE_KEY_PASSWORD"],
        "android.injected.version.code" => ENV["BUILD_NUMBER"]
      })
-   upload_to_play_store(track: "internal", 
+   upload_to_play_store(track: "closed", 
     json_key: ENV["GOOGLE_PLAY_JSON_KEY"], 
     release_status: "draft",
-    track_promote_to: "internal"
+    track_promote_to: "closed"
    )
  end
 end
