@@ -65,7 +65,8 @@ lane :copy_env do |options|
   # IOS Replace Google reversed client id for current application
   reversed_client_id = ENV["REVERSED_CLIENT_ID_#{options[:stage]}"]
   sh "sed -i '' \"s|<string>com\\.googleusercontent\\.apps\\.[^<]*</string>|<string>#{reversed_client_id}</string>|g\" ../ios/FastFastRider/Info.plist"
-  
+
+  ENV["GOOGLE_MAPS_API_KEY"] = ENV["GOOGLE_MAPS_API_KEY_#{options[:stage]}"]
 end
 
 
@@ -149,6 +150,7 @@ platform :android do
        "ANDROID_RELEASE_KEY_ALIAS",
        "ANDROID_RELEASE_KEY_PASSWORD",
        "GOOGLE_PLAY_JSON_KEY",
+       "GOOGLE_MAPS_API_KEY",
        "BUILD_NUMBER"
      ]
    )
@@ -175,7 +177,8 @@ platform :android do
        "android.injected.signing.store.password" => ENV["ANDROID_RELEASE_STORE_PASSWORD"],
        "android.injected.signing.key.alias" => ENV["ANDROID_RELEASE_KEY_ALIAS"],
        "android.injected.signing.key.password" => ENV["ANDROID_RELEASE_KEY_PASSWORD"],
-       "android.injected.version.code" => ENV["BUILD_NUMBER"]
+       "android.injected.version.code" => ENV["BUILD_NUMBER"],
+       "GOOGLE_MAPS_API_KEY" => ENV["GOOGLE_MAPS_API_KEY"]
      })
 
    upload_to_play_store(
@@ -197,7 +200,8 @@ platform :android do
        "android.injected.signing.store.password" => ENV["ANDROID_RELEASE_STORE_PASSWORD"],
        "android.injected.signing.key.alias" => ENV["ANDROID_RELEASE_KEY_ALIAS"],
        "android.injected.signing.key.password" => ENV["ANDROID_RELEASE_KEY_PASSWORD"],
-       "android.injected.version.code" => ENV["BUILD_NUMBER"]
+       "android.injected.version.code" => ENV["BUILD_NUMBER"],
+       "GOOGLE_MAPS_API_KEY" => ENV["GOOGLE_MAPS_API_KEY"]
      })
    upload_to_play_store(track: "closed", 
     json_key: ENV["GOOGLE_PLAY_JSON_KEY"], 
