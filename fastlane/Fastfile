@@ -150,7 +150,6 @@ platform :android do
        "ANDROID_RELEASE_KEY_ALIAS",
        "ANDROID_RELEASE_KEY_PASSWORD",
        "GOOGLE_PLAY_JSON_KEY",
-       "GOOGLE_MAPS_API_KEY",
        "BUILD_NUMBER"
      ]
    )
