@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {authStore} from '@store/auth';
 import {useCallback, useEffect} from 'react';
 import {STORAGE_KEY} from '../constant';
+import {apiInstance} from '../config/axios';
 
 interface PusherHookReturn {
   subscribe: (channelName: string, callback: (data: any) => void) => void;
@@ -27,7 +28,7 @@ export const usePusher = (): PusherHookReturn => {
   useEffect(() => {
     const initialize = async () => {
       await pusher.init({
-        authorizerTimeoutInSeconds: 30, //30sec
+        authorizerTimeoutInSeconds: 30, // 30sec
         apiKey: PusherInstance.appKey ?? '',
         cluster: PusherInstance.cluster ?? '',
         onAuthorizer: async (channelName: string, socketId: string) => {
@@ -36,28 +37,28 @@ export const usePusher = (): PusherHookReturn => {
             if (!token) {
               return undefined;
             }
-            const response = await fetch(
-              `${process.env.BASE_URL}broadcasting/auth`,
+
+            const response = await apiInstance.post(
+              process.env.BASE_URL + 'broadcasting/auth',
               {
-                method: 'POST',
+                socket_id: socketId,
+                channel_name: channelName,
+              },
+              {
                 headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: 'Bearer ' + token,
+                  Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                  socket_id: socketId,
-                  channel_name: channelName,
-                }),
               },
             );
-            const body = await response.json();
-            return body;
+
+            return response.data;
           } catch (error) {
             console.error('Authorizer error', error);
             return undefined;
           }
         },
       });
+
       await pusher.connect();
     };
 
@@ -72,12 +73,9 @@ export const usePusher = (): PusherHookReturn => {
         await pusher
           .subscribe({
             channelName: channelName,
-            onSubscriptionSucceeded: data => {
-            },
-            onMemberAdded: member => {
-            },
-            onMemberRemoved: member => {
-            },
+            onSubscriptionSucceeded: data => {},
+            onMemberAdded: member => {},
+            onMemberRemoved: member => {},
             onEvent: (event: PusherEvent) => {
               callback(event);
             },
