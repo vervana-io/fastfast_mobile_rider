@@ -181,7 +181,7 @@ platform :android do
    upload_to_play_store(
     track: "internal", 
     json_key: ENV["GOOGLE_PLAY_JSON_KEY"], 
-    release_status: "draft",
+    release_status: "completed",
     track_promote_to: "internal"
    )
  end
@@ -201,7 +201,7 @@ platform :android do
      })
    upload_to_play_store(track: "alpha", 
     json_key: ENV["GOOGLE_PLAY_JSON_KEY"], 
-    release_status: "draft",
+    release_status: "completed",
     track_promote_to: "alpha"
    )
  end
