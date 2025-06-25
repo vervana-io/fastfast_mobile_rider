@@ -29,7 +29,7 @@ import {theme} from './theme';
 import * as Sentry from '@sentry/react-native';
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN, // Replace with your Sentry DSN
+  dsn: process.env.SENTRY_DNS,
 
   // Adds more context data to events (IP address, cookies, user, etc.)
   // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
@@ -42,6 +42,7 @@ Sentry.init({
     Sentry.mobileReplayIntegration(),
     Sentry.feedbackIntegration(),
   ],
+  environment: __DEV__ ? 'Development' : 'Production',
 
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,
@@ -73,7 +74,7 @@ export default Sentry.wrap(function App() {
     });
     /* Log the error to an error reporting service */
     if (__DEV__) {
-      console.error(error)
+      console.error(error);
     }
   };
 
@@ -90,7 +91,7 @@ export default Sentry.wrap(function App() {
       try {
         await AsyncStorage.setItem('@color-mode', value);
       } catch (e) {
-        console.error(e)
+        console.error(e);
       }
     },
   };
