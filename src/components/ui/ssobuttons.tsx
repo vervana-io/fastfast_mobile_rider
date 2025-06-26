@@ -1,28 +1,26 @@
-import {Alert, Platform} from 'react-native';
-import {Box, Button, HStack, VStack} from 'native-base';
+import {
+  appleAuth,
+  appleAuthAndroid,
+} from '@invertase/react-native-apple-authentication';
 import {
   GoogleSignin,
   isErrorWithCode,
   isSuccessResponse,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import {Button, VStack} from 'native-base';
 import React, {useCallback} from 'react';
-import {
-  appleAuth,
-  appleAuthAndroid,
-} from '@invertase/react-native-apple-authentication';
+import {Alert, Platform} from 'react-native';
 
 import {AppleIcon} from '@assets/svg/AppleIcon.tsx';
 import {GoogleIcon} from '@assets/svg/GoogleIcon';
-import Toast from 'react-native-toast-message';
-import {apiType} from '@types/apiTypes';
-import {authStore} from '@store/auth';
-import {functions} from '@helpers/functions';
-import {jwtDecode} from 'jwt-decode';
-import messaging from '@react-native-firebase/messaging';
-import {navigate} from '@navigation/NavigationService';
-import {registerStoreType} from '@types/authType';
 import {useAuth} from '@hooks/useAuth';
+import {navigate} from '@navigation/NavigationService';
+import messaging from '@react-native-firebase/messaging';
+import {authStore} from '@store/auth';
+import {apiType} from '@types/apiTypes';
+import {registerStoreType} from '@types/authType';
+import Toast from 'react-native-toast-message';
 
 GoogleSignin.configure({
   webClientId:
@@ -212,14 +210,7 @@ export const SSOButtons = (props: SSOButtonsProps) => {
           text2: 'Apple Auth not supported for this device',
         });
       }
-    } catch (e) {
-      // @ts-ignore
-      // Toast.show({
-      //   type: 'error',
-      //   text1: 'Login',
-      //   text2: 'An error occurred.',
-      // });
-    }
+    } catch (e) {}
   }, [data, navigation, showLoading, type]);
 
   const signInAppleAndroid = useCallback(async () => {
@@ -329,7 +320,7 @@ export const SSOButtons = (props: SSOButtonsProps) => {
 
   return (
     <VStack space={2} mb={8}>
-      {/* {Platform.OS === 'ios' && <Apple />} */}
+      {Platform.OS === 'ios' && <Apple />}
       <Google />
     </VStack>
   );

@@ -65,7 +65,13 @@ lane :copy_env do |options|
   # IOS Replace Google reversed client id for current application
   reversed_client_id = ENV["REVERSED_CLIENT_ID_#{options[:stage]}"]
   sh "sed -i '' \"s|<string>com\\.googleusercontent\\.apps\\.[^<]*</string>|<string>#{reversed_client_id}</string>|g\" ../ios/FastFastRider/Info.plist"
-  
+
+  google_maps_api_key = ENV["GOOGLE_MAPS_API_KEY_#{options[:stage]}"]
+  escaped_key = google_maps_api_key.gsub('/', '\/')
+
+  google_maps_api_key = ENV["GOOGLE_MAPS_API_KEY_#{options[:stage]}"]
+  sh "sed -i '' \"s|\\${googleMapsApiKey}|#{google_maps_api_key}|g\" ../android/app/src/main/res/values/google_maps_api.xml"
+
 end
 
 
@@ -163,7 +169,7 @@ platform :android do
    ensure_env_vars(
     env_vars: [
      "FIREBASE_SERVICE_ACCOUNT", 
-     "FIREBASE_DISTRIBUTION_APP_ID"
+     "FIREBASE_DISTRIBUTION_APP_ID",
     ]
    )
    gradle(
@@ -175,13 +181,13 @@ platform :android do
        "android.injected.signing.store.password" => ENV["ANDROID_RELEASE_STORE_PASSWORD"],
        "android.injected.signing.key.alias" => ENV["ANDROID_RELEASE_KEY_ALIAS"],
        "android.injected.signing.key.password" => ENV["ANDROID_RELEASE_KEY_PASSWORD"],
-       "android.injected.version.code" => ENV["BUILD_NUMBER"]
+       "android.injected.version.code" => ENV["BUILD_NUMBER"],
      })
 
    upload_to_play_store(
     track: "internal", 
     json_key: ENV["GOOGLE_PLAY_JSON_KEY"], 
-    release_status: "draft",
+    release_status: "completed",
     track_promote_to: "internal"
    )
  end
@@ -197,12 +203,12 @@ platform :android do
        "android.injected.signing.store.password" => ENV["ANDROID_RELEASE_STORE_PASSWORD"],
        "android.injected.signing.key.alias" => ENV["ANDROID_RELEASE_KEY_ALIAS"],
        "android.injected.signing.key.password" => ENV["ANDROID_RELEASE_KEY_PASSWORD"],
-       "android.injected.version.code" => ENV["BUILD_NUMBER"]
+       "android.injected.version.code" => ENV["BUILD_NUMBER"],
      })
-   upload_to_play_store(track: "internal", 
+   upload_to_play_store(track: "alpha", 
     json_key: ENV["GOOGLE_PLAY_JSON_KEY"], 
-    release_status: "draft",
-    track_promote_to: "internal"
+    release_status: "completed",
+    track_promote_to: "alpha"
    )
  end
 end

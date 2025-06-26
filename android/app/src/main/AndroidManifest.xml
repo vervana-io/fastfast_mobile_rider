@@ -40,6 +40,6 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-      <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyAZTQAnphqXl7pidnK9RvU3bPrWbxAnMVg" />
+      <meta-data android:name="com.google.android.geo.API_KEY" android:value="@string/google_maps_key" />
     </application>
 </manifest>
