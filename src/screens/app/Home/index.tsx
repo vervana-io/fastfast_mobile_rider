@@ -147,37 +147,37 @@ export const Home = observer((props: HomeProps) => {
             if (event.eventName === 'rider_new_order') {
               const dData = event.data;
               const parsed = JSON.parse(dData);
-              const data = parsed.order;
-
+              const order = parsed.order;
+              const orderData = JSON.parse(order.data);
               const d: notificationsType = {
-                order_id: data.order_id,
-                title: 'New Oorder',
-                request_id: data.request_id,
-                user_id: '23',
+                order_id: order.order_id,
+                title: order.title,
+                request_id: order.request_id,
+                user_id: order.user_id,
                 data: {
-                  order_id: data.order_id,
-                  reference: 'feeere',
-                  title: 'New Order',
-                  notification_name: 'order_request',
-                  rider_id: data.rider_id,
-                  id: 234,
-                  pick_up_pin: '2344',
-                  delivery_pin: '23344',
-                  amount: data.amount,
-                  delivery_fee: data.delivery_fee,
-                  sub_total: data.sub_total,
+                  order_id: order.order_id,
+                  reference: orderData.reference || 'reference',
+                  title: orderData.title,
+                  notification_name: orderData.notification_name,
+                  rider_id: order.rider_id,
+                  id: order.order_id,
+                  pick_up_pin: '2344', // ?
+                  delivery_pin: '23344', //?
+                  amount: orderData.amount,
+                  delivery_fee: orderData.delivery_fee,
+                  sub_total: orderData.sub_total,
                   customer_address: {
-                    latitude: data.data.customer_address.latitude,
-                    longitude: data.data.customer_address.longitude,
-                    city: data.data.customer_address.city,
-                    street: data.data.customer_address.street,
-                    house_number: data.data.customer_address.house_number,
+                    latitude: orderData.customer_address.latitude,
+                    longitude: orderData.customer_address.longitude,
+                    city: orderData.customer_address.city,
+                    street: orderData.customer_address.street,
+                    house_number: orderData.customer_address.house_number,
                   },
                   address: {
-                    latitude: 899,
-                    longitude: data.data.address.longitude,
-                    city: data.data.address.city,
-                    house_number: data.data.address.house_number,
+                    latitude: orderData.address.latitude,
+                    longitude: orderData.address.longitude,
+                    city: orderData.address.city,
+                    house_number: orderData.address.house_number,
                     street: '',
                   },
                 },
@@ -505,10 +505,12 @@ export const Home = observer((props: HomeProps) => {
   }, [selectedOrder]);
 
   // pusher event setup
-  useEffect(() => {
+/*  useEffect(() => {
     subscribe(
       `private-orders.approved.${userD?.user?.id}`,
       (data: PusherEvent) => {
+        /!*
+        Compliance is not coming to this event
         if (data.eventName === 'user_compliance_approve') {
           userDetails.refetch();
           Toast.show({
@@ -529,7 +531,7 @@ export const Home = observer((props: HomeProps) => {
             swipeable: true,
             visibilityTime: 6000,
           });
-        }
+        }*!/
         if (data.eventName === 'rider_new_order') {
           const dData = data.data;
           const parsed = JSON.parse(dData);
@@ -548,7 +550,17 @@ export const Home = observer((props: HomeProps) => {
         }
       },
     );
-  }, [onlineStatus, orderApprovedSubscription, subscribe, userDetails]);
+  }, [
+    onlineStatus,
+    orderApprovedSubscription,
+    subscribe,
+    userD?.user?.id,
+    userDetails,
+  ]);*/
+
+  useEffect(() => {
+    orderApprovedSubscription(onlineStatus);
+  }, [onlineStatus, orderApprovedSubscription]);
 
   // open the order details sheet if we have a selected order
   useEffect(() => {
