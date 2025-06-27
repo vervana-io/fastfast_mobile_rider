@@ -66,7 +66,7 @@ export const OrderDetailsViewSheet = observer(() => {
   const request_id = payload?.request_id ?? ordersData?.misc_rider_info?.id;
 
   const {isForeground} = useAppState();
-  const {unsuscribe} = usePusher();
+  const {unsuscribe, subscribe} = usePusher();
   // variables
   const snapPoints = useMemo(() => ['30%', '60%', '85%'], []);
 
@@ -215,7 +215,22 @@ export const OrderDetailsViewSheet = observer(() => {
   useEffect(() => {
     if (NotificationOrder.data) {
       const data = NotificationOrder;
-      const notification_name = JSON.parse(data.data)?.notification_name;
+      const notification_name = data.data.notification_name;
+      const order_id = data.data.order_id;
+      subscribe(`private.orders.ready.${order_id}`, (data: any) => {
+        //waiting for when seller mark order this order to be ready
+        //events - ready, arrival, pick up, delivered
+        console.log('READy ORDER', data);
+        if (data.eventName === 'seller_order_ready_pickup') {
+          Toast.show({
+            type: 'success',
+            text1: 'Order Ready for Pickup',
+            text2: 'Your order is ready for pickup',
+            swipeable: true,
+            visibilityTime: 6000,
+          });
+        }
+      });
       // here we check if the notification is for an order request
       // after which we then check if we already have the order accepted
       if (notification_name === 'order_pickup') {
@@ -225,6 +240,23 @@ export const OrderDetailsViewSheet = observer(() => {
       }
     }
   }, [NotificationOrder, order_id]);
+
+  /*useEffect(() => {
+    subscribe(`private.orders.ready.${order_id}`, (data: any) => {
+      //waiting for when seller mark order this order to be ready
+      //events - ready, arrival, pick up, delivered
+      console.log('READy ORDER', data);
+      if (data.eventName === 'seller_order_ready_pickup') {
+        Toast.show({
+          type: 'success',
+          text1: 'Order Ready for Pickup',
+          text2: 'Your order is ready for pickup',
+          swipeable: true,
+          visibilityTime: 6000,
+        });
+      }
+    });
+  }, [order_id, subscribe]);*/
 
   const callCustomer = useCallback(() => {
     if (ordersData.customer?.phone_number_one) {

@@ -105,19 +105,6 @@ export const OrderRequest = observer(() => {
               ordersStore.setSelectedOrderId(Number(order_id));
               bottomSheetStore.SetSheet('orderDetailsView', true);
               unsuscribe('private.orders.approved.userId');
-              subscribe(`private.orders.ready.${order_id}`, (data: any) => {
-                //waiting for when seller mark order this order to be ready
-                //events - ready, arrival, pick up, delivered
-                if (data.eventName === 'rider_order_pickup') {
-                  Toast.show({
-                    type: 'success',
-                    text1: 'Order Ready for Pickup',
-                    text2: 'Your order is ready for pickup',
-                    swipeable: true,
-                    visibilityTime: 6000,
-                  });
-                }
-              });
             } else {
               Toast.show({
                 type: 'warning',
@@ -278,7 +265,8 @@ export const OrderRequest = observer(() => {
       // here we check if the notification is for an order request
       // after which we then check if we already have the order accepted
 
-      const CompleteNotification = JSON.parse(data.data);
+      //const CompleteNotification = JSON.parse(data.data);
+      const CompleteNotification = data.data;
 
       if (CompleteNotification.notification_name === 'order_request') {
         // first we check if the rider already has an ongoing order
@@ -287,7 +275,8 @@ export const OrderRequest = observer(() => {
           // here we check if an order is already being handled by the user
           // with this, the rider can only have one order at a time
           if (!checkForOrderById(data.order_id)) {
-            const payload: notificationsType = {
+            const payload: notificationsType = data;
+            /*const payload: notificationsType = {
               data: JSON.parse(
                 data.data || {
                   notification_name: 'order_request',
@@ -310,7 +299,7 @@ export const OrderRequest = observer(() => {
               rider_id: data.rider_id ?? '',
               title: data.title ?? '',
               user_id: data.user_id ?? '',
-            };
+            };*/
             setMainNotificationOrder(payload);
             setTimeout(() => {
               toggleBoxHeight();
@@ -323,7 +312,7 @@ export const OrderRequest = observer(() => {
         console.error('no order request');
       }
     }
-  }, [NotificationOrder, checkForOrderById, toggleBoxHeight]);
+  }, [NotificationOrder, checkForOrderById, toggleBoxHeight, subscribe]);
 
   return (
     <Animated.View style={[styles.box, animatedBoxStyle]}>
